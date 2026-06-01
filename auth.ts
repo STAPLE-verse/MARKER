@@ -34,4 +34,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
     })
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      // The user object is only passed in the very first time they log in
+      if (user) {
+        token.id = user.id;
+        token.username = user.username;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Here we pass the token data into the actual session object
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.username = token.username as string | undefined;
+      }
+      return session;
+    }
+  }
 })
