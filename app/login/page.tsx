@@ -7,8 +7,14 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
+import { login } from "@/features/auth/actions";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [rootError, setRootError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -18,14 +24,26 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    // We will hook this up to Auth.js later
-    console.log("Login Data:", data);
+    setRootError(null);
+    const result = await login(data);
+    
+    if (result.error) {
+      setRootError(result.error);
+    } else {
+      router.push("/");
+      router.refresh();
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-100 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md animate-in slide-in-from-bottom-4 fade-in duration-500">
         <Card title="Welcome back" bordered className="border-primary/20">
+          {rootError && (
+            <div className="alert alert-error mb-4 text-sm font-medium">
+              <span>{rootError}</span>
+            </div>
+          )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
             <Input
               label="Email Address"
