@@ -38,6 +38,9 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-100 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-lg animate-in slide-in-from-bottom-4 fade-in duration-500">
         <Card title="Create your account" bordered className="border-secondary/20">
+          <div className="text-sm text-base-content/80 bg-base-200 p-3 rounded-lg mb-4 border border-base-300">
+            Creating an account here will also create a global account for you on <a href="https://app.staplescience.com" target="_blank" rel="noopener noreferrer" className="text-secondary font-medium hover:underline">STAPLE</a>. If you already have a STAPLE account, you do not need to sign up again.
+          </div>
           {rootError && (
             <div className="alert alert-error mb-4">
               <span>{rootError}</span>

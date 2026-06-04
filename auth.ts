@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcryptjs"
+import { SecurePassword } from "@/lib/hash"
 import { prisma } from "@/lib/db"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -22,11 +22,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         // We only authenticate users who have a password (meaning they signed up locally)
-        if (!user || !user.password) return null;
+        if (!user || !user.hashedPassword) return null;
 
-        const passwordsMatch = await bcrypt.compare(
+        const passwordsMatch = await SecurePassword.verify(
           credentials.password as string,
-          user.password
+          user.hashedPassword
         );
 
         if (passwordsMatch) return user;
@@ -38,7 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       // The user object is only passed in the very first time they log in
       if (user) {
-        token.id = user.id;
+        token.id = user.id.toString();
         token.username = user.username;
       }
       return token;

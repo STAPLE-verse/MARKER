@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MARKER Platform",
-  description: "A federated Next.js module for the STAPLE ecosystem",
+  title: "MARKER",
+  description: "Metadata archive for research knowledge exchange and reuse",
 };
 
 export default function RootLayout({

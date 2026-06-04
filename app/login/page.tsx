@@ -30,7 +30,7 @@ export default function LoginPage() {
     if (result.error) {
       setRootError(result.error);
     } else {
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     }
   };
@@ -39,6 +39,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-100 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md animate-in slide-in-from-bottom-4 fade-in duration-500">
         <Card title="Welcome back" bordered className="border-primary/20">
+          <div className="text-sm text-base-content/80 bg-base-200 p-3 rounded-lg mb-4 border border-base-300">
+            MARKER uses STAPLE accounts. If you already have an account on <a href="https://app.staplescience.com" target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">STAPLE</a>, you can log in directly here.
+          </div>
           {rootError && (
             <div className="alert alert-error mb-4 text-sm font-medium">
               <span>{rootError}</span>

@@ -1,61 +1,466 @@
-generator client {
-  provider = "prisma-client-js"
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id            String          @id @default(cuid())
-  name          String?
-  username      String?         @unique
-  email         String          @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+generator client {
+  provider = "prisma-client-js"
 }
 
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  @@id([provider, providerAccountId])
+// --------------------------------------
+
+model User {
+  id                            Int                @id @default(autoincrement())
+  createdAt                     DateTime           @default(now())
+  updatedAt                     DateTime           @updatedAt
+  hashedPassword                String?
+  role                          String             @default("USER")
+  tos                           Boolean?
+  tokens                        Token[]
+  sessions                      Session[]
+  // notifications and dashboards
+  notifications                 Notification[]     @relation("UserNotifications")
+  widgets                       Widget[]
+  projectWidget                 ProjectWidget[]
+  emailProjectActivityFrequency EmailFrequency     @default(DAILY)
+  emailOverdueTaskFrequency     EmailFrequency     @default(DAILY)
+  // profile information
+  orcid                         String?
+  institution                   String?
+  username                      String             @unique
+  firstName                     String?
+  lastName                      String?
+  email                         String             @unique
+  language                      String             @default("en-US")
+  gravatar                      String?
+  tooltips                      Boolean            @default(true)
+  // relational information
+  projects                      ProjectMember[]
+  forms                         Form[]
+  publishedSchemas              PublishedSchema[]
+  folders                       Folder[]
+  roles                         Role[]
+  ProjectPrivilege              ProjectPrivilege[]
 }
 
 model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 Int       @id @default(autoincrement())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  expiresAt          DateTime?
+  handle             String    @unique
+  hashedSessionToken String?
+  antiCSRFToken      String?
+  publicData         String?
+  privateData        String?
+  user               User?     @relation(fields: [userId], references: [id])
+  userId             Int?
 }
 
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
- 
-  @@id([identifier, token])
+model Token {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  hashedToken String
+  type        String
+  expiresAt   DateTime
+  sentTo      String
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+
+  @@unique([hashedToken, type])
+}
+
+enum MemberPrivileges {
+  PROJECT_MANAGER
+  CONTRIBUTOR
+}
+
+model ProjectMember {
+  id                      Int                 @id @default(autoincrement())
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  projectId               Int
+  project                 Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name                    String?
+  users                   User[]
+  createdTasks            Task[]              @relation("CreatedTasks")
+  assignedTasks           Task[]              @relation("AssignedTasks")
+  roles                   Role[]
+  deleted                 Boolean             @default(false)
+  taskLogAssignedTo       TaskLog[]           @relation("assignedTo")
+  taskLogCompletedBy      TaskLog[]           @relation("completedBy")
+  reassignmentInvitations Invitation[]
+  pendingInvitations      Invitation[]        @relation("PendingTeamInvitations")
+  comments                Comment[]
+  tags                    Json?
+  commentReadStatus       CommentReadStatus[]
+  notes                   Note[]
+  formerTeamIds           Json?
+}
+
+model ProjectPrivilege {
+  createdAt DateTime         @default(now())
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  projectId Int
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project          @relation(fields: [projectId], references: [id])
+  privilege MemberPrivileges @default(PROJECT_MANAGER)
+}
+
+// Invites
+model Invitation {
+  createdAt       DateTime         @default(now())
+  id              Int              @id @default(autoincrement())
+  projectId       Int
+  project         Project          @relation(fields: [projectId], references: [id])
+  invitationCode  String
+  roles           Role[] // will change to roles
+  email           String
+  privilege       MemberPrivileges @default(CONTRIBUTOR)
+  addedBy         String
+  tags            Json?
+  reassignmentFor Int? // Foreign key to ProjectMember
+  projectMember   ProjectMember?   @relation(fields: [reassignmentFor], references: [id]) // Relation to ProjectMember
+  pendingTeams    ProjectMember[]  @relation("PendingTeamInvitations")
+}
+
+model Role {
+  id             Int             @id @default(autoincrement())
+  userId         Int
+  user           User            @relation(fields: [userId], references: [id])
+  name           String
+  description    String?
+  taxonomy       String?
+  tasks          Task[]
+  projectMembers ProjectMember[]
+  invitation     Invitation[]
+  Project        Project?        @relation(fields: [projectId], references: [id])
+  projectId      Int?
+}
+
+model Project {
+  id               Int                @id @default(autoincrement())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  // project metadata
+  name             String
+  description      String?
+  abstract         String?
+  keywords         String?
+  citation         String?
+  publisher        String?
+  identifier       String?
+  // project relations
+  tasks            Task[]
+  milestones       Milestone[]
+  containers       KanbanBoard[]
+  projectMembers   ProjectMember[]
+  roles            Role[]
+  projectWidget    ProjectWidget[]
+  notifications    Notification[]
+  ProjectPrivilege ProjectPrivilege[]
+  invitations      Invitation[]
+  metadata         Json? // Add metadata field
+  formVersion      FormVersion?       @relation(fields: [formVersionId], references: [id])
+  formVersionId    Int?
+  elements         Element[]
+  notes            Note[]
+}
+
+enum Status {
+  COMPLETED
+  NOT_COMPLETED
+}
+
+enum AutoAssignNew {
+  NONE
+  CONTRIBUTOR
+  TEAM
+  ALL
+}
+
+model Task {
+  id                 Int             @id @default(autoincrement())
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  createdBy          ProjectMember   @relation("CreatedTasks", fields: [createdById], references: [id], onDelete: Cascade)
+  createdById        Int
+  // task metadata
+  deadline           DateTime?
+  startDate          DateTime?
+  name               String
+  description        String?
+  tags               Json?
+  // kanban coding
+  containerTaskOrder Int //tells you what order the tasks are in for that container
+  containerId        Int //tells you which container it is in
+  container          KanbanBoard     @relation(fields: [containerId], references: [id])
+  // task relations
+  projectId          Int
+  project            Project         @relation(fields: [projectId], references: [id])
+  milestoneId        Int?
+  milestone          Milestone?      @relation(fields: [milestoneId], references: [id])
+  formVersionId      Int?
+  formVersion        FormVersion?    @relation(fields: [formVersionId], references: [id], onDelete: Cascade)
+  status             Status          @default(NOT_COMPLETED)
+  taskLogs           TaskLog[]
+  roles              Role[]
+  // who or which team should be assigned the task
+  assignedMembers    ProjectMember[] @relation("AssignedTasks")
+  elementId          Int?
+  element            Element?        @relation(fields: [elementId], references: [id])
+  autoAssignNew      AutoAssignNew   @default(NONE)
+  anonymous          Boolean         @default(false)
+  anonymousResponses Boolean         @default(false)
+}
+
+model TaskLog {
+  id            Int            @id @default(autoincrement())
+  createdAt     DateTime       @default(now()) //tells us when things happened
+  status        Status         @default(NOT_COMPLETED) //tells us if it done
+  metadata      Json?
+  // this helps with showing to the users so we don't have go back to projectMember table
+  completedAs   CompletedAs    @default(INDIVIDUAL)
+  // who or which team should be assigned the task
+  assignedToId  Int
+  assignedTo    ProjectMember  @relation("assignedTo", fields: [assignedToId], references: [id])
+  // this is who does the task who might not be assigned like the project manager
+  // this should be the id of the user (singular)
+  completedById Int?
+  completedBy   ProjectMember? @relation("completedBy", fields: [completedById], references: [id])
+  // what is the task this is tied to
+  taskId        Int
+  task          Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  comments      Comment[]
+  approved      Boolean?
+}
+
+model Comment {
+  id                Int                 @id @default(autoincrement())
+  createdAt         DateTime            @default(now()) // When the comment was created
+  updatedAt         DateTime            @updatedAt // Auto-update on edits
+  content           String // The comment text
+  taskLogId         Int
+  taskLog           TaskLog             @relation(fields: [taskLogId], references: [id], onDelete: Cascade)
+  authorId          Int
+  author            ProjectMember       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  commentReadStatus CommentReadStatus[]
+}
+
+enum CompletedAs {
+  INDIVIDUAL
+  TEAM
+}
+
+model KanbanBoard {
+  id             Int      @id @default(autoincrement())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  name           String   @default("To Do")
+  tasks          Task[]
+  containerOrder Int // tells you the order of the containers
+  projectId      Int
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Milestone {
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  projectId   Int
+  project     Project     @relation(fields: [projectId], references: [id])
+  name        String
+  description String?
+  task        Task[]
+  parents     Milestone[] @relation("MilestoneToMilestone")
+  children    Milestone[] @relation("MilestoneToMilestone")
+  tags        Json?
+  startDate   DateTime?
+  endDate     DateTime?
+}
+
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  forms     Form[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, userId])
+}
+
+model Form {
+  id        Int           @id @default(autoincrement())
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  userId    Int
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions  FormVersion[]
+  archived  Boolean       @default(false)
+  tags      Json?
+  folderId  Int?
+  folder    Folder?       @relation(fields: [folderId], references: [id])
+}
+
+model FormVersion {
+  id        Int       @id @default(autoincrement())
+  name      String
+  formId    Int
+  version   Int
+  schema    Json
+  uiSchema  Json?
+  archived  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  form      Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
+  tasks     Task[]
+  projects  Project[]
+
+  @@index([formId, version], name: "formVersionIndex")
+}
+
+model Notification {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  recipients   User[]   @relation("UserNotifications")
+  message      String
+  read         Boolean  @default(false)
+  announcement Boolean  @default(false)
+  projectId    Int?     @map("project_id")
+  project      Project? @relation(fields: [projectId], references: [id])
+  routeData    Json? // Flexible JSON field to store dynamic routing data
+}
+
+enum WidgetSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum EmailFrequency {
+  NEVER
+  DAILY
+  WEEKLY
+}
+
+model Widget {
+  id       Int        @id @default(autoincrement())
+  userId   Int
+  user     User       @relation(fields: [userId], references: [id])
+  type     String // "LastProject", "Notifications", "OverdueTask", "UpcomingTask"
+  show     Boolean    @default(true)
+  position Int
+  size     WidgetSize @default(MEDIUM)
+
+  @@unique([userId, type])
+}
+
+model ProjectWidget {
+  id        Int                @id @default(autoincrement())
+  userId    Int
+  user      User               @relation(fields: [userId], references: [id])
+  projectId Int
+  project   Project            @relation(fields: [projectId], references: [id])
+  type      String
+  show      Boolean            @default(true)
+  position  Int
+  size      WidgetSize         @default(MEDIUM)
+  privilege MemberPrivileges[] @default([CONTRIBUTOR, PROJECT_MANAGER])
+
+  @@unique([userId, projectId, type])
+}
+
+model CommentReadStatus {
+  id              Int           @id @default(autoincrement())
+  createdAt       DateTime      @default(now())
+  commentId       Int
+  comment         Comment       @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  projectMemberId Int
+  projectMember   ProjectMember @relation(fields: [projectMemberId], references: [id], onDelete: Cascade)
+  read            Boolean       @default(false)
+
+  @@unique([commentId, projectMemberId], name: "commentId_projectMemberId")
+}
+
+model Element {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projectId   Int
+  project     Project   @relation(fields: [projectId], references: [id])
+  name        String
+  description String?
+  task        Task[]
+  parents     Element[] @relation("ElementToElement")
+  children    Element[] @relation("ElementToElement")
+}
+
+enum NoteVisibility {
+  PRIVATE
+  PM_ONLY
+  CONTRIBUTORS @map("SHARED")
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  authorId Int
+  author   ProjectMember @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // content
+  title           String?
+  contentMarkdown String? // portable storage for search/export
+  contentJSON     Json? // optional rich-state (e.g., Lexical) for fidelity
+
+  // metadata
+  visibility NoteVisibility @default(PRIVATE)
+  pinned     Boolean        @default(false)
+  archived   Boolean        @default(false)
+  tags       Json?
+
+  @@index([projectId, authorId], name: "note_project_author_idx")
+  @@index([authorId, pinned], name: "note_author_pinned_idx")
+}
+
+model PublishedSchema {
+  // FINDABILITY
+  pid          String   @id // e.g., "ps_8f9a2b"
+  title        String
+  description  String?
+  keywords     String[] // For fast searching
+  ontologyRefs Json? // e.g., ["SNOMED:424144002", "NCIT:C25150"]
+
+  // ACCESSIBILITY & INTEROPERABILITY
+  schemaJson Json // The core JSON Schema
+  source     String @default("native") // "native", "cedar", "redcap"
+
+  // REUSABILITY & PROVENANCE
+  version  String // Semantic e.g. "1.0.0"
+  familyId String // Links v1.0.0 and v1.1.0 together
+  license  String @default("CC-BY-4.0") // CRITICAL FOR FAIR
+
+  // Lineage (PROV Ontology mapping)
+  derivedFromPid String? // Links to parent if this is a fork
+
+  // Authorship (Dublin Core mapping)
+  authorId Int
+  author   User @relation(fields: [authorId], references: [id])
+
+  // Internal tracking
+  originFormVersionId Int? // Link back to the STAPLE workspace draft
+  createdAt           DateTime @default(now())
+
+  @@unique([familyId, version])
+  @@index([keywords]) // Make searching fast
 }
