@@ -4,7 +4,7 @@ import { z } from "zod";
 import { SecurePassword } from "@/lib/hash";
 import { prisma } from "@/lib/db";
 import { signupSchema, loginSchema } from "./schemas";
-import { signIn } from "@/auth";
+import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 
 export async function signUp(data: z.infer<typeof signupSchema>) {

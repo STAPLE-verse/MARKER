@@ -22,7 +22,7 @@ const SidebarContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
 );
 SidebarContent.displayName = "SidebarContent";
 
-const SidebarMenu = React.forwardRef<HTMLUElement, React.HTMLAttributes<HTMLUElement>>(
+const SidebarMenu = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
   ({ className, ...props }, ref) => (
     <ul ref={ref} className={cn("menu w-full p-0 gap-1", className)} {...props} />
   )
