@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'link';
@@ -13,10 +14,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   size = 'md', 
   outline = false,
   wide = false,
-  className = '', 
+  className, 
   ...props 
 }, ref) => {
-  const baseClasses = "btn transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]";
   const variantClasses = {
     primary: "btn-primary",
     secondary: "btn-secondary",
@@ -32,13 +32,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
     xs: "btn-xs",
   }[size];
 
-  const outlineClass = outline ? "btn-outline" : "";
-  const wideClass = wide ? "btn-wide" : "";
-
   return (
     <button 
       ref={ref}
-      className={`${baseClasses} ${variantClasses} ${sizeClasses} ${outlineClass} ${wideClass} ${className}`.trim()}
+      className={cn(
+        "btn transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]",
+        variantClasses,
+        sizeClasses,
+        outline && "btn-outline",
+        wide && "btn-wide",
+        className
+      )}
       {...props}
     >
       {children}
