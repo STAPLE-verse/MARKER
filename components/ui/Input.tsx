@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
@@ -10,7 +11,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   helperText,
-  className = '',
+  className,
   ...props
 }, ref) => {
   return (
@@ -22,12 +23,19 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
       )}
       <input
         ref={ref}
-        className={`input input-bordered w-full ${error ? 'input-error' : ''} ${className}`}
+        className={cn(
+          "input input-bordered w-full",
+          error && "input-error",
+          className
+        )}
         {...props}
       />
       {(error || helperText) && (
         <label className="label">
-          <span className={`label-text-alt ${error ? 'text-error' : 'text-base-content/70'}`}>
+          <span className={cn(
+            "label-text-alt",
+            error ? "text-error" : "text-base-content/70"
+          )}>
             {error || helperText}
           </span>
         </label>

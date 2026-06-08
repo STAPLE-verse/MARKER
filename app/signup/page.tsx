@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, type SignupFormData } from "@/features/auth/schemas";
-import { Card } from "@/components/ui/Card";
+import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
@@ -37,8 +37,10 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-100 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-lg animate-in slide-in-from-bottom-4 fade-in duration-500">
-        <Card title="Create your account" bordered className="border-secondary/20">
-          <div className="text-sm text-base-content/80 bg-base-200 p-3 rounded-lg mb-4 border border-base-300">
+        <Card bordered className="border-secondary/20">
+          <CardBody>
+            <CardTitle>Create your account</CardTitle>
+            <div className="text-sm text-base-content/80 bg-base-200 p-3 rounded-lg mb-4 border border-base-300">
             Creating an account here will also create a global account for you on <a href="https://app.staplescience.com" target="_blank" rel="noopener noreferrer" className="text-secondary font-medium hover:underline">STAPLE</a>. If you already have a STAPLE account, you do not need to sign up again.
           </div>
           {rootError && (
@@ -88,7 +90,8 @@ export default function SignupPage() {
                 Log in
               </Link>
             </div>
-          </form>
+            </form>
+          </CardBody>
         </Card>
       </div>
     </div>

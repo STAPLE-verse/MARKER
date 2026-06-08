@@ -29,7 +29,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.hashedPassword
         );
 
-        if (passwordsMatch) return user;
+        if (passwordsMatch) {
+          return {
+            ...user,
+            id: user.id.toString()
+          };
+        }
         return null;
       }
     })
@@ -38,7 +43,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       // The user object is only passed in the very first time they log in
       if (user) {
-        token.id = user.id.toString();
+        if (user.id) {
+          token.id = user.id.toString();
+        }
         token.username = user.username;
       }
       return token;
