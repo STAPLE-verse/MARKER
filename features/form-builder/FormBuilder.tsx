@@ -1,6 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
-import { Alert, Input } from "reactstrap"
 import Card from "./Card"
 import Section from "./Section"
 import Add from "./Add"
@@ -89,26 +88,28 @@ export default function FormBuilder({
 
   return (
     <div className={`formBuilder ${className || ""}`}>
-      <Alert
+      <div
+        className="alert alert-warning mb-4 flex-col items-start"
         style={{
-          display: unsupportedFeatures.length === 0 ? "none" : "block",
+          display: unsupportedFeatures.length === 0 ? "none" : "flex",
         }}
-        color="warning"
       >
-        <h5>Unsupported Features:</h5>
-        {unsupportedFeatures.map((message, index) => (
-          <li key={index}>{message}</li>
-        ))}
-      </Alert>
+        <h5 className="font-bold">Unsupported Features:</h5>
+        <ul className="list-disc pl-5">
+          {unsupportedFeatures.map((message, index) => (
+            <li key={index}>{message}</li>
+          ))}
+        </ul>
+      </div>
       {(!mods || mods.showFormHead !== false) && (
         <div className="formHead" data-test="form-head">
           <div>
-            <h5 data-test="form-name-label">
+            <h5 data-test="form-name-label" className="font-semibold mb-2">
               {mods && mods.labels && typeof mods.labels.formNameLabel === "string"
                 ? mods.labels.formNameLabel
                 : "Form Name"}
             </h5>
-            <Input
+            <input
               value={schemaData.title || ""}
               placeholder="Title"
               type="text"
@@ -121,11 +122,11 @@ export default function FormBuilder({
                   uischema
                 )
               }}
-              className="form-title"
+              className="input input-bordered w-full form-title mb-4"
             />
           </div>
           <div>
-            <h5 data-test="form-description-label">
+            <h5 data-test="form-description-label" className="font-semibold mb-2">
               {mods && mods.labels && typeof mods.labels.formDescriptionLabel === "string"
                 ? mods.labels.formDescriptionLabel
                 : "Form Description"}

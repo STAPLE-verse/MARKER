@@ -1,5 +1,4 @@
 import React, { useState, ReactElement } from "react"
-import { Input } from "reactstrap"
 import CardEnumOptions from "../CardEnumOptions"
 import CardSelector from "./CardSelector"
 import FBCheckbox from "../checkbox/FBCheckbox"
@@ -97,7 +96,7 @@ export default function ValueSelector({
         switch (typeof val) {
           case "string":
             return (
-              <Input
+              <input
                 value={val || ""}
                 placeholder="String value"
                 type="text"
@@ -115,13 +114,13 @@ export default function ValueSelector({
                     },
                   })
                 }}
-                className="card-modal-text"
+                className="input input-bordered input-sm w-full"
               />
             )
             break
           case "number":
             return (
-              <Input
+              <input
                 value={val || ""}
                 placeholder="Number value"
                 type="number"
@@ -139,7 +138,7 @@ export default function ValueSelector({
                     },
                   })
                 }}
-                className="card-modal-number"
+                className="input input-bordered input-sm w-full"
               />
             )
             break
@@ -148,10 +147,9 @@ export default function ValueSelector({
           // @ts-ignore
           case "array":
             return (
-              <Input
+              <textarea
                 value={JSON.stringify(val) || ""}
                 placeholder="Array in JSON"
-                type="textarea"
                 onChange={(ev: any) => {
                   let newVal = val
                   try {
@@ -171,16 +169,15 @@ export default function ValueSelector({
                     },
                   })
                 }}
-                className="card-modal-text"
+                className="textarea textarea-bordered w-full"
               />
             )
             break
           case "object":
             return (
-              <Input
+              <textarea
                 value={JSON.stringify(val) || ""}
                 placeholder="Object in JSON"
-                type="textarea"
                 onChange={(ev: any) => {
                   let newVal = val
                   try {
@@ -200,7 +197,7 @@ export default function ValueSelector({
                     },
                   })
                 }}
-                className="card-modal-text"
+                className="textarea textarea-bordered w-full"
               />
             )
             break
@@ -221,6 +218,7 @@ export default function ValueSelector({
                 )
               })}
               <XMarkIcon
+                className="h-5 w-5 stroke-warning hover:stroke-error cursor-pointer mt-2"
                 onClick={() =>
                   onChange({
                     ...possibility,
@@ -232,28 +230,30 @@ export default function ValueSelector({
               />
             </li>
           ))}
-          <PlusIcon
-            className="h-6 w-6 stroke-2 stroke-secondary"
-            onClick={() => {
-              const newCase: { [key: string]: any } = {}
-              const propArr: { [key: string]: any } = parentSchema ? parentSchema.properties : {}
-              Object.keys(propArr).forEach((key) => {
-                if (propArr[key].type === "number" || propArr[key].type === "integer") {
-                  newCase[key] = 0
-                } else if (propArr[key].type === "array" || propArr[key].enum) {
-                  newCase[key] = []
-                } else if (propArr[key].type === "object" || propArr[key].properties) {
-                  newCase[key] = {}
-                } else {
-                  newCase[key] = ""
-                }
-              })
-              onChange({
-                ...possibility,
-                value: { enum: [...enumArr, newCase] },
-              })
-            }}
-          />
+          <div className="flex justify-start">
+            <PlusIcon
+              className="h-6 w-6 stroke-2 stroke-secondary hover:stroke-primary transition-colors cursor-pointer mt-4"
+              onClick={() => {
+                const newCase: { [key: string]: any } = {}
+                const propArr: { [key: string]: any } = parentSchema ? parentSchema.properties : {}
+                Object.keys(propArr).forEach((key) => {
+                  if (propArr[key].type === "number" || propArr[key].type === "integer") {
+                    newCase[key] = 0
+                  } else if (propArr[key].type === "array" || propArr[key].enum) {
+                    newCase[key] = []
+                  } else if (propArr[key].type === "object" || propArr[key].properties) {
+                    newCase[key] = {}
+                  } else {
+                    newCase[key] = ""
+                  }
+                })
+                onChange({
+                  ...possibility,
+                  value: { enum: [...enumArr, newCase] },
+                })
+              }}
+            />
+          </div>
         </div>
       )
     }

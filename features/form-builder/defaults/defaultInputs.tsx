@@ -1,15 +1,13 @@
 import React from "react"
-import { Input } from "reactstrap"
 import FBCheckbox from "../checkbox/FBCheckbox"
 import CardEnumOptions from "../CardEnumOptions"
 import { getRandomId } from "../utils"
 import type { FormInput, CardComponentType, CardComponentPropsType } from "../types"
-import { InputType } from "reactstrap/types/lib/Input"
 
 // specify the inputs required for a string type object
 export const CardDefaultParameterInputs: CardComponentType = () => <div />
 
-const getInputCardBodyComponent = ({ type }: { type: InputType }) =>
+const getInputCardBodyComponent = ({ type }: { type: React.HTMLInputTypeAttribute }) =>
   function InputCardBodyComponent({
     parameters,
     onChange,
@@ -20,12 +18,12 @@ const getInputCardBodyComponent = ({ type }: { type: InputType }) =>
     return (
       <React.Fragment>
         <h5>Default Value</h5>
-        <Input
+        <input
           value={(parameters.default || "") as string | number}
           placeholder="Default"
           type={type}
           onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-          className="card-text"
+          className="input input-bordered w-full mt-2"
         />
       </React.Fragment>
     )

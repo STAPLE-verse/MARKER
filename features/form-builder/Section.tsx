@@ -1,7 +1,5 @@
 import React, { ReactElement } from "react"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
-import SelectField from "src/core/components/fields/SelectField"
-import { Alert, Input, UncontrolledTooltip, FormGroup, FormFeedback } from "reactstrap"
 import MarkdownDescriptionInput from "./MarkdownDescriptionInput"
 import FBCheckbox from "./checkbox/FBCheckbox"
 import Collapse from "./Collapse/Collapse"
@@ -84,8 +82,8 @@ export default function Section({
         isOpen={cardOpen}
         toggleCollapse={() => setCardOpen(!cardOpen)}
         title={
-          <div className="card-title-row">
-            <span onClick={() => setCardOpen(!cardOpen)} className="label">
+          <div className="flex justify-between items-center w-full">
+            <span onClick={() => setCardOpen(!cardOpen)} className="text-xl font-bold cursor-pointer select-none">
               {schemaData.title || keyName}{" "}
               {parent ? (
                 <Tooltip
@@ -97,16 +95,11 @@ export default function Section({
                 ""
               )}
             </span>
-            <span className="move-icon">
-              <span id={`${elementId}_moveinfosection`}>
-                <ArrowsPointingOutIcon
-                  className="w-8 h-8 stroke-2 stroke-secondary"
-                  onClick={() => {}}
-                />
-              </span>
-              <UncontrolledTooltip placement="top" target={`${elementId}_moveinfosection`}>
-                Drag to move section
-              </UncontrolledTooltip>
+            <span className="tooltip tooltip-top cursor-grab active:cursor-grabbing p-1" data-tip="Drag to move section" id={`${elementId}_moveinfosection`}>
+              <ArrowsPointingOutIcon
+                className="w-6 h-6 stroke-2 text-base-content/50 hover:text-base-content transition-colors"
+                onClick={() => {}}
+              />
             </span>
           </div>
         }
@@ -119,19 +112,19 @@ export default function Section({
             {reference ? (
               <div className="section-entry section-reference">
                 <h5>Reference Section</h5>
-                <SelectField
+                <select
                   className="select select-bordered w-full mt-2 mb-2 text-primary border-primary border-2 bg-primary-content"
                   value={reference}
                   onChange={(e) => {
                     onChange(schema, uischema, e.target.value)
                   }}
-                  options={Object.keys(definitionData).map((key) => ({
-                    value: `#/definitions/${key}`,
-                    label: `#/definitions/${key}`,
-                  }))}
-                  optionValue="value"
-                  optionText="label"
-                />
+                >
+                  {Object.keys(definitionData).map((key) => (
+                    <option key={`#/definitions/${key}`} value={`#/definitions/${key}`}>
+                      {`#/definitions/${key}`}
+                    </option>
+                  ))}
+                </select>
               </div>
             ) : (
               ""
@@ -152,9 +145,8 @@ export default function Section({
                   type="help"
                 />
               </h5>
-              <FormGroup>
-                <Input
-                  invalid={keyError !== null}
+              <div className="form-control w-full mt-2">
+                <input
                   value={keyName || ""}
                   placeholder="Key"
                   type="text"
@@ -170,11 +162,15 @@ export default function Section({
                       onNameChange(name)
                     }
                   }}
-                  className="card-text"
+                  className={`input input-bordered w-full card-text ${keyError !== null ? 'input-error' : ''}`}
                   readOnly={hideKey}
                 />
-                <FormFeedback>{keyError}</FormFeedback>
-              </FormGroup>
+                {keyError && (
+                  <div className="label">
+                    <span className="label-text-alt text-error">{keyError}</span>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="section-entry" data-test="section-display-name">
               <h5>
@@ -192,7 +188,7 @@ export default function Section({
                   type="help"
                 />
               </h5>
-              <Input
+              <input
                 value={schemaData.title || ""}
                 placeholder="Title"
                 type="text"
@@ -205,7 +201,7 @@ export default function Section({
                     uischema
                   )
                 }
-                className="card-text"
+                className="input input-bordered w-full card-text mt-2"
               />
             </div>
             <div className="section-entry" data-test="section-description">
@@ -229,17 +225,19 @@ export default function Section({
                 onChange={(val) => onChange({ ...schema, description: val }, uischema)}
               />
             </div>
-            <Alert
+            <div
+              className="alert alert-warning mb-4 mt-4 flex-col items-start"
               style={{
-                display: unsupportedFeatures.length === 0 ? "none" : "block",
+                display: unsupportedFeatures.length === 0 ? "none" : "flex",
               }}
-              color="warning"
             >
-              <h5>Unsupported Features:</h5>
-              {unsupportedFeatures.map((message) => (
-                <li key={`${elementId}_${message}`}>{message}</li>
-              ))}
-            </Alert>
+              <h5 className="font-bold">Unsupported Features:</h5>
+              <ul className="list-disc pl-5">
+                {unsupportedFeatures.map((message) => (
+                  <li key={`${elementId}_${message}`}>{message}</li>
+                ))}
+              </ul>
+            </div>
           </div>
           <div className="section-body">
             {/* @ts-expect-error children error */}
@@ -310,31 +308,25 @@ export default function Section({
             )}
           </div>
           <div className="section-interactions">
-            <div className="flex items-center justify-center gap-2 w-full mt-4">
-              <span id={`${elementId}_editinfo`}>
-                <PencilIcon
-                  className="w-8 h-8 stroke-secondary"
-                  onClick={() => setModalOpen(true)}
-                />
-              </span>
-              <UncontrolledTooltip placement="top" target={`${elementId}_editinfo`}>
-                Additional configurations for this item
-              </UncontrolledTooltip>
-              <span id={`${elementId}_trashinfo`}>
-                <TrashIcon
-                  className="w-8 h-8 stroke-warning"
-                  onClick={() => (onDelete ? onDelete() : {})}
-                />
-              </span>
-              <UncontrolledTooltip placement="top" target={`${elementId}_trashinfo`}>
-                Delete item
-              </UncontrolledTooltip>
+            <div className="flex items-center justify-end gap-4 w-full mt-6 pt-4 border-t border-base-200">
               <FBCheckbox
                 onChangeValue={() => onRequireToggle()}
                 isChecked={required}
                 label="Required"
                 id={`${elementId}_required`}
               />
+              <span className="tooltip tooltip-top cursor-pointer p-1" data-tip="Additional configurations for this item" id={`${elementId}_editinfo`}>
+                <PencilIcon
+                  className="w-5 h-5 text-secondary hover:text-primary transition-colors"
+                  onClick={() => setModalOpen(true)}
+                />
+              </span>
+              <span className="tooltip tooltip-top cursor-pointer p-1" data-tip="Delete item" id={`${elementId}_trashinfo`}>
+                <TrashIcon
+                  className="w-5 h-5 text-warning hover:text-error transition-colors"
+                  onClick={() => (onDelete ? onDelete() : {})}
+                />
+              </span>
             </div>
           </div>
         </div>

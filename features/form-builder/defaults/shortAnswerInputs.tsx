@@ -1,11 +1,9 @@
 import React, { useState } from "react"
-import { Input } from "reactstrap"
 import FBCheckbox from "../checkbox/FBCheckbox"
 import Tooltip from "../Tooltip"
 import { getRandomId } from "../utils"
 import type { CardComponentType, FormInput, DataType } from "../types"
 import { PlaceholderInput } from "../inputs/PlaceholderInput"
-import SelectField from "src/core/components/fields/SelectField"
 
 const formatDictionary = {
   "": "None",
@@ -41,7 +39,7 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
   return (
     <div>
       <div className="text-[18px] font-bold">Minimum Length</div>
-      <Input
+      <input
         value={parameters.minLength ? parameters.minLength : ""}
         placeholder="Minimum Length"
         key="minLength"
@@ -52,10 +50,10 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
             minLength: parseInt(ev.target.value, 10),
           })
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">Maximum Length</div>
-      <Input
+      <input
         value={parameters.maxLength ? parameters.maxLength : ""}
         placeholder="Maximum Length"
         key="maxLength"
@@ -66,7 +64,7 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
             maxLength: parseInt(ev.target.value, 10),
           })
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">
         Regular Expression Pattern{" "}
@@ -82,7 +80,7 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
           />
         </a>
       </div>
-      <Input
+      <input
         value={parameters.pattern ? parameters.pattern : ""}
         placeholder="Regular Expression Pattern"
         key="pattern"
@@ -93,7 +91,7 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
             pattern: ev.target.value,
           })
         }}
-        className="card-modal-text"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">
         Format{" "}
@@ -103,8 +101,8 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
           text="Require string input to match a certain common format"
         />
       </div>
-      <SelectField
-        className="select text-primary select-bordered border-primary border-2 w-full mt-2 mb-2 bg-primary-content"
+      <select
+        className="select text-primary select-bordered border-primary border-2 w-full mt-2 mb-4 bg-primary-content"
         value={parameters.format || ""}
         onChange={(e) =>
           onChange({
@@ -112,13 +110,13 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
             format: e.target.value,
           })
         }
-        options={Object.keys(formatDictionary).map((key) => ({
-          value: key,
-          label: formatDictionary[key as FormatDictionaryKey],
-        }))}
-        optionValue="value"
-        optionText="label"
-      />
+      >
+        {Object.keys(formatDictionary).map((key) => (
+          <option key={key} value={key}>
+            {formatDictionary[key as FormatDictionaryKey]}
+          </option>
+        ))}
+      </select>
       <div className="text-[18px] font-bold">
         Auto Complete Category{" "}
         <a
@@ -133,8 +131,8 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
           />
         </a>
       </div>
-      <SelectField
-        className="select text-primary select-bordered border-primary border-2 w-full mt-2 mb-2 bg-primary-content"
+      <select
+        className="select text-primary select-bordered border-primary border-2 w-full mt-2 mb-4 bg-primary-content"
         value={parameters["ui:autocomplete"] || ""}
         onChange={(e) =>
           onChange({
@@ -142,13 +140,13 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
             "ui:autocomplete": e.target.value,
           })
         }
-        options={Object.keys(autoDictionary).map((key) => ({
-          value: key,
-          label: autoDictionary[key as AutoDictionaryKey],
-        }))}
-        optionValue="value"
-        optionText="label"
-      />
+      >
+        {Object.keys(autoDictionary).map((key) => (
+          <option key={key} value={key}>
+            {autoDictionary[key as AutoDictionaryKey]}
+          </option>
+        ))}
+      </select>
 
       <PlaceholderInput parameters={parameters} onChange={onChange} />
 
@@ -174,7 +172,7 @@ const ShortAnswerField: CardComponentType = ({ parameters, onChange }) => {
   return (
     <React.Fragment>
       <h5>Default Value</h5>
-      <Input
+      <input
         value={parameters.default as string | number | readonly string[] | undefined}
         placeholder="Default"
         type={
@@ -182,7 +180,7 @@ const ShortAnswerField: CardComponentType = ({ parameters, onChange }) => {
           "text"
         }
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="card-text"
+        className="input input-bordered w-full mt-2"
       />
     </React.Fragment>
   )
@@ -192,12 +190,12 @@ const Password: CardComponentType = ({ parameters, onChange }) => {
   return (
     <React.Fragment>
       <h5>Default Password</h5>
-      <Input
+      <input
         value={parameters.default as string | number | readonly string[] | undefined}
         placeholder="Default"
         type="password"
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="card-text"
+        className="input input-bordered w-full mt-2"
       />
     </React.Fragment>
   )

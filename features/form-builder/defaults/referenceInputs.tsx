@@ -1,6 +1,5 @@
 import React from "react"
 import type { FormInput, CardComponentType } from "../types"
-import SelectField from "src/core/components/fields/SelectField"
 import { PlaceholderInput } from "../inputs/PlaceholderInput"
 
 export const CardReferenceParameterInputs: CardComponentType = ({ parameters, onChange }) => {
@@ -24,17 +23,17 @@ const RefChoice: CardComponentType = ({ parameters, onChange }) => {
 
   return (
     <div className="card-select">
-      <SelectField
+      <select
         className="select select-bordered w-full mt-2 mb-2 text-primary border-primary border-2 bg-primary-content"
         value={parameters.$ref || ""}
         onChange={(e) => onChange({ ...parameters, $ref: e.target.value })}
-        options={Object.keys(parameters.definitionData || {}).map((key) => ({
-          value: `#/definitions/${key}`,
-          label: parameters.definitionData![key].title || `#/definitions/${key}`,
-        }))}
-        optionValue="value"
-        optionText="label"
-      />
+      >
+        {Object.keys(parameters.definitionData || {}).map((key) => (
+          <option key={key} value={`#/definitions/${key}`}>
+            {parameters.definitionData![key].title || `#/definitions/${key}`}
+          </option>
+        ))}
+      </select>
     </div>
   )
 }

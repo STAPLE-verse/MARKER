@@ -1,5 +1,4 @@
 import React, { ReactElement } from "react"
-import { UncontrolledTooltip } from "reactstrap"
 import FBCheckbox from "./checkbox/FBCheckbox"
 import Collapse from "./Collapse/Collapse"
 import CardModal from "./CardModal"
@@ -35,8 +34,8 @@ export default function Card({
         isOpen={cardOpen}
         toggleCollapse={() => setCardOpen(!cardOpen)}
         title={
-          <div className="card-title-row">
-            <span onClick={() => setCardOpen(!cardOpen)} className="label">
+          <div className="flex justify-between items-center w-full">
+            <span onClick={() => setCardOpen(!cardOpen)} className="text-lg font-bold cursor-pointer select-none">
               {componentProps.title || componentProps.name}{" "}
               {componentProps.parent ? (
                 <Tooltip
@@ -57,14 +56,11 @@ export default function Card({
                 ""
               )}
             </span>
-            <span className="move-icon" id={`${elementId}_moveformcard`}>
+            <span className="tooltip tooltip-top cursor-grab active:cursor-grabbing p-1" data-tip="Drag to move form item" id={`${elementId}_moveformcard`}>
               <ArrowsPointingOutIcon
-                className="w-8 h-8 stroke-2 stroke-secondary"
+                className="w-6 h-6 stroke-2 text-base-content/50 hover:text-base-content transition-colors"
                 onClick={() => {}}
               />
-              <UncontrolledTooltip placement="top" target={`${elementId}_moveformcard`}>
-                Drag to move form item
-              </UncontrolledTooltip>
             </span>
           </div>
         }
@@ -81,19 +77,7 @@ export default function Card({
             showObjectNameInput={showObjectNameInput}
           />
         </div>
-        <div className="flex items-center justify-center gap-2 w-full mt-4">
-          <span id={`${elementId}_editinfo`}>
-            <PencilIcon className="w-8 h-8 stroke-secondary" onClick={() => setModalOpen(true)} />
-          </span>
-          <UncontrolledTooltip placement="top" target={`${elementId}_editinfo`}>
-            Additional configurations for this item
-          </UncontrolledTooltip>
-          <span id={`${elementId}_trashinfo`}>
-            <TrashIcon className="w-8 h-8 stroke-warning" onClick={() => onDelete && onDelete()} />
-          </span>
-          <UncontrolledTooltip placement="top" target={`${elementId}_trashinfo`}>
-            Delete item
-          </UncontrolledTooltip>
+        <div className="flex items-center justify-end gap-4 w-full mt-6 pt-4 border-t border-base-200">
           <FBCheckbox
             onChangeValue={() =>
               onChange({
@@ -105,6 +89,12 @@ export default function Card({
             label="Required"
             id={`${elementId}_required`}
           />
+          <span className="tooltip tooltip-top cursor-pointer p-1" data-tip="Additional configurations for this item" id={`${elementId}_editinfo`}>
+            <PencilIcon className="w-5 h-5 text-secondary hover:text-primary transition-colors" onClick={() => setModalOpen(true)} />
+          </span>
+          <span className="tooltip tooltip-top cursor-pointer p-1" data-tip="Delete item" id={`${elementId}_trashinfo`}>
+            <TrashIcon className="w-5 h-5 text-warning hover:text-error transition-colors" onClick={() => onDelete && onDelete()} />
+          </span>
         </div>
         <CardModal
           componentProps={componentProps as CardComponentPropsType}

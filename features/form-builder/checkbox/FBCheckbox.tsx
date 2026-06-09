@@ -33,27 +33,26 @@ const FBCheckbox: FC<FBCheckboxProps> = ({
   const potentialCheckboxId = id !== "" ? id : label
   const checkboxId = potentialCheckboxId !== "" ? potentialCheckboxId : undefined
   return (
-    <div data-test="checkbox" className={`${classes} checkbox-style flex items-center`}>
-      <input
-        type="checkbox"
-        id={checkboxId}
-        data-test={dataTest || undefined}
-        onChange={(event) => {
-          if (!disabled) {
-            onChangeValue(event)
-          }
-        }}
-        value={value}
-        disabled={disabled}
-        checked={isChecked}
-      />
-      <div className="checkbox-overlay text-lg">
-        {label && (
-          <label htmlFor={checkboxId} className={labelClassName || undefined}>
-            {label}
-          </label>
-        )}
-      </div>
+    <div data-test="checkbox" className="form-control">
+      <label htmlFor={checkboxId} className={`label cursor-pointer justify-start gap-3 ${labelClassName || ""}`}>
+        <input
+          type="checkbox"
+          id={checkboxId}
+          data-test={dataTest || undefined}
+          onChange={(event) => {
+            if (!disabled) {
+              onChangeValue(event)
+            }
+          }}
+          value={value}
+          disabled={disabled}
+          checked={isChecked}
+          className={classnames("checkbox checkbox-primary", {
+            "checkbox-disabled": disabled
+          })}
+        />
+        {label && <span className="label-text text-base">{label}</span>}
+      </label>
     </div>
   )
 }

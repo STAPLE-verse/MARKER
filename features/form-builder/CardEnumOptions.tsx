@@ -1,5 +1,4 @@
 import React, { ReactElement } from "react"
-import { Input, UncontrolledTooltip } from "reactstrap"
 import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline"
 
 interface CardEnumOptionsProps {
@@ -25,8 +24,8 @@ export default function CardEnumOptions({
     if (names && index < names.length) name = names[index] ?? ""
     possibleValues.push(
       //@ts-ignore
-      <div key={index} className="card-enum-option">
-        <Input
+      <div key={index} className="flex items-center gap-2 mb-2">
+        <input
           value={value === undefined || value === null ? "" : value}
           placeholder="Stored Value"
           key={`val-${index}`}
@@ -54,9 +53,9 @@ export default function CardEnumOptions({
               names
             )
           }}
-          className="card-text"
+          className="input input-bordered input-sm w-full"
         />
-        <Input
+        <input
           value={name || ""}
           placeholder="Label"
           key={`name-${index}`}
@@ -69,20 +68,21 @@ export default function CardEnumOptions({
                 ...names.slice(index + 1),
               ])
           }}
-          className="card-text"
+          className="input input-bordered input-sm w-full"
           style={{ display: showNames ? "initial" : "none" }}
         />
-        <div className="delete-button">
-          <XMarkIcon
-            onClick={() => {
-              // remove this value
-              onChange(
-                [...initialValues.slice(0, index), ...initialValues.slice(index + 1)],
-                names ? [...names.slice(0, index), ...names.slice(index + 1)] : undefined
-              )
-            }}
-          />
-        </div>
+        <button
+          className="btn btn-ghost btn-sm btn-circle"
+          onClick={() => {
+            // remove this value
+            onChange(
+              [...initialValues.slice(0, index), ...initialValues.slice(index + 1)],
+              names ? [...names.slice(0, index), ...names.slice(index + 1)] : undefined
+            )
+          }}
+        >
+          <XMarkIcon className="h-5 w-5 stroke-warning hover:stroke-error" />
+        </button>
       </div>
     )
   }
@@ -90,9 +90,9 @@ export default function CardEnumOptions({
   return (
     <React.Fragment>
       {possibleValues}
-      <span id="add-enum-option">
+      <span className="tooltip tooltip-top cursor-pointer" data-tip="Add new possible option">
         <PlusIcon
-          className="h-6 w-6 stroke-secondary mt-2 mb-2"
+          className="h-6 w-6 stroke-secondary mt-2 mb-2 hover:stroke-primary transition-colors"
           strokeWidth={4}
           onClick={() => {
             // add a new dropdown option
@@ -103,9 +103,6 @@ export default function CardEnumOptions({
           }}
         />
       </span>
-      <UncontrolledTooltip placement="top" target="add-enum-option">
-        Add new possible option
-      </UncontrolledTooltip>
     </React.Fragment>
   )
 }

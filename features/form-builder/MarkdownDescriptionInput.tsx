@@ -38,14 +38,18 @@ export default function MarkdownDescriptionInput({
           value={value}
           placeholder="Description"
           rows={4}
-          className="form-description w-full"
+          className="textarea textarea-bordered w-full form-description"
           onChange={(ev) => onChange(ev.target.value)}
         />
       ) : (
-        <div className="markdown-display prose max-w-none dark:prose-invert p-2 bg-base-200 rounded border border-base-300 min-h-[6rem]">
-          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
-            {value || "_Nothing to preview yet…_"}
-          </ReactMarkdown>
+        <div className="markdown-display prose prose-sm max-w-none prose-p:m-0 dark:prose-invert textarea textarea-bordered w-full h-auto min-h-[6rem]">
+          {value ? (
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
+              {value}
+            </ReactMarkdown>
+          ) : (
+            <span className="text-base-content/40 italic">Nothing to preview yet…</span>
+          )}
         </div>
       )}
     </div>

@@ -15,21 +15,24 @@ type Props = {
 export default function FBRadioButton(props: Props): ReactElement {
   const { label, value, checked, name, onChange, required, disabled, autoFocus } = props
   const [id] = useState(`radio-${Math.floor(Math.random() * 1000000)}`)
-  const classes = classnames("fb-radio-button", { disabled })
+  const classes = classnames("form-control w-full", { disabled })
   return (
     <div className={classes} key={value}>
-      <input
-        id={id}
-        type="radio"
-        name={name}
-        value={value}
-        checked={checked}
-        required={required}
-        disabled={disabled}
-        autoFocus={autoFocus}
-        onChange={() => onChange(value)}
-      />
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id} className="label cursor-pointer justify-start gap-3">
+        <input
+          id={id}
+          type="radio"
+          name={name}
+          value={value}
+          checked={checked}
+          required={required}
+          disabled={disabled}
+          autoFocus={autoFocus}
+          onChange={() => onChange(value)}
+          className="radio radio-primary radio-sm"
+        />
+        <span className="label-text text-base">{label}</span>
+      </label>
     </div>
   )
 }

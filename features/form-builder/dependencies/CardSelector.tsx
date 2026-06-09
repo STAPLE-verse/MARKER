@@ -1,5 +1,4 @@
 import React, { useState, ReactElement } from "react"
-import SelectField from "src/core/components/fields/SelectField"
 import { getRandomId } from "../utils"
 import { XMarkIcon } from "@heroicons/react/24/outline"
 
@@ -30,22 +29,26 @@ export default function CardSelector({
           </li>
         ))}
       </ul>
-      <SelectField
+      <select
         value=""
         onChange={(e) => {
-          onChange([...chosenChoices, e.target.value])
+          if (e.target.value) {
+            onChange([...chosenChoices, e.target.value])
+          }
         }}
         className="select select-bordered w-full mt-2 mb-2 text-primary border-primary border-2 bg-primary-content"
-        placeholder={placeholder}
-        options={possibleChoices
+      >
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {possibleChoices
           .filter((choice) => !chosenChoices.includes(choice))
-          .map((choice) => ({
-            value: choice,
-            label: choice,
-          }))}
-        optionValue="value"
-        optionText="label"
-      />
+          .map((choice) => (
+            <option key={choice} value={choice}>
+              {choice}
+            </option>
+          ))}
+      </select>
     </React.Fragment>
   )
 }

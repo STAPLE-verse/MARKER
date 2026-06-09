@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { Input } from "reactstrap"
 import FBCheckbox from "../checkbox/FBCheckbox"
 import Tooltip from "../Tooltip"
 import { getRandomId } from "../utils"
@@ -12,7 +11,7 @@ const CardLongAnswerParameterInputs: CardComponentType = ({ parameters, onChange
   return (
     <div>
       <div className="text-[18px] font-bold">Minimum Length</div>
-      <Input
+      <input
         value={parameters.minLength ? parameters.minLength : ""}
         placeholder="Minimum Length"
         key="minLength"
@@ -23,10 +22,10 @@ const CardLongAnswerParameterInputs: CardComponentType = ({ parameters, onChange
             minLength: parseInt(ev.target.value, 10),
           })
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">Maximum Length</div>
-      <Input
+      <input
         value={parameters.maxLength ? parameters.maxLength : ""}
         placeholder="Maximum Length"
         key="maxLength"
@@ -37,7 +36,7 @@ const CardLongAnswerParameterInputs: CardComponentType = ({ parameters, onChange
             maxLength: parseInt(ev.target.value, 10),
           })
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">
         Regular Expression Pattern{" "}
@@ -49,7 +48,7 @@ const CardLongAnswerParameterInputs: CardComponentType = ({ parameters, onChange
           />
         </a>
       </div>
-      <Input
+      <input
         value={parameters.pattern ? parameters.pattern : ""}
         placeholder="Regular Expression Pattern"
         key="pattern"
@@ -60,7 +59,7 @@ const CardLongAnswerParameterInputs: CardComponentType = ({ parameters, onChange
             pattern: ev.target.value,
           })
         }}
-        className="card-modal-text"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <PlaceholderInput parameters={parameters} onChange={onChange} />
       <div className="card-modal-boolean">
@@ -85,12 +84,11 @@ const LongAnswer: CardComponentType = ({ parameters, onChange }) => {
   return (
     <React.Fragment>
       <h5>Default Value</h5>
-      <Input
+      <textarea
         value={parameters.default as string | number | readonly string[] | undefined}
         placeholder="Default"
-        type="textarea"
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="card-textarea"
+        className="textarea textarea-bordered w-full mt-2"
       />
     </React.Fragment>
   )

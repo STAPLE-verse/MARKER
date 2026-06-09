@@ -1458,6 +1458,9 @@ export function onDragEnd(
   }
 ) {
   const { schema, uischema, onChange, definitionData, definitionUi, categoryHash } = details
+
+  if (!result.destination) return
+
   const src = result.source.index
   const dest = result.destination.index
   const newElementObjArr = generateElementPropsFromSchemas({

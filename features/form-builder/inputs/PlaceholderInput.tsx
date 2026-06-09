@@ -2,7 +2,6 @@ import React, { useState } from "react"
 import type { CardComponentType } from "../types"
 import { getRandomId } from "../utils"
 import Tooltip from "../Tooltip"
-import { Input } from "reactstrap"
 
 export const PlaceholderInput: CardComponentType = ({ parameters, onChange }) => {
   const [elementId] = useState(getRandomId())
@@ -22,7 +21,7 @@ export const PlaceholderInput: CardComponentType = ({ parameters, onChange }) =>
           />
         </a>
       </div>
-      <Input
+      <input
         value={parameters["ui:placeholder"] ? parameters["ui:placeholder"] : ""}
         placeholder="Placeholder"
         key="placeholder"
@@ -33,7 +32,7 @@ export const PlaceholderInput: CardComponentType = ({ parameters, onChange }) =>
             "ui:placeholder": ev.target.value,
           })
         }}
-        className="card-modal-text"
+        className="input input-bordered input-sm w-full mb-4"
       />
     </React.Fragment>
   )

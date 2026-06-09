@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { Input } from "reactstrap"
 import { excludeKeys, generateElementComponentsFromSchemas, generateCategoryHash } from "../utils"
 import Card from "../Card"
 import Section from "../Section"
@@ -15,8 +14,8 @@ import type { FormInput, CardComponentType, CardComponentPropsType } from "../ty
 const CardArrayParameterInputs: CardComponentType = ({ parameters, onChange }) => {
   return (
     <div>
-      <h4>Minimum Items</h4>
-      <Input
+      <div className="text-[18px] font-bold">Minimum Items</div>
+      <input
         value={parameters.minItems || ""}
         placeholder="ex: 2"
         key="minimum"
@@ -27,10 +26,10 @@ const CardArrayParameterInputs: CardComponentType = ({ parameters, onChange }) =
             minItems: parseInt(ev.target.value, 10),
           })
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4 mt-2"
       />
-      <h4>Maximum Items</h4>
-      <Input
+      <div className="text-[18px] font-bold">Maximum Items</div>
+      <input
         value={parameters.maxItems || ""}
         placeholder="ex: 2"
         key="maximum"
@@ -41,7 +40,7 @@ const CardArrayParameterInputs: CardComponentType = ({ parameters, onChange }) =
             maxItems: parseInt(ev.target.value, 10),
           })
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4 mt-2"
       />
     </div>
   )

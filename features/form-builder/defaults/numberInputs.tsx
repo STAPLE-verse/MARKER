@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { Input } from "reactstrap"
 import FBCheckbox from "../checkbox/FBCheckbox"
 import Tooltip from "../Tooltip"
 import { getRandomId } from "../utils"
@@ -18,7 +17,7 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
           text="Require number to be a multiple of this number"
         />
       </div>
-      <Input
+      <input
         value={parameters.multipleOf ? parameters.multipleOf : ""}
         placeholder="ex: 2"
         key="multipleOf"
@@ -31,10 +30,10 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
             multipleOf: newVal,
           })
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">Minimum</div>
-      <Input
+      <input
         value={parameters.minimum || parameters.exclusiveMinimum || ""}
         placeholder="ex: 3"
         key="minimum"
@@ -57,7 +56,7 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
             })
           }
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <div className="card-modal-boolean">
         <FBCheckbox
@@ -85,7 +84,7 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
         />
       </div>
       <div className="text-[18px] font-bold">Maximum</div>
-      <Input
+      <input
         value={parameters.maximum || parameters.exclusiveMaximum || ""}
         placeholder="ex: 8"
         key="maximum"
@@ -108,7 +107,7 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
             })
           }
         }}
-        className="card-modal-number"
+        className="input input-bordered input-sm w-full mb-4"
       />
       <div className="card-modal-boolean">
         <FBCheckbox
@@ -143,7 +142,7 @@ const NumberField: CardComponentType = ({ parameters, onChange }) => {
   return (
     <React.Fragment>
       <h5>Default Number</h5>
-      <Input
+      <input
         value={parameters.default as string | number | readonly string[] | undefined}
         placeholder="Default"
         type="number"
@@ -153,7 +152,7 @@ const NumberField: CardComponentType = ({ parameters, onChange }) => {
             default: parseFloat(ev.target.value),
           })
         }
-        className="card-number"
+        className="input input-bordered w-full mt-2"
       />
     </React.Fragment>
   )

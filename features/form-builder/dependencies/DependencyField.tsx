@@ -1,5 +1,4 @@
 import React, { useState, ReactElement } from "react"
-import { UncontrolledTooltip } from "reactstrap"
 import { PlusCircleIcon } from "@heroicons/react/24/solid"
 import FBRadioGroup from "../radio/FBRadioGroup"
 import Tooltip from "../Tooltip"
@@ -52,8 +51,8 @@ export default function DependencyField({
   const valueBased = checkIfValueBasedDependency(parameters.dependents || [])
   return (
     <div className="form-dependency dependencyField">
-      <div className="text-[18px] font-bold mb-2">
-        Dependencies{" "}
+      <div className="text-[18px] font-bold mb-2 flex items-center gap-2">
+        Dependencies
         <Tooltip
           id={`${elementId}_dependent`}
           type="help"
@@ -73,14 +72,14 @@ export default function DependencyField({
               {
                 value: "value",
                 label: (
-                  <React.Fragment>
-                    Specific value{" "}
+                  <div className="flex items-center gap-2">
+                    Specific value
                     <Tooltip
                       id={`${elementId}_valuebased`}
                       type="help"
                       text="Specify whether these elements should show based on this element's value"
                     />
-                  </React.Fragment>
+                  </div>
                 ),
               },
             ]}
@@ -112,7 +111,7 @@ export default function DependencyField({
         </React.Fragment>
       )}
       <DependencyWarning parameters={parameters} />
-      <div className="form-dependency-conditions">
+      <div className="form-dependency-conditions mt-4 space-y-4">
         {parameters.dependents
           ? parameters.dependents.map((possibility, index) => (
               <DependencyPossibility
@@ -146,9 +145,9 @@ export default function DependencyField({
             ))
           : ""}
 
-        <span className="plus" id={`${elementId}_adddependency`}>
+        <span className="tooltip tooltip-top cursor-pointer" data-tip="Add another dependency relation linking this element and other form elements">
           <PlusCircleIcon
-            className="h-6 w-6 stroke-secondary stroke-2 fill-base-100"
+            className="h-8 w-8 stroke-secondary stroke-2 fill-base-100 hover:stroke-primary transition-colors mt-2"
             onClick={() => {
               const newDependents = parameters.dependents ? [...parameters.dependents] : []
               newDependents.push({
@@ -162,9 +161,6 @@ export default function DependencyField({
             }}
           />
         </span>
-        <UncontrolledTooltip placement="top" target={`${elementId}_adddependency`}>
-          Add another dependency relation linking this element and other form elements
-        </UncontrolledTooltip>
       </div>
     </div>
   )

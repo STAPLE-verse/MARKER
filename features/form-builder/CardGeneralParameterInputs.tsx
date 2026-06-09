@@ -1,9 +1,7 @@
 import React, { ReactElement } from "react"
-import { Input, FormGroup, FormFeedback } from "reactstrap"
 import classnames from "classnames"
 import GeneralParameterInputs from "./GeneralParameterInputs"
 import MarkdownDescriptionInput from "./MarkdownDescriptionInput"
-import SelectField from "src/core/components/fields/SelectField"
 import {
   defaultUiProps,
   defaultDataProps,
@@ -96,9 +94,8 @@ export default function CardGeneralParameterInputs({
               />
             </h5>
 
-            <FormGroup>
-              <Input
-                invalid={keyError !== null}
+            <div className="form-control w-full mt-2">
+              <input
                 value={keyState || ""}
                 placeholder="Key"
                 type="text"
@@ -120,10 +117,14 @@ export default function CardGeneralParameterInputs({
                     onChange({ ...parameters })
                   }
                 }}
-                className="card-text"
+                className={`input input-bordered w-full card-text ${keyError !== null ? 'input-error' : ''}`}
               />
-              <FormFeedback>{keyError}</FormFeedback>
-            </FormGroup>
+              {keyError && (
+                <div className="label">
+                  <span className="label-text-alt text-error">{keyError}</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
         <div className="card-entry">
@@ -141,7 +142,7 @@ export default function CardGeneralParameterInputs({
               type="help"
             />
           </h5>
-          <Input
+          <input
             value={titleState || ""}
             placeholder="Title"
             type="text"
@@ -149,7 +150,7 @@ export default function CardGeneralParameterInputs({
             onBlur={(ev) => {
               onChange({ ...parameters, title: ev.target.value })
             }}
-            className="card-text"
+            className="input input-bordered w-full mt-2 card-text"
           />
         </div>
       </div>
@@ -193,8 +194,8 @@ export default function CardGeneralParameterInputs({
               type="help"
             />
           </h5>
-          <SelectField
-            className="select text-primary select-bordered border-primary border-2 w-full mt-2 mb-2 bg-primary-content"
+          <select
+            className="select select-bordered w-full mt-2 mb-2"
             value={parameters.category}
             onChange={(e) => {
               const newCategory = e.target.value
@@ -216,10 +217,13 @@ export default function CardGeneralParameterInputs({
                 category: newProps.category || newCategory,
               })
             }}
-            options={availableInputTypes()}
-            optionValue="value"
-            optionText="label"
-          />
+          >
+            {availableInputTypes().map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
