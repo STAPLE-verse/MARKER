@@ -212,6 +212,7 @@ export default function CardGeneralParameterInputs({
               onChange({
                 ...newProps,
                 title: newProps.title || parameters.title,
+                description: parameters.description,
                 default: newProps.default || "",
                 type: newProps.type || categoryType(newCategory, allFormInputs),
                 category: newProps.category || newCategory,
