@@ -125,7 +125,7 @@ export default function FormBuilder({
                   uischema
                 )
               }}
-              className="input input-bordered w-full form-title mb-4"
+              className="input input-primary input-bordered w-full form-title mb-4"
             />
           </div>
           <div>
@@ -149,7 +149,7 @@ export default function FormBuilder({
           </div>
         </div>
       )}
-      <div className="form-body formBody">
+      <div className="form-body formBody mt-6">
         {/* @ts-expect-error children the droppable*/}
         <DragDropContext
           onDragEnd={(result) =>
@@ -190,13 +190,13 @@ export default function FormBuilder({
                 }).map((element: any, index) => (
                   // @ts-ignore: suppress key error, can't change key assignment
                   <Draggable key={element.key} draggableId={element.key} index={index}>
-                    {(providedDraggable) => (
+                    {(providedDraggable, snapshot) => (
                       <div
                         ref={providedDraggable.innerRef}
                         {...providedDraggable.draggableProps}
                         {...providedDraggable.dragHandleProps}
                         style={providedDraggable.draggableProps.style}
-                        className="pb-4"
+                        className={`pb-4 ${snapshot.isDragging && !snapshot.isDropAnimating ? "opacity-60" : ""}`}
                       >
                         {element}
                       </div>

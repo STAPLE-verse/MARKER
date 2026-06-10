@@ -37,18 +37,15 @@ export default function FormPreview() {
   }
 
   return (
-    <div className="bg-base-100 rounded-box p-6 border border-base-300 shadow-xl overflow-y-auto max-h-full">
-      <h3 className="text-xl font-bold mb-4 pb-2 border-b border-base-200">Live Form Preview</h3>
-      <div className="p-4 bg-base-200 rounded-xl">
-        {/* We use strict true to match standard RJSF typing */}
-        <ThemedForm
-          schema={state.schema as any}
-          uiSchema={hideSubmitButton(state.uiSchema)}
-          formData={state.formData}
-          onChange={handleChange}
-          validator={validator}
-        />
-      </div>
+    <div className="h-full overflow-y-auto pt-2 pb-8">
+      {/* We use strict true to match standard RJSF typing */}
+      <ThemedForm
+        schema={state.schema as any}
+        uiSchema={hideSubmitButton(state.uiSchema)}
+        formData={state.formData}
+        onChange={handleChange}
+        validator={validator}
+      />
     </div>
   )
 }

@@ -22,7 +22,7 @@ const CardLongAnswerParameterInputs: CardComponentType = ({ parameters, onChange
             minLength: parseInt(ev.target.value, 10),
           })
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">Maximum Length</div>
       <input
@@ -36,7 +36,7 @@ const CardLongAnswerParameterInputs: CardComponentType = ({ parameters, onChange
             maxLength: parseInt(ev.target.value, 10),
           })
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">
         Regular Expression Pattern{" "}
@@ -59,7 +59,7 @@ const CardLongAnswerParameterInputs: CardComponentType = ({ parameters, onChange
             pattern: ev.target.value,
           })
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <PlaceholderInput parameters={parameters} onChange={onChange} />
       <div className="card-modal-boolean">
@@ -88,7 +88,7 @@ const LongAnswer: CardComponentType = ({ parameters, onChange }) => {
         value={parameters.default as string | number | readonly string[] | undefined}
         placeholder="Default"
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="textarea textarea-bordered w-full mt-2"
+        className="textarea textarea-primary textarea-bordered w-full mt-2"
       />
     </React.Fragment>
   )

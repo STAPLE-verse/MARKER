@@ -50,7 +50,7 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
             minLength: parseInt(ev.target.value, 10),
           })
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">Maximum Length</div>
       <input
@@ -64,7 +64,7 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
             maxLength: parseInt(ev.target.value, 10),
           })
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">
         Regular Expression Pattern{" "}
@@ -91,7 +91,7 @@ const CardShortAnswerParameterInputs: CardComponentType = ({ parameters, onChang
             pattern: ev.target.value,
           })
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">
         Format{" "}
@@ -180,7 +180,7 @@ const ShortAnswerField: CardComponentType = ({ parameters, onChange }) => {
           "text"
         }
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="input input-bordered w-full mt-2"
+        className="input input-primary input-bordered w-full mt-2"
       />
     </React.Fragment>
   )
@@ -195,7 +195,7 @@ const Password: CardComponentType = ({ parameters, onChange }) => {
         placeholder="Default"
         type="password"
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="input input-bordered w-full mt-2"
+        className="input input-primary input-bordered w-full mt-2"
       />
     </React.Fragment>
   )

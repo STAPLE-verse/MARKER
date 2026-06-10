@@ -30,7 +30,7 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
             multipleOf: newVal,
           })
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <div className="text-[18px] font-bold">Minimum</div>
       <input
@@ -56,7 +56,7 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
             })
           }
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <div className="card-modal-boolean">
         <FBCheckbox
@@ -107,7 +107,7 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
             })
           }
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className="input input-primary input-bordered input-sm w-full mb-4"
       />
       <div className="card-modal-boolean">
         <FBCheckbox
@@ -152,7 +152,7 @@ const NumberField: CardComponentType = ({ parameters, onChange }) => {
             default: parseFloat(ev.target.value),
           })
         }
-        className="input input-bordered w-full mt-2"
+        className="input input-primary input-bordered w-full mt-2"
       />
     </React.Fragment>
   )

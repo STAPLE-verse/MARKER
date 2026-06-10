@@ -14,7 +14,7 @@ export default function MarkdownDescriptionInput({
 
   return (
     <div className="form-description-wrapper">
-      <div className="form-desc-toolbar flex items-center gap-2 mb-1">
+      <div className="form-desc-toolbar flex items-center gap-2 mb-3">
         <div className="join">
           <button
             type="button"
@@ -38,11 +38,11 @@ export default function MarkdownDescriptionInput({
           value={value}
           placeholder="Description"
           rows={4}
-          className="textarea textarea-bordered w-full form-description"
+          className="textarea textarea-primary textarea-bordered w-full form-description"
           onChange={(ev) => onChange(ev.target.value)}
         />
       ) : (
-        <div className="markdown-display prose prose-sm max-w-none prose-p:m-0 dark:prose-invert textarea textarea-bordered w-full h-auto min-h-[6rem]">
+        <div className="markdown-display prose prose-sm max-w-none prose-p:m-0 dark:prose-invert textarea textarea-primary textarea-bordered w-full h-auto min-h-[6rem]">
           {value ? (
             <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
               {value}

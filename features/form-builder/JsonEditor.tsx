@@ -21,9 +21,8 @@ export default function JsonEditor() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-base-100 rounded-box p-4 border border-base-300 shadow-xl">
-      <div className="flex justify-between items-center mb-4 pb-2 border-b border-base-200">
-        <h3 className="text-xl font-bold">JSON Data & UI Schemas</h3>
+    <div className="flex flex-col h-full">
+      <div className="flex justify-end mb-4">
         <button onClick={toggleEditable} className={`btn btn-sm ${restrictEdit ? "btn-outline btn-secondary" : "btn-warning"}`}>
           {restrictEdit ? "Enable Editing" : "Disable Editing"}
         </button>

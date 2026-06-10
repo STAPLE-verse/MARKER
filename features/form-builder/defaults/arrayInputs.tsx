@@ -26,7 +26,7 @@ const CardArrayParameterInputs: CardComponentType = ({ parameters, onChange }) =
             minItems: parseInt(ev.target.value, 10),
           })
         }}
-        className="input input-bordered input-sm w-full mb-4 mt-2"
+        className="input input-primary input-bordered input-sm w-full mb-4 mt-2"
       />
       <div className="text-[18px] font-bold">Maximum Items</div>
       <input
@@ -40,7 +40,7 @@ const CardArrayParameterInputs: CardComponentType = ({ parameters, onChange }) =
             maxItems: parseInt(ev.target.value, 10),
           })
         }}
-        className="input input-bordered input-sm w-full mb-4 mt-2"
+        className="input input-primary input-bordered input-sm w-full mb-4 mt-2"
       />
     </div>
   )

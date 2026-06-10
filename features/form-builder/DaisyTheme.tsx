@@ -176,7 +176,7 @@ const MyTextWidget = (props: WidgetProps) => {
       <input
         type="text"
         style={{ fontSize: "1rem" }}
-        className="input input-primary input-bordered w-full max-w-sm m-2"
+        className="input input-primary input-bordered w-full mt-2"
         value={props.value || ""}
         required={props.required}
         onChange={(event) => props.onChange(event.target.value)}
@@ -191,7 +191,7 @@ const MyEmailWidget = (props: WidgetProps) => {
       <input
         type="email"
         style={{ fontSize: "1rem" }}
-        className="input input-primary input-bordered w-full max-w-sm m-2"
+        className="input input-primary input-bordered w-full mt-2"
         value={props.value || ""}
         required={props.required}
         onChange={(event) => props.onChange(event.target.value)}

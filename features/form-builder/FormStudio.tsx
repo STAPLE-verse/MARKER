@@ -21,21 +21,21 @@ function FormStudioInner({ onSave, mods }: { onSave?: (state: any) => void; mods
   return (
     <div className="flex flex-col w-full h-full animate-in fade-in duration-300">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <div className="tabs tabs-boxed bg-base-200 p-1">
+        <div className="tabs tabs-bordered w-full md:w-auto">
           <button
-            className={`tab tab-lg transition-all ${activeTab === "builder" ? "tab-active bg-base-100 shadow-sm font-bold" : "hover:text-base-content/70"}`}
+            className={`tab tab-lg transition-all font-semibold ${activeTab === "builder" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
             onClick={() => setActiveTab("builder")}
           >
             Visual Builder
           </button>
           <button
-            className={`tab tab-lg transition-all ${activeTab === "json" ? "tab-active bg-base-100 shadow-sm font-bold" : "hover:text-base-content/70"}`}
+            className={`tab tab-lg transition-all font-semibold ${activeTab === "json" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
             onClick={() => setActiveTab("json")}
           >
             JSON Editor
           </button>
           <button
-            className={`tab tab-lg transition-all ${activeTab === "preview" ? "tab-active bg-base-100 shadow-sm font-bold" : "hover:text-base-content/70"}`}
+            className={`tab tab-lg transition-all font-semibold ${activeTab === "preview" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
             onClick={() => setActiveTab("preview")}
           >
             Live Preview
@@ -49,7 +49,7 @@ function FormStudioInner({ onSave, mods }: { onSave?: (state: any) => void; mods
         )}
       </div>
 
-      <div className="flex-1 w-full bg-base-100 rounded-xl">
+      <div className="flex-1 w-full min-h-0 rounded-xl overflow-y-auto overflow-x-hidden px-1 pr-2">
         <div className={activeTab === "builder" ? "block" : "hidden"}>
           <FormBuilder
             schema={typeof state.schema === "string" ? state.schema : JSON.stringify(state.schema)}
@@ -65,7 +65,7 @@ function FormStudioInner({ onSave, mods }: { onSave?: (state: any) => void; mods
             mods={mods}
           />
         </div>
-        <div className={activeTab === "json" ? "block h-[800px]" : "hidden"}>
+        <div className={activeTab === "json" ? "block h-full" : "hidden"}>
           <JsonEditor />
         </div>
         <div className={activeTab === "preview" ? "block" : "hidden"}>

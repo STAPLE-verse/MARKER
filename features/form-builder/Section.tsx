@@ -162,7 +162,7 @@ export default function Section({
                       onNameChange(name)
                     }
                   }}
-                  className={`input input-bordered w-full card-text ${keyError !== null ? 'input-error' : ''}`}
+                  className={`input input-primary input-bordered w-full card-text ${keyError !== null ? 'input-error' : ''}`}
                   readOnly={hideKey}
                 />
                 {keyError && (
@@ -201,7 +201,7 @@ export default function Section({
                     uischema
                   )
                 }
-                className="input input-bordered w-full card-text mt-2"
+                className="input input-primary input-bordered w-full card-text mt-2"
               />
             </div>
             <div className="section-entry" data-test="section-description">
@@ -278,13 +278,13 @@ export default function Section({
                     }).map((element: any, index) => (
                       // @ts-ignore: suppress key error, can't change key assignment
                       <Draggable key={element.key} draggableId={element.key} index={index}>
-                        {(providedDraggable) => (
+                        {(providedDraggable, snapshot) => (
                           <div
                             ref={providedDraggable.innerRef}
                             {...providedDraggable.draggableProps}
                             {...providedDraggable.dragHandleProps}
                             style={providedDraggable.draggableProps.style}
-                            className="pb-4"
+                            className={`pb-4 ${snapshot.isDragging && !snapshot.isDropAnimating ? "opacity-60" : ""}`}
                           >
                             {element}
                           </div>

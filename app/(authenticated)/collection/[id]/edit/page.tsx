@@ -43,7 +43,7 @@ export default function SchemaEditPage() {
         </PageHeader>
       </div>
 
-      <div className="flex-1 w-full min-h-0 border border-base-300 p-6 rounded-box bg-base-100 shadow-xl overflow-hidden">
+      <div className="flex-1 w-full min-h-0 border border-base-300 p-6 rounded-box bg-base-200/50 shadow-inner overflow-hidden">
         <FormStudio
           initialSchema={schema}
           initialUiSchema={uiSchema}

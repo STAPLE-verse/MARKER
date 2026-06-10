@@ -117,7 +117,7 @@ export default function CardGeneralParameterInputs({
                     onChange({ ...parameters })
                   }
                 }}
-                className={`input input-bordered w-full card-text ${keyError !== null ? 'input-error' : ''}`}
+                className={`input input-primary input-bordered w-full card-text ${keyError !== null ? 'input-error' : ''}`}
               />
               {keyError && (
                 <div className="label">
@@ -150,7 +150,7 @@ export default function CardGeneralParameterInputs({
             onBlur={(ev) => {
               onChange({ ...parameters, title: ev.target.value })
             }}
-            className="input input-bordered w-full mt-2 card-text"
+            className="input input-primary input-bordered w-full mt-2 card-text"
           />
         </div>
       </div>
@@ -195,7 +195,7 @@ export default function CardGeneralParameterInputs({
             />
           </h5>
           <select
-            className="select select-bordered w-full mt-2 mb-2"
+            className="select select-primary select-bordered w-full mt-2 mb-2"
             value={parameters.category}
             onChange={(e) => {
               const newCategory = e.target.value
