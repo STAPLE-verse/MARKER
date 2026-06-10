@@ -256,7 +256,11 @@ export default function Section({
               {/* @ts-expect-error children error */}
               <Droppable droppableId="droppable" type={DROPPABLE_TYPE}>
                 {(providedDroppable) => (
-                  <div ref={providedDroppable.innerRef} {...providedDroppable.droppableProps}>
+                  <div 
+                    ref={providedDroppable.innerRef} 
+                    {...providedDroppable.droppableProps}
+                    className="mt-4"
+                  >
                     {generateElementComponentsFromSchemas({
                       schemaData: schema,
                       uiSchemaData: uischema,
@@ -279,6 +283,8 @@ export default function Section({
                             ref={providedDraggable.innerRef}
                             {...providedDraggable.draggableProps}
                             {...providedDraggable.dragHandleProps}
+                            style={providedDraggable.draggableProps.style}
+                            className="pb-4"
                           >
                             {element}
                           </div>

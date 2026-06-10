@@ -17,7 +17,7 @@ interface CollapseProps {
 }
 
 const Collapse: FC<CollapseProps> = (props) => {
-  const classes = classnames(`border border-base-300 rounded-xl bg-base-100 shadow-sm p-4 my-4 transition-all ${props.className || ""}`, {
+  const classes = classnames(`border border-base-300 rounded-xl bg-base-100 shadow-sm p-4 ${props.className || ""}`, {
     "opacity-50 pointer-events-none": props.disableToggle,
   })
 

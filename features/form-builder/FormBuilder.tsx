@@ -20,6 +20,7 @@ import {
 import DEFAULT_FORM_INPUTS from "./defaults/defaultFormInputs"
 import type { Mods, InitParameters, AddFormObjectParametersType } from "./types"
 
+
 export default function FormBuilder({
   schema,
   uischema,
@@ -164,7 +165,11 @@ export default function FormBuilder({
           {/* @ts-expect-error children is part of the map*/}
           <Droppable droppableId="droppable" type={DROPPABLE_TYPE}>
             {(providedDroppable) => (
-              <div ref={providedDroppable.innerRef} {...providedDroppable.droppableProps}>
+              <div 
+                ref={providedDroppable.innerRef} 
+                {...providedDroppable.droppableProps}
+                className="mb-4"
+              >
                 {generateElementComponentsFromSchemas({
                   schemaData,
                   uiSchemaData,
@@ -188,6 +193,8 @@ export default function FormBuilder({
                         ref={providedDraggable.innerRef}
                         {...providedDraggable.draggableProps}
                         {...providedDraggable.dragHandleProps}
+                        style={providedDraggable.draggableProps.style}
+                        className="pb-4"
                       >
                         {element}
                       </div>

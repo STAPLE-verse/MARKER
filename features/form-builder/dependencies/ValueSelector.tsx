@@ -142,37 +142,7 @@ export default function ValueSelector({
               />
             )
             break
-          // TODO: arrays are classified as objects - this may be unreachable code.
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          case "array":
-            return (
-              <textarea
-                value={JSON.stringify(val) || ""}
-                placeholder="Array in JSON"
-                onChange={(ev: any) => {
-                  let newVal = val
-                  try {
-                    newVal = JSON.parse(ev.target.value)
-                  } catch {
-                    console.error("invalid JSON array input")
-                  }
-                  const oldCombo = possibility.value.enum[index]
-                  onChange({
-                    ...possibility,
-                    value: {
-                      enum: [
-                        ...enumArr.slice(0, index),
-                        { ...oldCombo, [key]: newVal },
-                        ...enumArr.slice(index + 1),
-                      ],
-                    },
-                  })
-                }}
-                className="textarea textarea-bordered w-full"
-              />
-            )
-            break
+
           case "object":
             return (
               <textarea
