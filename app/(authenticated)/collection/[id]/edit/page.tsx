@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
-import { FormBuilder } from "@/features/form-builder";
+import { FormStudio } from "@/features/form-builder";
 
 export default function SchemaEditPage() {
   const params = useParams();
@@ -14,63 +14,41 @@ export default function SchemaEditPage() {
   const [schema, setSchema] = useState<string>("{}");
   const [uiSchema, setUiSchema] = useState<string>("{}");
 
+  const handleSave = (state: { schema: object; uiSchema: object; formData: object }) => {
+    // Note: Here you would save the state to the DB via a server action.
+    // For now, we update the local state and navigate back or show a toast.
+    setSchema(JSON.stringify(state.schema));
+    setUiSchema(JSON.stringify(state.uiSchema));
+    router.push(`/collection/${id}`);
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300">
-      <div className="mb-4">
+    <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300 h-screen flex flex-col">
+      <div className="mb-4 flex-none">
         <Button variant="ghost" onClick={() => router.back()} size="sm">
           ← Back
         </Button>
       </div>
 
-      <PageHeader
-        title="Schema Form Builder"
-        description="Design your metadata template schema visually. Changes are saved as a draft version."
-      >
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => router.back()} size="sm">
-            Cancel
-          </Button>
-          <Button variant="primary" size="sm" onClick={() => router.push(`/collection/${id}`)}>
-            Save Draft
-          </Button>
-        </div>
-      </PageHeader>
+      <div className="flex-none">
+        <PageHeader
+          title="Schema Form Studio"
+          description="Design, edit, and preview your metadata template schema all in one place. Changes are saved as a draft version."
+        >
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={() => router.back()} size="sm">
+              Cancel
+            </Button>
+          </div>
+        </PageHeader>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Side: Builder interface */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="border border-base-300 p-6 rounded-box bg-base-100 shadow-xl">
-            <FormBuilder
-              schema={schema}
-              uischema={uiSchema}
-              onChange={(newSchema: string, newUiSchema: string) => {
-                setSchema(newSchema);
-                setUiSchema(newUiSchema);
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Right Side: Real-time JSON schema preview */}
-        <div className="space-y-6">
-          <div className="border border-base-300 p-6 rounded-box bg-base-100 shadow-xl">
-            <h2 className="text-xl font-bold mb-4 text-secondary">JSON Schema Preview</h2>
-            <div className="bg-base-200 p-4 rounded-box overflow-x-auto max-h-[300px]">
-              <pre className="text-xs font-mono text-base-content/80">
-                {JSON.stringify(JSON.parse(schema || "{}"), null, 2)}
-              </pre>
-            </div>
-          </div>
-          
-          <div className="border border-base-300 p-6 rounded-box bg-base-100 shadow-xl">
-            <h2 className="text-xl font-bold mb-4 text-secondary">UI Schema Preview</h2>
-            <div className="bg-base-200 p-4 rounded-box overflow-x-auto max-h-[300px]">
-              <pre className="text-xs font-mono text-base-content/80">
-                {JSON.stringify(JSON.parse(uiSchema || "{}"), null, 2)}
-              </pre>
-            </div>
-          </div>
-        </div>
+      <div className="flex-1 w-full min-h-0 border border-base-300 p-6 rounded-box bg-base-100 shadow-xl overflow-hidden">
+        <FormStudio
+          initialSchema={schema}
+          initialUiSchema={uiSchema}
+          onSave={handleSave}
+        />
       </div>
     </div>
   );

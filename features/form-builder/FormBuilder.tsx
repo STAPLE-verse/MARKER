@@ -1,3 +1,5 @@
+"use client"
+
 import React, { ReactElement, useEffect, useState } from "react"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import Card from "./Card"
