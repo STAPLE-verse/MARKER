@@ -16,7 +16,7 @@ type FBRadioGroupPropsType = {
 
 export default function FBRadioGroup(props: FBRadioGroupPropsType): ReactElement {
   const { options, defaultValue, onChange, horizontal, id, autoFocus, disabled } = props
-  const name = Math.random().toString()
+  const name = React.useId()
   // Removed JSS class usage
   const classes = classnames("fb-radio-group", {
     horizontal,

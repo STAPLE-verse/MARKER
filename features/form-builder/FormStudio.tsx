@@ -1,10 +1,20 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState } from "react"
 import { FormStudioProvider, useFormStudio } from "./FormStudioContext"
+import dynamic from "next/dynamic"
 import FormBuilder from "./FormBuilder"
-import JsonEditor from "./JsonEditor"
 import FormPreview from "./FormPreview"
+
+// Lazy-load the JSON editor to prevent loading Monaco until the user actually clicks the tab
+const JsonEditor = dynamic(() => import("./JsonEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-full w-full bg-base-200 rounded-lg border border-base-300">
+      <span className="loading loading-spinner text-primary loading-lg"></span>
+    </div>
+  ),
+})
 import type { Mods } from "./types"
 
 interface FormStudioProps {
@@ -14,9 +24,16 @@ interface FormStudioProps {
   mods?: Mods
 }
 
-function FormStudioInner({ onSave, mods }: { onSave?: (state: any) => void; mods?: Mods }) {
+function FormStudioInner({ onSave, mods }: { onSave?: (state: { schema: object; uiSchema: object; formData: object }) => void; mods?: Mods }) {
   const { state, setSchema, setUiSchema } = useFormStudio()
   const [activeTab, setActiveTab] = useState<"builder" | "json" | "preview">("builder")
+  
+  // Track if the JSON tab has ever been visited so we only load the heavy editor once,
+  // but keep it mounted in the background to preserve undo history and unsaved text.
+  const [hasVisitedJson, setHasVisitedJson] = useState(false)
+  if (activeTab === "json" && !hasVisitedJson) {
+    setHasVisitedJson(true)
+  }
 
   return (
     <div className="flex flex-col w-full h-full animate-in fade-in duration-300">
@@ -66,7 +83,7 @@ function FormStudioInner({ onSave, mods }: { onSave?: (state: any) => void; mods
           />
         </div>
         <div className={activeTab === "json" ? "block h-full" : "hidden"}>
-          <JsonEditor />
+          {hasVisitedJson && <JsonEditor />}
         </div>
         <div className={activeTab === "preview" ? "block" : "hidden"}>
           <FormPreview />

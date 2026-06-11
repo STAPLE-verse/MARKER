@@ -1,6 +1,6 @@
 "use client"
 
-import React, { ReactElement, useEffect, useState } from "react"
+import React, { ReactElement, useEffect } from "react"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import Card from "./Card"
 import Section from "./Section"
@@ -64,7 +64,7 @@ export default function FormBuilder({
   const [cardOpenArray, setCardOpenArray] = React.useState(defaultCollapseStates)
   const categoryHash = generateCategoryHash(allFormInputs)
 
-  const [isFirstRender, setIsFirstRender] = useState(true)
+  const isFirstRender = React.useRef(true)
 
   const addProperties: AddFormObjectParametersType = {
     schema: schemaData,
@@ -80,14 +80,14 @@ export default function FormBuilder({
   const hideAddButton = schemaData.properties && Object.keys(schemaData.properties).length !== 0
 
   useEffect(() => {
-    if (isFirstRender) {
+    if (isFirstRender.current) {
       if (onMount)
         onMount({
           categoryHash,
         })
-      setIsFirstRender(false)
+      isFirstRender.current = false
     }
-  }, [isFirstRender, onMount, categoryHash])
+  }, [onMount, categoryHash])
 
   return (
     <div className={`formBuilder ${className || ""}`}>
@@ -150,7 +150,6 @@ export default function FormBuilder({
         </div>
       )}
       <div className="form-body formBody mt-6">
-        {/* @ts-expect-error children the droppable*/}
         <DragDropContext
           onDragEnd={(result) =>
             onDragEnd(result, {
@@ -164,7 +163,6 @@ export default function FormBuilder({
             })
           }
         >
-          {/* @ts-expect-error children is part of the map*/}
           <Droppable droppableId="droppable" type={DROPPABLE_TYPE}>
             {(providedDroppable) => (
               <div 

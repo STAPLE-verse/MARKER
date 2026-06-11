@@ -13,8 +13,6 @@ export default function Card({
   componentProps,
   onChange,
   onDelete,
-  onMoveUp,
-  onMoveDown,
   TypeSpecificParameters,
   addElem,
   cardOpen,
@@ -29,7 +27,6 @@ export default function Card({
 
   return (
     <React.Fragment>
-      {/* @ts-expect-error children error */}
       <Collapse
         isOpen={cardOpen}
         toggleCollapse={() => setCardOpen(!cardOpen)}

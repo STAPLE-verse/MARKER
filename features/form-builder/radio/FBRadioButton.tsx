@@ -14,7 +14,7 @@ type Props = {
 
 export default function FBRadioButton(props: Props): ReactElement {
   const { label, value, checked, name, onChange, required, disabled, autoFocus } = props
-  const [id] = useState(`radio-${Math.floor(Math.random() * 1000000)}`)
+  const id = React.useId()
   const classes = classnames("form-control w-full", { disabled })
   return (
     <div className={classes} key={value}>

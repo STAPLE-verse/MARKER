@@ -143,7 +143,7 @@ const NumberField: CardComponentType = ({ parameters, onChange }) => {
     <React.Fragment>
       <h5>Default Number</h5>
       <input
-        value={parameters.default as string | number | readonly string[] | undefined}
+        value={(parameters.default ?? "") as string | number | readonly string[]}
         placeholder="Default"
         type="number"
         onChange={(ev) =>

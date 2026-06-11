@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import { useState } from "react"
 import DependencyField from "./dependencies/DependencyField"
 import type { CardModalType, CardComponentPropsType } from "./types"
 import Tooltip from "./Tooltip"
@@ -13,9 +13,11 @@ const CardModal: CardModalType = ({
   // assign state values for parameters that should only change on hitting "Save"
   const [componentPropsState, setComponentProps] = useState(componentProps)
 
-  useEffect(() => {
+  const [prevComponentProps, setPrevComponentProps] = useState(componentProps)
+  if (componentProps !== prevComponentProps) {
+    setPrevComponentProps(componentProps)
     setComponentProps(componentProps)
-  }, [componentProps])
+  }
 
   if (!isOpen) return null
 

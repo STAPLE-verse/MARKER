@@ -173,7 +173,7 @@ const ShortAnswerField: CardComponentType = ({ parameters, onChange }) => {
     <React.Fragment>
       <h5>Default Value</h5>
       <input
-        value={parameters.default as string | number | readonly string[] | undefined}
+        value={(parameters.default ?? "") as string | number | readonly string[]}
         placeholder="Default"
         type={
           (formatTypeDictionary[parameters.format as FormatTypeDictionaryKey] as "email" | "url") ||
@@ -191,7 +191,7 @@ const Password: CardComponentType = ({ parameters, onChange }) => {
     <React.Fragment>
       <h5>Default Password</h5>
       <input
-        value={parameters.default as string | number | readonly string[] | undefined}
+        value={(parameters.default ?? "") as string | number | readonly string[]}
         placeholder="Default"
         type="password"
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}

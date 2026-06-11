@@ -17,12 +17,10 @@ export default function CardEnumOptions({
   onChange,
   type,
 }: CardEnumOptionsProps): ReactElement {
-  const possibleValues = []
-  for (let index = 0; index < initialValues.length; index += 1) {
-    const value = initialValues[index]
+  const possibleValues = initialValues.map((value, index) => {
     let name = `${value}`
     if (names && index < names.length) name = names[index] ?? ""
-    possibleValues.push(
+    return (
       //@ts-ignore
       <div key={index} className="flex items-center gap-2 mb-2">
         <input
@@ -85,7 +83,7 @@ export default function CardEnumOptions({
         </button>
       </div>
     )
-  }
+  })
 
   return (
     <React.Fragment>

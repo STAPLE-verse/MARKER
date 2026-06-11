@@ -31,8 +31,6 @@ export default function Section({
   onRequireToggle,
   onDependentsChange,
   onDelete,
-  onMoveUp,
-  onMoveDown,
   path,
   definitionData,
   definitionUi,
@@ -77,7 +75,6 @@ export default function Section({
 
   return (
     <React.Fragment>
-      {/* @ts-expect-error children error */}
       <Collapse
         isOpen={cardOpen}
         toggleCollapse={() => setCardOpen(!cardOpen)}
@@ -240,7 +237,6 @@ export default function Section({
             </div>
           </div>
           <div className="section-body">
-            {/* @ts-expect-error children error */}
             <DragDropContext
               onDragEnd={(result) =>
                 onDragEnd(result, {
@@ -253,7 +249,6 @@ export default function Section({
                 })
               }
             >
-              {/* @ts-expect-error children error */}
               <Droppable droppableId="droppable" type={DROPPABLE_TYPE}>
                 {(providedDroppable) => (
                   <div 
