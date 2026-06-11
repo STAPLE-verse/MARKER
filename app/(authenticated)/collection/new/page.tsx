@@ -63,7 +63,7 @@ export default function NewSchemaPage() {
         <Card bordered>
           <CardBody>
             <CardTitle className="text-xl">Schema Information</CardTitle>
-            <form className="space-y-4 mt-2" onSubmit={(e) => { e.preventDefault(); router.push("/collection"); }}>
+            <form className="space-y-4 mt-2" onSubmit={(e) => { e.preventDefault(); router.push("/collection/draft-123/edit"); }}>
               <Input label="Title" placeholder="e.g. Cognitive Assessment Form" required />
               <Input label="Description" placeholder="Provide a brief description of the schema's purpose..." />
               <div className="grid grid-cols-2 gap-4">
@@ -112,7 +112,7 @@ export default function NewSchemaPage() {
                           size="sm"
                           onClick={() => {
                             // Import action goes here
-                            router.push("/collection");
+                            router.push(`/collection/${form.id}/edit`);
                           }}
                         >
                           Import
