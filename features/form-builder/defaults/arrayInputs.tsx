@@ -113,8 +113,7 @@ const InnerCard: CardComponentType = ({ parameters, onChange, mods }) => {
         definitionUi,
         hideKey: true,
         cardOpenArray: [cardOpen],
-        setCardOpenArray: (updater) => {
-          const newArr = typeof updater === "function" ? updater([cardOpen]) : updater
+        setCardOpenArray: (newArr) => {
           setCardOpen(newArr[0] ?? false)
         },
         allFormInputs,
