@@ -88,7 +88,7 @@ export default function CardEnumOptions({
   return (
     <React.Fragment>
       {possibleValues}
-      <span className="tooltip tooltip-top cursor-pointer" data-tip="Add new possible option">
+      <span className="tooltip tooltip-right z-50 cursor-pointer" data-tip="Add new possible option">
         <PlusIcon
           className="h-6 w-6 stroke-secondary mt-2 mb-2 hover:stroke-primary transition-colors"
           strokeWidth={4}

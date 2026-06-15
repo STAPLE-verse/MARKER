@@ -218,7 +218,7 @@ features/
 - [ ] Implement `createNewVersion` action (version bumping logic)
 - [ ] Add version history UI on `/collection/[id]` detail page
 - [ ] Build the "Publication Wizard" Modal (collects FAIR metadata: domain, language, contributors, license, release notes)
-- [ ] Update STAPLE's FormBuilder UI (`CardGeneralParameterInputs.tsx`, `types.ts`) to add an `ontologyId` input to specific field properties.
+- [ ] Update FormBuilder UI (`CardGeneralParameterInputs.tsx`, `types.ts`) to add an `ontologyId` input to specific field properties.
 - [ ] Implement `publishSchema` action (extracts nested `ontologyId`s to populate `PublishedSchema.ontologyRefs`, generates PID, immutability)
 - [ ] Wire the publish modal to trigger from the draft detail page (keeping FormBuilder strictly for structural editing)
 - [ ] Refactor detail page to show draft vs. published status from real data

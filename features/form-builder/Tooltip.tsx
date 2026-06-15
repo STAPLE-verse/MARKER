@@ -19,7 +19,7 @@ export default function Tooltip({
   const Icon = typeMap[type]
 
   return (
-    <span className="tooltip tooltip-top tooltip-info z-50 before:max-w-xs" data-tip={text} id={id}>
+    <span className="tooltip tooltip-right tooltip-info z-50 before:max-w-xs" data-tip={text} id={id}>
       <Icon className="h-4 w-4 inline stroke-2 stroke-info" />
     </span>
   )
