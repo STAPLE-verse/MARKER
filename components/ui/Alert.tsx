@@ -36,9 +36,9 @@ export function Alert({
   return (
     <div role="alert" className={cn(`alert alert-${variant} shadow-sm`, className)}>
       {Icon && <Icon className="h-6 w-6 shrink-0" strokeWidth={2} />}
-      <div>
+      <div className="flex-1 w-full">
         {title && <h3 className="font-bold">{title}</h3>}
-        <div className="text-sm">{children}</div>
+        <div className="text-sm w-full">{children}</div>
       </div>
     </div>
   );

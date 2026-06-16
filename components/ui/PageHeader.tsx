@@ -22,9 +22,9 @@ import { cn } from '@/lib/utils';
  * </PageHeader>
  */
 
-const PageHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & {
-  title: string;
-  description?: string;
+const PageHeader = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> & {
+  title: React.ReactNode;
+  description?: React.ReactNode;
 }>(({ title, description, children, className, ...props }, ref) => (
   <div
     ref={ref}
