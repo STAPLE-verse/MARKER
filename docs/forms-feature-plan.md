@@ -46,6 +46,11 @@ To maintain a clean user experience, MARKER separates the structural creation of
 | **JSON-LD Export** | Architecture doc describes embedded `@context`. Not implemented. |
 | **Validation** | No Zod schemas for form creation / version metadata. |
 
+### Open Architecture Questions
+> **Pending Decision:** Should we allow users to import MARKER Draft schemas into STAPLE, or only Published schemas?
+> * **Approach A (Strict FAIR - Recommended):** STAPLE can *only* import `PublishedSchema` records. Drafts are unstable workbenches. If a user wants to test or use their schema in STAPLE, they must publish it to guarantee immutability and get a PID.
+> * **Approach B (Flexible Hard-Copy):** STAPLE can import Drafts, but the import must perform a hard-copy clone of the JSON into a new `app: "staple"` Form record. This severs the link, ensuring that any subsequent in-place edits to the Draft in MARKER do not break active STAPLE data collection tasks.
+
 ---
 
 ## 2. Data Model Recap
@@ -200,15 +205,15 @@ features/
 ### Phase 1: Wire the Draft Lifecycle (Core CRUD)
 > **Goal:** A user can create, save, load, and delete draft forms with real DB persistence.
 
-- [ ] Create `features/forms/schemas.ts` — Zod schemas for form creation input
-- [ ] Create `features/forms/actions.ts` — `createForm`, `saveFormVersion`, `deleteForm`
-- [ ] Create `features/forms/queries.ts` — `getUserForms`, `getFormById`, `getFormVersion`
-- [ ] Create `features/forms/types.ts` — TypeScript types for query returns
-- [ ] Refactor `/collection` page → server data fetch with `getUserForms`
-- [ ] Wire `/collection/new` "From Scratch" tab → `createForm` + redirect
-- [ ] Wire `/collection/[id]` → `getFormById` with ownership check
-- [ ] Wire `/collection/[id]/edit` → load `FormVersion` schema, save via `saveFormVersion`
-- [ ] Wire Delete action on collection page
+- [x] Create `features/forms/schemas.ts` — Zod schemas for form creation input
+- [x] Create `features/forms/actions.ts` — `createForm`, `saveFormVersion`, `deleteForm`
+- [x] Create `features/forms/queries.ts` — `getUserForms`, `getFormById`, `getFormVersion`
+- [x] Create `features/forms/types.ts` — TypeScript types for query returns
+- [x] Refactor `/collection` page → server data fetch with `getUserForms`
+- [x] Wire `/collection/new` "From Scratch" tab → `createForm` + redirect
+- [x] Wire `/collection/[id]` → `getFormById` with ownership check
+- [x] Wire `/collection/[id]/edit` → load `FormVersion` schema, save via `saveFormVersion`
+- [x] Wire Delete action on collection page
 
 **Deliverable:** User can create a form, open it in FormStudio, build fields, save, come back later and continue editing. Collection page shows real forms from the database.
 

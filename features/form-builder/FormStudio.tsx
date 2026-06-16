@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { FormStudioProvider, useFormStudio } from "./FormStudioContext"
 import dynamic from "next/dynamic"
 import FormBuilder from "./FormBuilder"
@@ -20,11 +20,12 @@ import type { Mods } from "./types"
 interface FormStudioProps {
   initialSchema?: string | object
   initialUiSchema?: string | object
-  onSave?: (state: { schema: object; uiSchema: object; formData: object }) => void
+  onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
+  onSaveCheckpoint?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
   mods?: Mods
 }
 
-function FormStudioInner({ onSave, mods }: { onSave?: (state: { schema: object; uiSchema: object; formData: object }) => void; mods?: Mods }) {
+function FormStudioInner({ onAutoSave, onSaveCheckpoint, mods }: { onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; onSaveCheckpoint?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; mods?: Mods }) {
   const { state, setSchema, setUiSchema } = useFormStudio()
   const [activeTab, setActiveTab] = useState<"builder" | "json" | "preview">("builder")
   
@@ -34,6 +35,42 @@ function FormStudioInner({ onSave, mods }: { onSave?: (state: { schema: object; 
   if (activeTab === "json" && !hasVisitedJson) {
     setHasVisitedJson(true)
   }
+
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved")
+  const isInitialMount = useRef(true)
+  const lastSavedStateRef = useRef<string>("")
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      lastSavedStateRef.current = JSON.stringify({ schema: state.schema, uiSchema: state.uiSchema })
+      return
+    }
+    if (!onAutoSave) return
+
+    const currentStateStr = JSON.stringify({ schema: state.schema, uiSchema: state.uiSchema })
+    
+    // If the JSON hasn't actually changed, ignore the aggressive React render and return early
+    if (currentStateStr === lastSavedStateRef.current) {
+      return
+    }
+
+    setSaveStatus("unsaved")
+    const handler = setTimeout(async () => {
+      setSaveStatus("saving")
+      try {
+        await onAutoSave(state)
+        lastSavedStateRef.current = currentStateStr // Cache the successfully saved state
+        setSaveStatus("saved")
+      } catch (e) {
+        console.error("Auto-save failed", e)
+        setSaveStatus("unsaved")
+      }
+    }, 1500)
+
+    return () => clearTimeout(handler)
+  }, [state.schema, state.uiSchema, onAutoSave])
 
   return (
     <div className="flex flex-col w-full h-full animate-in fade-in duration-300">
@@ -59,11 +96,20 @@ function FormStudioInner({ onSave, mods }: { onSave?: (state: { schema: object; 
           </button>
         </div>
 
-        {onSave && (
-          <button className="btn btn-primary shadow-md hover:shadow-lg transition-all" onClick={() => onSave(state)}>
-            Save Form
-          </button>
-        )}
+        <div className="flex items-center gap-4">
+          {onAutoSave && (
+            <div className="flex items-center">
+              {saveStatus === "saved" && <span className="text-sm font-medium text-base-content/50">Saved to draft</span>}
+              {saveStatus === "saving" && <span className="text-sm font-medium text-base-content/70 flex items-center gap-2"><span className="loading loading-spinner loading-xs"></span>Saving...</span>}
+              {saveStatus === "unsaved" && <span className="text-sm font-medium text-warning">Unsaved changes</span>}
+            </div>
+          )}
+          {onSaveCheckpoint && (
+            <button className="btn btn-primary btn-outline shadow-sm hover:shadow-md transition-all" onClick={() => onSaveCheckpoint(state)}>
+              Save as Checkpoint
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex-1 w-full min-h-0 rounded-xl overflow-y-auto overflow-x-hidden px-1 pr-2">
@@ -96,7 +142,7 @@ function FormStudioInner({ onSave, mods }: { onSave?: (state: { schema: object; 
 export default function FormStudio(props: FormStudioProps) {
   return (
     <FormStudioProvider initialSchema={props.initialSchema} initialUiSchema={props.initialUiSchema}>
-      <FormStudioInner onSave={props.onSave} mods={props.mods} />
+      <FormStudioInner onAutoSave={props.onAutoSave} onSaveCheckpoint={props.onSaveCheckpoint} mods={props.mods} />
     </FormStudioProvider>
   )
 }
