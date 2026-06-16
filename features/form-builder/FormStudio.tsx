@@ -20,12 +20,13 @@ import type { Mods } from "./types"
 interface FormStudioProps {
   initialSchema?: string | object
   initialUiSchema?: string | object
-  onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
-  onSaveCheckpoint?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
+  onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void> | void
+  onSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
+  onSaveNewVersion?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
   mods?: Mods
 }
 
-function FormStudioInner({ onAutoSave, onSaveCheckpoint, mods }: { onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; onSaveCheckpoint?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; mods?: Mods }) {
+function FormStudioInner({ onAutoSave, onSave, onSaveNewVersion, mods }: { onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void> | void; onSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; onSaveNewVersion?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; mods?: Mods }) {
   const { state, setSchema, setUiSchema } = useFormStudio()
   const [activeTab, setActiveTab] = useState<"builder" | "json" | "preview">("builder")
   
@@ -98,15 +99,20 @@ function FormStudioInner({ onAutoSave, onSaveCheckpoint, mods }: { onAutoSave?: 
 
         <div className="flex items-center gap-4">
           {onAutoSave && (
-            <div className="flex items-center">
-              {saveStatus === "saved" && <span className="text-sm font-medium text-base-content/50">Saved to draft</span>}
+            <div className="flex items-center mr-2">
+              {saveStatus === "saved" && <span className="text-sm font-medium text-base-content/50">Saved locally</span>}
               {saveStatus === "saving" && <span className="text-sm font-medium text-base-content/70 flex items-center gap-2"><span className="loading loading-spinner loading-xs"></span>Saving...</span>}
               {saveStatus === "unsaved" && <span className="text-sm font-medium text-warning">Unsaved changes</span>}
             </div>
           )}
-          {onSaveCheckpoint && (
-            <button className="btn btn-primary btn-outline shadow-sm hover:shadow-md transition-all" onClick={() => onSaveCheckpoint(state)}>
-              Save as Checkpoint
+          {onSave && (
+            <button className="btn btn-ghost border border-base-300 hover:border-base-content/30 shadow-sm transition-all" onClick={() => onSave(state)}>
+              Save Changes
+            </button>
+          )}
+          {onSaveNewVersion && (
+            <button className="btn btn-primary shadow-sm hover:shadow-md transition-all" onClick={() => onSaveNewVersion(state)}>
+              Save as New Version
             </button>
           )}
         </div>
@@ -142,7 +148,7 @@ function FormStudioInner({ onAutoSave, onSaveCheckpoint, mods }: { onAutoSave?: 
 export default function FormStudio(props: FormStudioProps) {
   return (
     <FormStudioProvider initialSchema={props.initialSchema} initialUiSchema={props.initialUiSchema}>
-      <FormStudioInner onAutoSave={props.onAutoSave} onSaveCheckpoint={props.onSaveCheckpoint} mods={props.mods} />
+      <FormStudioInner onAutoSave={props.onAutoSave} onSave={props.onSave} onSaveNewVersion={props.onSaveNewVersion} mods={props.mods} />
     </FormStudioProvider>
   )
 }
