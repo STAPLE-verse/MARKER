@@ -6,6 +6,8 @@ import dynamic from "next/dynamic"
 import FormBuilder from "./FormBuilder"
 import FormPreview from "./FormPreview"
 
+import { CheckCircleIcon, ExclamationCircleIcon } from "@heroicons/react/20/solid"
+
 // Lazy-load the JSON editor to prevent loading Monaco until the user actually clicks the tab
 const JsonEditor = dynamic(() => import("./JsonEditor"), {
   ssr: false,
@@ -23,10 +25,11 @@ interface FormStudioProps {
   onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void> | void
   onSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
   onSaveNewVersion?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
+  onCancel?: () => void
   mods?: Mods
 }
 
-function FormStudioInner({ onAutoSave, onSave, onSaveNewVersion, mods }: { onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void> | void; onSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; onSaveNewVersion?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; mods?: Mods }) {
+export function FormStudioUI({ onAutoSave, onSave, onSaveNewVersion, onCancel, mods }: { onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void> | void; onSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; onSaveNewVersion?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; onCancel?: () => void; mods?: Mods }) {
   const { state, setSchema, setUiSchema } = useFormStudio()
   const [activeTab, setActiveTab] = useState<"builder" | "json" | "preview">("builder")
   
@@ -74,8 +77,8 @@ function FormStudioInner({ onAutoSave, onSave, onSaveNewVersion, mods }: { onAut
   }, [state.schema, state.uiSchema, onAutoSave])
 
   return (
-    <div className="flex flex-col w-full h-full animate-in fade-in duration-300">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+    <div className="flex flex-col w-full h-full animate-in fade-in duration-300 bg-base-100 border border-base-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="flex flex-col md:flex-row justify-between items-end border-b border-base-200 px-4 pt-4 bg-base-200 gap-4">
         <div className="tabs tabs-bordered w-full md:w-auto">
           <button
             className={`tab tab-lg transition-all font-semibold ${activeTab === "builder" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
@@ -97,28 +100,52 @@ function FormStudioInner({ onAutoSave, onSave, onSaveNewVersion, mods }: { onAut
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 pb-3">
           {onAutoSave && (
-            <div className="flex items-center mr-2">
-              {saveStatus === "saved" && <span className="text-sm font-medium text-base-content/50">Saved locally</span>}
-              {saveStatus === "saving" && <span className="text-sm font-medium text-base-content/70 flex items-center gap-2"><span className="loading loading-spinner loading-xs"></span>Saving...</span>}
-              {saveStatus === "unsaved" && <span className="text-sm font-medium text-warning">Unsaved changes</span>}
+            <div className="flex items-center mr-1 bg-base-100 px-3 py-1.5 rounded-full border border-base-300 shadow-sm min-w-[130px] justify-center transition-all">
+              {saveStatus === "saved" && (
+                <span className="text-xs font-medium text-base-content/60 flex items-center gap-1.5">
+                  <CheckCircleIcon className="w-4 h-4 text-success/80" />
+                  Saved locally
+                </span>
+              )}
+              {saveStatus === "saving" && (
+                <span className="text-xs font-medium text-base-content/70 flex items-center gap-1.5">
+                  <span className="loading loading-spinner loading-xs text-primary"></span>
+                  Saving...
+                </span>
+              )}
+              {saveStatus === "unsaved" && (
+                <span className="text-xs font-medium text-warning flex items-center gap-1.5">
+                  <ExclamationCircleIcon className="w-4 h-4" />
+                  Unsaved changes
+                </span>
+              )}
             </div>
           )}
-          {onSave && (
-            <button className="btn btn-ghost border border-base-300 hover:border-base-content/30 shadow-sm transition-all" onClick={() => onSave(state)}>
-              Save Changes
+          {onCancel && (
+            <button className="btn btn-secondary btn-outline transition-all ml-2" onClick={onCancel}>
+              Cancel
             </button>
           )}
+          {onSave && (
+            <div className="tooltip tooltip-bottom" data-tip="Overwrites the current version of this schema.">
+              <button className="btn btn-ghost border border-base-300 hover:border-base-content/30 shadow-sm transition-all" onClick={() => onSave(state)}>
+                Save Changes
+              </button>
+            </div>
+          )}
           {onSaveNewVersion && (
-            <button className="btn btn-primary shadow-sm hover:shadow-md transition-all" onClick={() => onSaveNewVersion(state)}>
-              Save as New Version
-            </button>
+            <div className="tooltip tooltip-bottom tooltip-primary" data-tip="Preserves current history and saves edits as a brand new version.">
+              <button className="btn btn-primary shadow-sm hover:shadow-md transition-all" onClick={() => onSaveNewVersion(state)}>
+                Save as New Version
+              </button>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="flex-1 w-full min-h-0 rounded-xl overflow-y-auto overflow-x-hidden px-1 pr-2">
+      <div className="flex-1 w-full min-h-0 overflow-y-auto overflow-x-hidden p-6">
         <div className={activeTab === "builder" ? "block" : "hidden"}>
           <FormBuilder
             schema={typeof state.schema === "string" ? state.schema : JSON.stringify(state.schema)}
@@ -148,7 +175,7 @@ function FormStudioInner({ onAutoSave, onSave, onSaveNewVersion, mods }: { onAut
 export default function FormStudio(props: FormStudioProps) {
   return (
     <FormStudioProvider initialSchema={props.initialSchema} initialUiSchema={props.initialUiSchema}>
-      <FormStudioInner onAutoSave={props.onAutoSave} onSave={props.onSave} onSaveNewVersion={props.onSaveNewVersion} mods={props.mods} />
+      <FormStudioUI onAutoSave={props.onAutoSave} onSave={props.onSave} onSaveNewVersion={props.onSaveNewVersion} onCancel={props.onCancel} mods={props.mods} />
     </FormStudioProvider>
   )
 }

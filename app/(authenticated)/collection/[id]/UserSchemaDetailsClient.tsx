@@ -11,6 +11,8 @@ import Link from "next/link";
 import { FormWithAllVersions } from "@/features/forms/types";
 import { FormStudioProvider, FormPreview } from "@/features/form-builder";
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
+import { BackButton } from "@/components/ui/BackButton";
+import { Badge } from "@/components/ui/Badge";
 
 interface UserSchemaDetailsClientProps {
   form: FormWithAllVersions;
@@ -45,54 +47,28 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
       <div className="flex-1 h-screen overflow-y-auto pr-16">
         
         {/* Top-Left Back Button */}
-        <div className="p-4 lg:px-8 pt-6">
-          <Button variant="ghost" onClick={() => router.push("/collection")} size="sm" className="text-base-content/60 hover:text-base-content">
-            ← Back to Collection
-          </Button>
-        </div>
+        <BackButton href="/collection">
+          Back to Collection
+        </BackButton>
 
-        <div className="container mx-auto px-4 pb-8 max-w-4xl animate-in fade-in duration-300 relative">
+        <div className="container mx-auto px-4 pb-8 max-w-6xl animate-in fade-in duration-300 relative">
           
-          {/* Banner for viewing older versions */}
-          {!isViewingLatest && (
-            <Alert variant="warning" className="mb-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
-                <div className="text-base">
-                  <span className="font-bold">Viewing older version:</span> Version {selectedVersion.version}
-                </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button size="sm" variant="ghost" onClick={() => setSelectedVersion(form.versions[0])}>
-                    Back to Latest
-                  </Button>
-                  <Button size="sm" variant="primary">
-                    Restore this Version
-                  </Button>
-                  <Button size="sm" variant="secondary">
-                    Clone...
-                  </Button>
-                </div>
-              </div>
-            </Alert>
-          )}
-
           <PageHeader
             title={
-              <div className="flex items-center gap-3">
-                <span>{selectedVersion.name || "Untitled Draft"}</span>
-                <span
-                  className={`badge ${
-                    type === "Published" ? "badge-success" : "badge-warning"
-                  }`}
-                >
-                  {type}
+              <div className="flex items-center gap-3 flex-nowrap">
+                <span className="truncate" title={selectedVersion.name || "Untitled Form"}>
+                  {selectedVersion.name || "Untitled Form"}
                 </span>
+                <Badge variant="primary" outline className="shrink-0 mt-0.5">
+                  v{selectedVersion.version}
+                </Badge>
+                <Badge variant={type === "Published" ? "success" : "warning"} className="shrink-0 mt-0.5">
+                  {type}
+                </Badge>
               </div>
             }
             description={
-              <div className="flex flex-col gap-1 mt-1">
-                <span>Version: {selectedVersion.version}</span>
-                {pid && <span className="font-mono text-primary text-xs">PID: {pid}</span>}
-              </div>
+              pid ? <span className="font-mono text-primary text-xs">PID: {pid}</span> : null
             }
           >
             <div className="flex gap-2 items-center">
@@ -121,6 +97,28 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
             </div>
           </PageHeader>
 
+          {/* Banner for viewing older versions */}
+          {!isViewingLatest && (
+            <Alert variant="warning" className="mb-6 mt-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
+                <div className="text-base">
+                  <span className="font-bold">Viewing older version:</span> Version {selectedVersion.version}
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <Button size="sm" variant="ghost" onClick={() => setSelectedVersion(form.versions[0])}>
+                    Back to Latest
+                  </Button>
+                  <Button size="sm" variant="primary">
+                    Restore this Version
+                  </Button>
+                  <Button size="sm" variant="secondary">
+                    Clone...
+                  </Button>
+                </div>
+              </div>
+            </Alert>
+          )}
+
           <div className="space-y-6 mt-8">
             <Card bordered>
               <CardBody>
@@ -136,13 +134,13 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
                 <div className="border-b border-base-200 px-4 pt-4 bg-base-200 flex justify-between items-end">
                   <div className="tabs tabs-bordered">
                     <button
-                      className={`tab tab-lg ${activeTab === "schema" ? "tab-active font-semibold" : ""}`}
+                      className={`tab tab-lg transition-all font-semibold ${activeTab === "schema" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
                       onClick={() => setActiveTab("schema")}
                     >
                       JSON Source
                     </button>
                     <button
-                      className={`tab tab-lg ${activeTab === "preview" ? "tab-active font-semibold" : ""}`}
+                      className={`tab tab-lg transition-all font-semibold ${activeTab === "preview" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
                       onClick={() => setActiveTab("preview")}
                     >
                       Form Preview

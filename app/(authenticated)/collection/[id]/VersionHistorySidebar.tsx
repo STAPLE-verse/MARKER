@@ -1,5 +1,6 @@
 import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/Sidebar";
 import { ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Badge } from "@/components/ui/Badge";
 import { FormWithAllVersions } from "@/features/forms/types";
 
 type FormVersionType = FormWithAllVersions["versions"][0];
@@ -63,7 +64,7 @@ export function VersionHistorySidebar({
                 <div className="flex justify-between items-start mb-1">
                   <div className="font-semibold flex items-center gap-2">
                     v{v.version}
-                    {isLatest && <span className="badge badge-sm badge-success">Latest</span>}
+                    {isLatest && <Badge size="sm" variant="success">Latest</Badge>}
                   </div>
                   <div className="text-xs text-base-content/50 whitespace-nowrap">
                     {new Date(v.createdAt).toLocaleDateString()}

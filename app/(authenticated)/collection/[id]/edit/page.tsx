@@ -19,6 +19,8 @@ export default async function SchemaEditPage({ params }: { params: Promise<{ id:
   return (
     <SchemaEditClient 
       formId={form.id} 
+      formName={latestVersion.name || "Untitled Form"}
+      formVersion={latestVersion.version}
       initialSchema={(latestVersion.schema || {}) as Record<string, unknown>} 
       initialUiSchema={(latestVersion.uiSchema || {}) as Record<string, unknown>} 
     />

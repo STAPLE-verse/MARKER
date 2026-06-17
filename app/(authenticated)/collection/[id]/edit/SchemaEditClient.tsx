@@ -4,19 +4,36 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
-import { FormStudio } from "@/features/form-builder";
+import { FormStudioProvider, FormStudioUI, useFormStudio } from "@/features/form-builder";
 import { saveFormVersion } from "@/features/forms/mutations/saveFormVersion";
 import { createFormCheckpoint } from "@/features/forms/mutations/createFormCheckpoint";
 import { Alert } from "@/components/ui/Alert";
-import { useFormDraft } from "@/features/forms/hooks/useFormDraft";
+import { BackButton } from "@/components/ui/BackButton";
+import { Badge } from "@/components/ui/Badge";
+import { useFormDraft, FormDraftData } from "@/features/forms/hooks/useFormDraft";
 
 interface SchemaEditClientProps {
   formId: number;
+  formName: string;
+  formVersion: number;
   initialSchema: Record<string, unknown>;
   initialUiSchema: Record<string, unknown>;
 }
 
-export default function SchemaEditClient({ formId, initialSchema, initialUiSchema }: SchemaEditClientProps) {
+interface EditPageContentProps {
+  formName: string;
+  formVersion: number;
+  isSaving: boolean;
+  draftToRestore: FormDraftData | null;
+  restoreDraft: () => void;
+  discardDraft: () => void;
+  handleAutoSave: (state: { schema: object; uiSchema: object; formData: object }) => void;
+  handleSave: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>;
+  handleSaveNewVersion: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>;
+  onCancel: () => void;
+}
+
+export default function SchemaEditClient({ formId, formName, formVersion, initialSchema, initialUiSchema }: SchemaEditClientProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   
@@ -79,68 +96,99 @@ export default function SchemaEditClient({ formId, initialSchema, initialUiSchem
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300 h-screen flex flex-col">
-      <div className="mb-4 flex-none">
-        <Button variant="ghost" onClick={() => router.back()} size="sm">
-          ← Back
-        </Button>
-      </div>
+    <FormStudioProvider key={studioKey} initialSchema={currentSchema} initialUiSchema={currentUiSchema}>
+      <EditPageContent 
+        formName={formName}
+        formVersion={formVersion}
+        isSaving={isSaving}
+        draftToRestore={draftToRestore}
+        restoreDraft={restoreDraft}
+        discardDraft={discardDraft}
+        handleAutoSave={handleAutoSave}
+        handleSave={handleSave}
+        handleSaveNewVersion={handleSaveNewVersion}
+        onCancel={() => router.back()}
+      />
+    </FormStudioProvider>
+  );
+}
 
-      <div className="flex-none">
-        <PageHeader
-          title="Schema Form Studio"
-          description="Design, edit, and preview your metadata template schema all in one place. Auto-saves locally to your browser."
-        >
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => router.back()} size="sm" disabled={isSaving}>
-              Cancel
-            </Button>
-          </div>
-        </PageHeader>
-      </div>
-      
-      {draftToRestore && (
-        <div className="flex-none mb-4">
-          <Alert variant="info" showIcon>
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
-              <div className="text-sm font-medium">
-                We found unsaved changes in your browser from a previous session.
-                {draftToRestore.timestamp && (
-                  <span className="opacity-75 block sm:inline sm:ml-1 font-normal">
-                    (Last edited: {new Date(draftToRestore.timestamp).toLocaleString()})
+function EditPageContent(props: EditPageContentProps) {
+  const { state } = useFormStudio();
+
+  return (
+    <div className="relative min-h-screen bg-base-100 overflow-hidden flex">
+      <div className="flex-1 h-screen overflow-y-auto flex flex-col">
+        {/* Top-Left Cancel Button */}
+        <BackButton onClick={props.onCancel} disabled={props.isSaving}>
+          Cancel Editing
+        </BackButton>
+
+        <div className="container mx-auto px-4 pb-8 max-w-6xl animate-in fade-in duration-300 flex-1 flex flex-col relative">
+          <div className="flex-none mb-2">
+            <PageHeader
+              title={
+                <div className="flex items-center gap-3 flex-nowrap">
+                  <span className="truncate" title={`Editing: ${props.formName}`}>
+                    <span className="text-base-content/50 font-normal">Editing:</span> {props.formName}
                   </span>
-                )}
-              </div>
-              <div className="flex gap-2 shrink-0">
-                <Button size="sm" variant="ghost" onClick={discardDraft}>
-                  Discard
+                  <Badge variant="primary" outline className="shrink-0 mt-0.5">
+                    v{props.formVersion}
+                  </Badge>
+                </div>
+              }
+            >
+              <div className="flex gap-2 items-center">
+                <Button size="sm" variant="primary" outline onClick={() => props.handleSave(state)} disabled={props.isSaving}>
+                  Save Changes
                 </Button>
-                <Button size="sm" variant="primary" onClick={restoreDraft}>
-                  Restore Draft
+                <Button size="sm" variant="primary" onClick={() => props.handleSaveNewVersion(state)} disabled={props.isSaving}>
+                  Save as New Version
                 </Button>
               </div>
-            </div>
-          </Alert>
-        </div>
-      )}
-
-      <div className="flex-1 w-full min-h-0 border border-base-300 p-6 rounded-box bg-base-200/50 shadow-inner overflow-hidden relative">
-        {isSaving && (
-          <div className="absolute inset-0 z-50 bg-base-100/50 backdrop-blur-sm flex items-center justify-center">
-            <div className="flex items-center gap-3 bg-base-100 p-4 rounded-xl shadow-xl border border-base-300">
-              <span className="loading loading-spinner text-primary"></span>
-              <span className="font-medium">Saving to database...</span>
-            </div>
+            </PageHeader>
           </div>
-        )}
-        <FormStudio
-          key={studioKey}
-          initialSchema={currentSchema}
-          initialUiSchema={currentUiSchema}
-          onAutoSave={handleAutoSave}
-          onSave={handleSave}
-          onSaveNewVersion={handleSaveNewVersion}
-        />
+          
+          {props.draftToRestore && (
+            <div className="flex-none mb-6 mt-2">
+              <Alert variant="info" showIcon>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
+                  <div className="text-sm font-medium">
+                    We found unsaved changes in your browser from a previous session.
+                    {props.draftToRestore.timestamp && (
+                      <span className="opacity-75 block sm:inline sm:ml-1 font-normal">
+                        (Last edited: {new Date(props.draftToRestore.timestamp).toLocaleString()})
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button size="sm" variant="ghost" onClick={props.discardDraft}>
+                      Discard
+                    </Button>
+                    <Button size="sm" variant="primary" onClick={props.restoreDraft}>
+                      Restore Draft
+                    </Button>
+                  </div>
+                </div>
+              </Alert>
+            </div>
+          )}
+
+          {/* Borderless FormStudio Container */}
+          <div className="flex-1 w-full min-h-0 relative mt-4">
+            {props.isSaving && (
+              <div className="absolute inset-0 z-50 bg-base-100/50 backdrop-blur-sm flex items-center justify-center">
+                <div className="flex items-center gap-3 bg-base-100 p-4 rounded-xl shadow-xl border border-base-300">
+                  <span className="loading loading-spinner text-primary"></span>
+                  <span className="font-medium">Saving to database...</span>
+                </div>
+              </div>
+            )}
+            <FormStudioUI
+              onAutoSave={props.handleAutoSave}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
