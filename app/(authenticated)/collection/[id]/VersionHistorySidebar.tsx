@@ -37,13 +37,20 @@ export function VersionHistorySidebar({
             Version History
           </div>
         )}
-        <button 
-          className="btn btn-sm btn-ghost btn-circle" 
-          onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-          title="Toggle Version History"
-        >
-          {isHistoryOpen ? <XMarkIcon className="w-5 h-5" /> : <ClockIcon className="w-5 h-5" />}
-        </button>
+        <div className={!isHistoryOpen && versions.length > 1 ? "indicator" : ""}>
+          {!isHistoryOpen && versions.length > 1 && (
+            <Badge size="xs" variant="primary" className="indicator-item indicator-top indicator-end shadow-sm">
+              {versions.length}
+            </Badge>
+          )}
+          <button 
+            className="btn btn-sm btn-ghost btn-circle" 
+            onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+            title="Toggle Version History"
+          >
+            {isHistoryOpen ? <XMarkIcon className="w-5 h-5" /> : <ClockIcon className="w-5 h-5" />}
+          </button>
+        </div>
       </SidebarHeader>
       
       {isHistoryOpen ? (
