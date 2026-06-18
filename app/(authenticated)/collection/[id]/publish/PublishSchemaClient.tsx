@@ -12,6 +12,9 @@ import { useForm } from "react-hook-form";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Form } from "@/components/ui/Form";
+import { Stepper } from "@/components/ui/Stepper";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { publishFormSchema, PublishFormInput } from "@/features/forms/schemas";
 
 interface PublishSchemaClientProps {
   formId: number;
@@ -24,7 +27,8 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm({
+  const form = useForm<PublishFormInput>({
+    resolver: zodResolver(publishFormSchema),
     defaultValues: {
       domain: "",
       language: "",
@@ -33,9 +37,22 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
     }
   });
 
-  const { register } = form;
+  const { register, formState: { errors } } = form;
 
-  const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, 3));
+  const handleNext = async () => {
+    // Manually trigger validation on the current step fields before proceeding
+    let isValid = false;
+    if (currentStep === 1) {
+      isValid = await form.trigger(["domain", "language", "license"]);
+    } else if (currentStep === 2) {
+      // Step 2 is contributors (placeholder)
+      isValid = true;
+    }
+    
+    if (isValid) {
+      setCurrentStep((prev) => Math.min(prev + 1, 3));
+    }
+  };
   const handlePrev = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
   const handlePublish = async (data: any) => {
@@ -69,13 +86,12 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
           }
         />
 
-        {/* DaisyUI Stepper */}
         <div className="w-full flex justify-center mb-6 mt-2">
-          <ul className="steps w-full max-w-2xl">
-            <li className={`step ${currentStep >= 1 ? "step-primary" : ""}`}>FAIR Metadata</li>
-            <li className={`step ${currentStep >= 2 ? "step-primary" : ""}`}>Contributors</li>
-            <li className={`step ${currentStep >= 3 ? "step-primary" : ""}`}>Review & Freeze</li>
-          </ul>
+          <Stepper 
+            steps={["FAIR Metadata", "Contributors", "Review & Freeze"]}
+            currentStep={currentStep}
+            className="w-full max-w-2xl"
+          />
         </div>
 
         <Form form={form} onSubmit={handlePublish}>
@@ -101,6 +117,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
                         { value: "economics", label: "Economics" },
                         { value: "sociology", label: "Sociology" }
                       ]}
+                      error={errors.domain?.message}
                       {...register("domain")}
                     />
                     <Select
@@ -113,6 +130,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
                         { value: "fr", label: "French" },
                         { value: "de", label: "German" }
                       ]}
+                      error={errors.language?.message}
                       {...register("language")}
                     />
                     <div className="md:col-span-2">
@@ -124,6 +142,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
                           { value: "MIT", label: "MIT License" }
                         ]}
                         helperText="Open-source licenses are required for STAPLE-verse market publication to ensure FAIR principles."
+                        error={errors.license?.message}
                         {...register("license")}
                       />
                     </div>

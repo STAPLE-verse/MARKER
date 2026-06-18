@@ -20,3 +20,12 @@ export const deleteFormSchema = z.object({
 })
 
 export type DeleteFormInput = z.infer<typeof deleteFormSchema>
+
+export const publishFormSchema = z.object({
+  domain: z.string().min(1, "Please select a domain/discipline"),
+  language: z.string().min(1, "Please select a primary language"),
+  license: z.string().min(1, "License is required"),
+  releaseNotes: z.string().optional(),
+})
+
+export type PublishFormInput = z.infer<typeof publishFormSchema>
