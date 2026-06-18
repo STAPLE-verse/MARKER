@@ -11,7 +11,7 @@ export function Step1FairMetadata() {
       title="Core FAIR Metadata" 
       description="Provide categorization details to make this schema discoverable in the STAPLE-verse market."
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-6">
         <Select
           label="Domain / Discipline"
           placeholder="Select domain..."
@@ -37,19 +37,17 @@ export function Step1FairMetadata() {
           error={errors.language?.message}
           {...register("language")}
         />
-        <div className="md:col-span-2">
-          <Select
-            label="License"
-            options={[
-              { value: "CC-BY 4.0", label: "Creative Commons Attribution 4.0 (CC-BY 4.0)" },
-              { value: "CC0 1.0", label: "CC0 1.0 Universal (Public Domain Dedication)" },
-              { value: "MIT", label: "MIT License" }
-            ]}
-            helperText="Open-source licenses are required for STAPLE-verse market publication to ensure FAIR principles."
-            error={errors.license?.message}
-            {...register("license")}
-          />
-        </div>
+        <Select
+          label="License"
+          options={[
+            { value: "CC-BY 4.0", label: "Creative Commons Attribution 4.0 (CC-BY 4.0)" },
+            { value: "CC0 1.0", label: "CC0 1.0 Universal (Public Domain Dedication)" },
+            { value: "MIT", label: "MIT License" }
+          ]}
+          helperText="Open-source licenses are required for STAPLE-verse publication to ensure FAIR principles."
+          error={errors.license?.message}
+          {...register("license")}
+        />
       </div>
     </WizardStep>
   );
