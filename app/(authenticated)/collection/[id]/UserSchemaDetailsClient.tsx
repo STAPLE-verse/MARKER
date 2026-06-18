@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Modal, ModalActions } from "@/components/ui/Modal";
 import { Alert } from "@/components/ui/Alert";
 import Link from "next/link";
 import { FormWithAllVersions } from "@/features/forms/types";
@@ -13,14 +12,13 @@ import { FormStudioProvider, FormPreview } from "@/features/form-builder";
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
 import { BackButton } from "@/components/ui/BackButton";
 import { Badge } from "@/components/ui/Badge";
+import { FormPageLayout } from "@/components/layout/FormPageLayout";
 
 interface UserSchemaDetailsClientProps {
   form: FormWithAllVersions;
 }
 
 export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClientProps) {
-  const router = useRouter();
-  const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"schema" | "preview">("schema");
   
   // History sidebar is open by default
@@ -35,23 +33,26 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
   const type: string = "Draft";
   const pid = null;
 
-  const handlePublish = () => {
-    // Real publish logic will trigger here in Phase 2
-    setPublishModalOpen(false);
-    router.push("/collection");
-  };
+  // Real publish logic will trigger on the dedicated /publish page
 
   return (
-    <div className="relative min-h-screen bg-base-100 overflow-hidden flex">
-      {/* Main Content Area */}
-      <div className="flex-1 h-screen overflow-y-auto pr-16">
-        
-        {/* Top-Left Back Button */}
-        <BackButton href="/collection">
-          Back to Collection
-        </BackButton>
-
-        <div className="container mx-auto px-4 pb-8 max-w-6xl animate-in fade-in duration-300 relative">
+    <>
+      <FormPageLayout
+        backButton={
+          <BackButton href="/collection">
+            Back to Collection
+          </BackButton>
+        }
+        sidebar={
+          <VersionHistorySidebar 
+            isHistoryOpen={isHistoryOpen}
+            setIsHistoryOpen={setIsHistoryOpen}
+            versions={form.versions}
+            selectedVersion={selectedVersion}
+            setSelectedVersion={setSelectedVersion}
+          />
+        }
+      >
           
           <PageHeader
             title={
@@ -81,9 +82,11 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
                           Edit
                         </Button>
                       </Link>
-                      <Button variant="primary" size="sm" onClick={() => setPublishModalOpen(true)}>
-                        Publish Schema
-                      </Button>
+                      <Link href={`/collection/${form.id}/publish`}>
+                        <Button variant="primary" size="sm">
+                          Publish Schema
+                        </Button>
+                      </Link>
                     </>
                   ) : (
                     <Link href={`/schemas/${pid}`}>
@@ -188,42 +191,7 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
               </CardBody>
             </Card>
           </div>
-        </div>
-      </div>
-
-      {/* History Sidebar / Right Rail */}
-      <VersionHistorySidebar 
-        isHistoryOpen={isHistoryOpen}
-        setIsHistoryOpen={setIsHistoryOpen}
-        versions={form.versions}
-        selectedVersion={selectedVersion}
-        setSelectedVersion={setSelectedVersion}
-      />
-
-      <Modal
-        open={publishModalOpen}
-        onClose={() => setPublishModalOpen(false)}
-        title="Publish Schema to Market"
-      >
-        <div className="py-4 space-y-3">
-          <p className="text-base-content/85">
-            You are about to publish <span className="font-bold text-primary">{selectedVersion.name}</span>.
-          </p>
-          <div className="alert alert-info shadow-sm text-sm">
-            <span>
-              <strong>Note:</strong> Once published, schemas are <strong>immutable</strong> (frozen) to ensure research reproducibility. Updates will generate a new version identifier.
-            </span>
-          </div>
-        </div>
-        <ModalActions>
-          <Button variant="ghost" onClick={() => setPublishModalOpen(false)}>
-            Cancel
-          </Button>
-          <Button variant="accent" onClick={handlePublish}>
-            Publish & Freeze Version
-          </Button>
-        </ModalActions>
-      </Modal>
-    </div>
+      </FormPageLayout>
+    </>
   );
 }

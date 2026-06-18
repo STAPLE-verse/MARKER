@@ -35,8 +35,8 @@ export function BackButton({ href, onClick, children, disabled }: BackButtonProp
   );
 
   return (
-    <div className="p-4 lg:px-8 pt-6 flex-none">
+    <>
       {href ? <Link href={href}>{content}</Link> : content}
-    </div>
+    </>
   );
 }

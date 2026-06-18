@@ -10,6 +10,7 @@ import { createFormCheckpoint } from "@/features/forms/mutations/createFormCheck
 import { Alert } from "@/components/ui/Alert";
 import { BackButton } from "@/components/ui/BackButton";
 import { Badge } from "@/components/ui/Badge";
+import { FormPageLayout } from "@/components/layout/FormPageLayout";
 import { useFormDraft, FormDraftData } from "@/features/forms/hooks/useFormDraft";
 
 interface SchemaEditClientProps {
@@ -117,16 +118,15 @@ function EditPageContent(props: EditPageContentProps) {
   const { state } = useFormStudio();
 
   return (
-    <div className="relative min-h-screen bg-base-100 overflow-hidden flex">
-      <div className="flex-1 h-screen overflow-y-auto flex flex-col">
-        {/* Top-Left Cancel Button */}
+    <FormPageLayout
+      backButton={
         <BackButton onClick={props.onCancel} disabled={props.isSaving}>
           Cancel Editing
         </BackButton>
-
-        <div className="container mx-auto px-4 pb-8 max-w-6xl animate-in fade-in duration-300 flex-1 flex flex-col relative">
-          <div className="flex-none mb-2">
-            <PageHeader
+      }
+    >
+      <div className="flex-none mb-2">
+        <PageHeader
               title={
                 <div className="flex items-center gap-3 flex-nowrap">
                   <span className="truncate" title={`Editing: ${props.formName}`}>
@@ -188,8 +188,6 @@ function EditPageContent(props: EditPageContentProps) {
               onAutoSave={props.handleAutoSave}
             />
           </div>
-        </div>
-      </div>
-    </div>
+    </FormPageLayout>
   );
 }
