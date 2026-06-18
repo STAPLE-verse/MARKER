@@ -2,19 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
+import { useForm } from "react-hook-form";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { BackButton } from "@/components/ui/BackButton";
 import { Badge } from "@/components/ui/Badge";
-import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
-import { useForm } from "react-hook-form";
-import { Select } from "@/components/ui/Select";
-import { Textarea } from "@/components/ui/Textarea";
 import { Form } from "@/components/ui/Form";
 import { Stepper } from "@/components/ui/Stepper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { publishFormSchema, PublishFormInput } from "@/features/forms/schemas";
+import { Step1FairMetadata } from "./components/Step1FairMetadata";
+import { Step2Contributors } from "./components/Step2Contributors";
+import { Step3Review } from "./components/Step3Review";
 
 interface PublishSchemaClientProps {
   formId: number;
@@ -36,8 +37,6 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
       releaseNotes: ""
     }
   });
-
-  const { register, formState: { errors } } = form;
 
   const handleNext = async () => {
     // Manually trigger validation on the current step fields before proceeding
@@ -98,104 +97,9 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
           {/* Main Wizard Container */}
           <Card bordered className="flex-1 shadow-sm overflow-visible mb-6">
             <CardBody className="p-6 md:p-10">
-              {currentStep === 1 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div>
-                    <h2 className="text-2xl font-bold">Core FAIR Metadata</h2>
-                    <p className="text-base-content/70 mt-1">
-                      Provide categorization details to make this schema discoverable in the STAPLE-verse market.
-                    </p>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Select
-                      label="Domain / Discipline"
-                      placeholder="Select domain..."
-                      options={[
-                        { value: "psychology", label: "Psychology" },
-                        { value: "neuroscience", label: "Neuroscience" },
-                        { value: "economics", label: "Economics" },
-                        { value: "sociology", label: "Sociology" }
-                      ]}
-                      error={errors.domain?.message}
-                      {...register("domain")}
-                    />
-                    <Select
-                      label="Primary Language"
-                      placeholder="Select language..."
-                      options={[
-                        { value: "en", label: "English (US)" },
-                        { value: "en-gb", label: "English (UK)" },
-                        { value: "es", label: "Spanish" },
-                        { value: "fr", label: "French" },
-                        { value: "de", label: "German" }
-                      ]}
-                      error={errors.language?.message}
-                      {...register("language")}
-                    />
-                    <div className="md:col-span-2">
-                      <Select
-                        label="License"
-                        options={[
-                          { value: "CC-BY 4.0", label: "Creative Commons Attribution 4.0 (CC-BY 4.0)" },
-                          { value: "CC0 1.0", label: "CC0 1.0 Universal (Public Domain Dedication)" },
-                          { value: "MIT", label: "MIT License" }
-                        ]}
-                        helperText="Open-source licenses are required for STAPLE-verse market publication to ensure FAIR principles."
-                        error={errors.license?.message}
-                        {...register("license")}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {currentStep === 2 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div>
-                    <h2 className="text-2xl font-bold">Contributors</h2>
-                    <p className="text-base-content/70 mt-1">
-                      List the authors and maintainers of this schema. ORCIDs are highly recommended.
-                    </p>
-                  </div>
-                  
-                  {/* Placeholder for the complex array builder */}
-                  <div className="border-2 border-dashed border-base-300 rounded-xl p-8 bg-base-50/50 flex flex-col justify-center items-center h-56 transition-colors hover:border-primary/50">
-                    <div className="text-center">
-                      <p className="text-base-content/40 font-mono text-sm mb-4">{"<ContributorArrayBuilder />"}</p>
-                      <Button variant="secondary" outline size="sm" type="button">+ Add Contributor</Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {currentStep === 3 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div>
-                    <h2 className="text-2xl font-bold">Review & Freeze</h2>
-                    <p className="text-base-content/70 mt-1">
-                      Finalize your release notes and permanently mint this version.
-                    </p>
-                  </div>
-                  
-                  <div className="alert alert-info shadow-sm bg-info/10 border border-info/20 text-info-content">
-                    <div>
-                      <h3 className="font-bold">Permanent Action</h3>
-                      <div className="text-sm">
-                        You are about to permanently publish <span className="font-bold">v{formVersion}</span>. 
-                        Once published, schemas are completely frozen. Any future edits will automatically branch into a new version.
-                      </div>
-                    </div>
-                  </div>
-
-                  <Textarea 
-                    label="Release Notes (Optional)"
-                    placeholder="Describe what is new or changed in this schema version to help researchers understand the update..."
-                    className="h-32 mt-6"
-                    {...register("releaseNotes")}
-                  />
-                </div>
-              )}
+              {currentStep === 1 && <Step1FairMetadata />}
+              {currentStep === 2 && <Step2Contributors />}
+              {currentStep === 3 && <Step3Review formVersion={formVersion} />}
             </CardBody>
           </Card>
 
