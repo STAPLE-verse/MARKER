@@ -12,7 +12,7 @@ import { FormStudioProvider, FormPreview } from "@/features/form-builder";
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
 import { BackButton } from "@/components/ui/BackButton";
 import { Badge } from "@/components/ui/Badge";
-import { FormPageLayout } from "@/components/layout/FormPageLayout";
+import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 
 interface UserSchemaDetailsClientProps {
   form: FormWithAllVersions;

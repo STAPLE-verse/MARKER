@@ -10,7 +10,7 @@ import { createFormCheckpoint } from "@/features/forms/mutations/createFormCheck
 import { Alert } from "@/components/ui/Alert";
 import { BackButton } from "@/components/ui/BackButton";
 import { Badge } from "@/components/ui/Badge";
-import { FormPageLayout } from "@/components/layout/FormPageLayout";
+import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { useFormDraft, FormDraftData } from "@/features/forms/hooks/useFormDraft";
 
 interface SchemaEditClientProps {
