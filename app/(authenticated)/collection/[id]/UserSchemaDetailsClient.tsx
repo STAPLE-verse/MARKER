@@ -14,13 +14,16 @@ import { BackButton } from "@/components/ui/BackButton";
 import { Badge } from "@/components/ui/Badge";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
+import { cloneFormVersion } from "@/features/forms/mutations/cloneFormVersion";
 
 interface UserSchemaDetailsClientProps {
   form: FormWithAllVersions;
 }
 
 export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"schema" | "preview">("schema");
+  const [isCloning, setIsCloning] = useState(false);
   
   // History sidebar is open by default
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -34,6 +37,17 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
   const type = selectedVersion.status === "PUBLISHED" ? "Published" : "Draft";
   const publishedSchema = selectedVersion.publishedSchemas?.[0];
   const pid = publishedSchema?.pid || null;
+
+  const handleClone = async () => {
+    try {
+      setIsCloning(true);
+      const newFormId = await cloneFormVersion({ versionId: selectedVersion.id });
+      router.push(`/collection/${newFormId}`);
+    } catch (error) {
+      console.error("Failed to clone form", error);
+      setIsCloning(false);
+    }
+  };
 
   // Real publish logic will trigger on the dedicated /publish page
 
@@ -75,6 +89,9 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
             }
           >
             <div className="flex gap-2 items-center">
+              <Button variant="secondary" outline size="sm" onClick={handleClone} disabled={isCloning}>
+                {isCloning ? "Cloning..." : "Clone"}
+              </Button>
               {isViewingLatest && (
                 <>
                   {type === "Draft" ? (
@@ -114,14 +131,8 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
                   <span className="font-bold">Viewing older version:</span> {type === "Published" ? `v${publishedSchema?.version} (Release)` : `Draft ${selectedVersion.version}`}
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Button size="sm" variant="ghost" onClick={() => setSelectedVersion(form.versions[0])}>
-                    Back to Latest
-                  </Button>
                   <Button size="sm" variant="primary">
                     Restore this Version
-                  </Button>
-                  <Button size="sm" variant="secondary">
-                    Clone...
                   </Button>
                 </div>
               </div>
