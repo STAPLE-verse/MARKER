@@ -70,7 +70,7 @@ export function VersionHistorySidebar({
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="font-semibold flex items-center gap-2">
-                    v{v.version}
+                    {v.status === "PUBLISHED" ? `v${v.publishedSchemas?.[0]?.version || v.version}` : `Rev ${v.version}`}
                     {v.status === "PUBLISHED" && <Badge size="sm" variant="success">Published</Badge>}
                     {v.status === "DRAFT" && <Badge size="sm" variant="warning">Draft</Badge>}
                     {isLatest && <Badge size="sm" variant="primary">Latest</Badge>}

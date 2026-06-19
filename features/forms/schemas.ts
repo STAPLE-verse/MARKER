@@ -33,6 +33,7 @@ export const publishFormSchema = z.object({
     })
   ).min(1, "At least one contributor is required"),
   keywords: z.array(z.string()).min(1, "Please provide at least one keyword"),
+  version: z.string().regex(/^\d+\.\d+\.\d+$/, "Must be a valid semantic version (e.g., 1.0.0)"),
   releaseNotes: z.string().optional(),
 })
 

@@ -51,7 +51,6 @@ export const publishSchema = authenticatedAction(
     }
     
     const pid = generatePID("ps");
-    const semVer = `1.0.${latestVersion.version}`;
     const familyId = `family_${form.id}`;
 
     // 2. Create the immutable PublishedSchema snapshot and lock the FormVersion
@@ -64,7 +63,7 @@ export const publishSchema = authenticatedAction(
           schemaJson: latestVersion.schema ?? {},
           uiSchema: latestVersion.uiSchema ?? {},
           source: "native",
-          version: semVer,
+          version: input.version,
           familyId,
           license: input.license,
           releaseNotes: input.releaseNotes,

@@ -46,6 +46,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion, cur
         orcid: currentUser.orcid 
       }],
       keywords: [],
+      version: "1.0.0",
       releaseNotes: ""
     }
   });
