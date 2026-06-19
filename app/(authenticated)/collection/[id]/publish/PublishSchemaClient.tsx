@@ -13,6 +13,7 @@ import { Form } from "@/components/ui/Form";
 import { Stepper } from "@/components/ui/Stepper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { publishFormSchema, PublishFormInput } from "@/features/forms/schemas";
+import { publishSchema } from "@/features/forms/actions/publishSchema";
 import { Step1FairMetadata } from "./components/Step1FairMetadata";
 import { Step2Contributors } from "./components/Step2Contributors";
 import { Step3Review } from "./components/Step3Review";
@@ -21,9 +22,14 @@ interface PublishSchemaClientProps {
   formId: number;
   formName: string;
   formVersion: number;
+  currentUser: {
+    name: string;
+    orcid: string;
+    isProfileIncomplete: boolean;
+  };
 }
 
-export default function PublishSchemaClient({ formId, formName, formVersion }: PublishSchemaClientProps) {
+export default function PublishSchemaClient({ formId, formName, formVersion, currentUser }: PublishSchemaClientProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,6 +40,11 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
       domain: "",
       language: "",
       license: "CC-BY 4.0",
+      contributors: [{ 
+        name: currentUser.name, 
+        role: "Author", 
+        orcid: currentUser.orcid 
+      }],
       releaseNotes: ""
     }
   });
@@ -44,8 +55,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
     if (currentStep === 1) {
       isValid = await form.trigger(["domain", "language", "license"]);
     } else if (currentStep === 2) {
-      // Step 2 is contributors (placeholder)
-      isValid = true;
+      isValid = await form.trigger(["contributors"]);
     }
     
     if (isValid) {
@@ -55,13 +65,21 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
   const handlePrev = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
   const handlePublish = async (data: any) => {
+    if (currentStep !== 3) return;
     setIsSubmitting(true);
-    console.log("Publishing form with data:", data);
-    // Real publishing logic and form state aggregation will go here in Phase 2
-    setTimeout(() => {
+    
+    try {
+      const response = await publishSchema({
+        ...data,
+        formId
+      });
+      
+      router.push(`/collection/${formId}?published=${response.pid}`);
+    } catch (error) {
+      console.error("Failed to publish schema:", error);
       setIsSubmitting(false);
-      router.push(`/collection/${formId}`);
-    }, 1500);
+      // TODO: Add toast notification for errors
+    }
   };
 
   return (
@@ -93,12 +111,26 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
           />
         </div>
 
-        <Form form={form} onSubmit={handlePublish}>
+        <Form 
+          form={form} 
+          onSubmit={handlePublish}
+          onKeyDown={(e) => {
+            // Prevent Enter key from implicitly submitting the entire form on steps 1 and 2
+            if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+              e.preventDefault();
+              if (currentStep < 3) {
+                handleNext();
+              } else {
+                form.handleSubmit(handlePublish)();
+              }
+            }
+          }}
+        >
           {/* Main Wizard Container */}
           <Card bordered className="flex-1 shadow-sm overflow-visible mb-6">
             <CardBody className="p-6 md:p-10">
               {currentStep === 1 && <Step1FairMetadata />}
-              {currentStep === 2 && <Step2Contributors />}
+              {currentStep === 2 && <Step2Contributors isProfileIncomplete={currentUser.isProfileIncomplete} />}
               {currentStep === 3 && <Step3Review formVersion={formVersion} />}
             </CardBody>
           </Card>
@@ -110,11 +142,24 @@ export default function PublishSchemaClient({ formId, formName, formVersion }: P
             </Button>
             
             {currentStep < 3 ? (
-              <Button variant="primary" onClick={handleNext} type="button">
+              <Button 
+                variant="primary" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  (e.currentTarget as HTMLElement).blur();
+                  handleNext();
+                }} 
+                type="button"
+              >
                 Continue to {currentStep === 1 ? "Contributors" : "Review"} →
               </Button>
             ) : (
-              <Button variant="accent" type="submit" disabled={isSubmitting}>
+              <Button 
+                variant="accent" 
+                type="button" 
+                onClick={form.handleSubmit(handlePublish)} 
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <><span className="loading loading-spinner loading-sm"></span> Publishing...</>
                 ) : (

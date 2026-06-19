@@ -25,7 +25,20 @@ export const publishFormSchema = z.object({
   domain: z.string().min(1, "Please select a domain/discipline"),
   language: z.string().min(1, "Please select a primary language"),
   license: z.string().min(1, "License is required"),
+  contributors: z.array(
+    z.object({
+      name: z.string().min(1, "Name is required"),
+      role: z.string().min(1, "Role is required"),
+      orcid: z.string().optional(),
+    })
+  ).min(1, "At least one contributor is required"),
   releaseNotes: z.string().optional(),
 })
 
 export type PublishFormInput = z.infer<typeof publishFormSchema>
+
+export const publishSchemaActionSchema = publishFormSchema.extend({
+  formId: z.number(),
+});
+
+export type PublishSchemaActionInput = z.infer<typeof publishSchemaActionSchema>

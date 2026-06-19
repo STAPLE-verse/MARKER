@@ -1,6 +1,7 @@
 import { useFormContext } from "react-hook-form";
 import { Textarea } from "@/components/ui/Textarea";
 import { WizardStep } from "@/components/ui/WizardStep";
+import { Alert } from "@/components/ui/Alert";
 import { PublishFormInput } from "@/features/forms/schemas";
 
 interface Step3ReviewProps {
@@ -15,15 +16,10 @@ export function Step3Review({ formVersion }: Step3ReviewProps) {
       title="Review & Freeze" 
       description="Finalize your release notes and permanently mint this version."
     >
-      <div className="alert alert-info shadow-sm bg-info/10 border border-info/20 text-info-content">
-        <div>
-          <h3 className="font-bold">Permanent Action</h3>
-          <div className="text-sm">
-            You are about to permanently publish <span className="font-bold">v{formVersion}</span>. 
-            Once published, schemas are completely frozen. Any future edits will automatically branch into a new version.
-          </div>
-        </div>
-      </div>
+      <Alert variant="info" title="Permanent Action">
+        You are about to permanently publish <span className="font-bold">v{formVersion}</span>. 
+        Once published, schemas are completely frozen. Any future edits will automatically branch into a new version.
+      </Alert>
 
       <Textarea 
         label="Release Notes (Optional)"
