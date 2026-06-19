@@ -1,10 +1,11 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Control } from "react-hook-form";
 import { Select } from "@/components/ui/Select";
 import { WizardStep } from "@/components/ui/WizardStep";
 import { PublishFormInput } from "@/features/forms/schemas";
+import { KeywordsInput } from "@/components/ui/KeywordsInput";
 
 export function Step1FairMetadata() {
-  const { register, formState: { errors } } = useFormContext<PublishFormInput>();
+  const { register, control, formState: { errors } } = useFormContext<PublishFormInput>();
 
   return (
     <WizardStep 
@@ -47,6 +48,14 @@ export function Step1FairMetadata() {
           helperText="Open-source licenses are required for STAPLE-verse publication to ensure FAIR principles."
           error={errors.license?.message}
           {...register("license")}
+        />
+        <KeywordsInput
+          name="keywords"
+          control={control as Control<any>}
+          label="Keywords"
+          placeholder="Add keywords..."
+          description="Press Enter, Comma, or Semicolon to add a keyword. Required for marketplace discovery."
+          errors={errors}
         />
       </div>
     </WizardStep>

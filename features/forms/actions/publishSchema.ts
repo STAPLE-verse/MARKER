@@ -68,6 +68,7 @@ export const publishSchema = authenticatedAction(
           familyId,
           license: input.license,
           releaseNotes: input.releaseNotes,
+          keywords: input.keywords,
           domain: input.domain,
           language: input.language,
           ontologyRefs: extractOntologyIds(latestVersion.schema),

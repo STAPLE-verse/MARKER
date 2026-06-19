@@ -45,6 +45,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion, cur
         role: "Author", 
         orcid: currentUser.orcid 
       }],
+      keywords: [],
       releaseNotes: ""
     }
   });
@@ -53,7 +54,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion, cur
     // Manually trigger validation on the current step fields before proceeding
     let isValid = false;
     if (currentStep === 1) {
-      isValid = await form.trigger(["domain", "language", "license"]);
+      isValid = await form.trigger(["domain", "language", "license", "keywords"]);
     } else if (currentStep === 2) {
       isValid = await form.trigger(["contributors"]);
     }

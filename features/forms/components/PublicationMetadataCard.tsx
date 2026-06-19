@@ -13,6 +13,7 @@ interface PublicationMetadataCardProps {
     domain?: string | null;
     language: string;
     releaseNotes?: string | null;
+    keywords?: string[];
     contributors?: any;
   };
 }
@@ -40,6 +41,19 @@ export function PublicationMetadataCard({ publishedSchema }: PublicationMetadata
             <div className="md:col-span-3 mt-2">
               <h4 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-1">Release Notes</h4>
               <p className="text-base-content/80 bg-base-200/50 p-3 rounded-lg text-sm border border-base-200">{publishedSchema.releaseNotes}</p>
+            </div>
+          )}
+
+          {Array.isArray(publishedSchema.keywords) && publishedSchema.keywords.length > 0 && (
+            <div className="md:col-span-3 mt-2">
+              <h4 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-2">Keywords</h4>
+              <div className="flex flex-wrap gap-2">
+                {publishedSchema.keywords.map((kw, i) => (
+                  <Badge key={i} variant="secondary" outline className="font-medium">
+                    {kw}
+                  </Badge>
+                ))}
+              </div>
             </div>
           )}
           

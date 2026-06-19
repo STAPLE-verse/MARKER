@@ -32,6 +32,7 @@ export const publishFormSchema = z.object({
       orcid: z.string().optional(),
     })
   ).min(1, "At least one contributor is required"),
+  keywords: z.array(z.string()).min(1, "Please provide at least one keyword"),
   releaseNotes: z.string().optional(),
 })
 
