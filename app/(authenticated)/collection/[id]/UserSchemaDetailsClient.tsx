@@ -13,6 +13,7 @@ import { VersionHistorySidebar } from "./VersionHistorySidebar";
 import { BackButton } from "@/components/ui/BackButton";
 import { Badge } from "@/components/ui/Badge";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
+import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
 
 interface UserSchemaDetailsClientProps {
   form: FormWithAllVersions;
@@ -31,7 +32,8 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
   
   // Real status from Prisma FormVersion
   const type = selectedVersion.status === "PUBLISHED" ? "Published" : "Draft";
-  const pid = selectedVersion.publishedSchemas?.[0]?.pid || null;
+  const publishedSchema = selectedVersion.publishedSchemas?.[0];
+  const pid = publishedSchema?.pid || null;
 
   // Real publish logic will trigger on the dedicated /publish page
 
@@ -90,11 +92,6 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
                     </>
                   ) : (
                     <>
-                      <Link href={`/collection/${form.id}/edit`}>
-                        <Button variant="secondary" outline size="sm">
-                          View Structure
-                        </Button>
-                      </Link>
                       {pid && (
                         <Link href={`/schemas/${pid}`}>
                           <Button variant="secondary" size="sm">
@@ -132,9 +129,11 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
           )}
 
           <div className="space-y-6 mt-8">
+            {publishedSchema && <PublicationMetadataCard publishedSchema={publishedSchema as any} />}
+
             <Card bordered>
               <CardBody>
-                <CardTitle className="text-xl">Description</CardTitle>
+                <CardTitle className="text-xl border-b border-base-200 pb-2 mb-4">Description</CardTitle>
                 <p className="text-base-content/85 leading-relaxed">
                   {typeof schemaJson.description === "string" ? schemaJson.description : "No description provided."}
                 </p>

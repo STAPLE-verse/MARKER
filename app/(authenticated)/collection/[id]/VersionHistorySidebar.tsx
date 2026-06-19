@@ -72,6 +72,7 @@ export function VersionHistorySidebar({
                   <div className="font-semibold flex items-center gap-2">
                     v{v.version}
                     {v.status === "PUBLISHED" && <Badge size="sm" variant="success">Published</Badge>}
+                    {v.status === "DRAFT" && <Badge size="sm" variant="warning">Draft</Badge>}
                     {isLatest && <Badge size="sm" variant="primary">Latest</Badge>}
                   </div>
                   <div className="text-xs text-base-content/50 whitespace-nowrap">
