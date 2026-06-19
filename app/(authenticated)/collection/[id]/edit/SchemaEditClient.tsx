@@ -17,6 +17,7 @@ interface SchemaEditClientProps {
   formId: number;
   formName: string;
   formVersion: number;
+  totalVersions: number;
   initialSchema: Record<string, unknown>;
   initialUiSchema: Record<string, unknown>;
 }
@@ -24,6 +25,7 @@ interface SchemaEditClientProps {
 interface EditPageContentProps {
   formName: string;
   formVersion: number;
+  totalVersions: number;
   isSaving: boolean;
   draftToRestore: FormDraftData | null;
   restoreDraft: () => void;
@@ -34,7 +36,7 @@ interface EditPageContentProps {
   onCancel: () => void;
 }
 
-export default function SchemaEditClient({ formId, formName, formVersion, initialSchema, initialUiSchema }: SchemaEditClientProps) {
+export default function SchemaEditClient({ formId, formName, formVersion, totalVersions, initialSchema, initialUiSchema }: SchemaEditClientProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   
@@ -101,6 +103,7 @@ export default function SchemaEditClient({ formId, formName, formVersion, initia
       <EditPageContent 
         formName={formName}
         formVersion={formVersion}
+        totalVersions={totalVersions}
         isSaving={isSaving}
         draftToRestore={draftToRestore}
         restoreDraft={restoreDraft}
@@ -129,11 +132,11 @@ function EditPageContent(props: EditPageContentProps) {
         <PageHeader
               title={
                 <div className="flex items-center gap-3 flex-nowrap">
-                  <span className="truncate" title={`Editing: ${props.formName}`}>
-                    <span className="text-base-content/50 font-normal">Editing:</span> {props.formName}
+                  <span className="truncate" title={`Form Builder: ${props.formName}`}>
+                    <span className="text-base-content/50 font-normal">Form Builder:</span> {props.formName}
                   </span>
                   <Badge variant="primary" outline className="shrink-0 mt-0.5">
-                    v{props.formVersion}
+                    Draft {props.formVersion}
                   </Badge>
                 </div>
               }
@@ -142,9 +145,11 @@ function EditPageContent(props: EditPageContentProps) {
                 <Button size="sm" variant="primary" outline onClick={() => props.handleSave(state)} disabled={props.isSaving}>
                   Save Changes
                 </Button>
-                <Button size="sm" variant="primary" onClick={() => props.handleSaveNewVersion(state)} disabled={props.isSaving}>
-                  Save as New Version
-                </Button>
+                {props.totalVersions > 1 && (
+                  <Button size="sm" variant="primary" onClick={() => props.handleSaveNewVersion(state)} disabled={props.isSaving}>
+                    Save as New Version
+                  </Button>
+                )}
               </div>
             </PageHeader>
           </div>

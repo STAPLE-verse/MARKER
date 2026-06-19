@@ -63,7 +63,7 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
                   {selectedVersion.name || "Untitled Form"}
                 </span>
                 <Badge variant="primary" outline className="shrink-0 mt-0.5">
-                  {type === "Published" ? `v${publishedSchema?.version || selectedVersion.version}` : `Rev ${selectedVersion.version}`}
+                  {type === "Published" ? `v${publishedSchema?.version || selectedVersion.version}` : `Draft ${selectedVersion.version}`}
                 </Badge>
                 <Badge variant={type === "Published" ? "success" : "warning"} className="shrink-0 mt-0.5">
                   {type}
@@ -111,7 +111,7 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
             <Alert variant="warning" className="mb-6 mt-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
                 <div className="text-base">
-                  <span className="font-bold">Viewing older version:</span> {type === "Published" ? `v${publishedSchema?.version} (Release)` : `Revision ${selectedVersion.version} (Draft)`}
+                  <span className="font-bold">Viewing older version:</span> {type === "Published" ? `v${publishedSchema?.version} (Release)` : `Draft ${selectedVersion.version}`}
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button size="sm" variant="ghost" onClick={() => setSelectedVersion(form.versions[0])}>
