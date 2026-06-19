@@ -311,6 +311,12 @@ model Form {
   originalImportHash String?
 }
 
+enum VersionStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 model FormVersion {
   id        Int       @id @default(autoincrement())
   name      String
@@ -321,8 +327,10 @@ model FormVersion {
   archived  Boolean   @default(false)
   createdAt DateTime  @default(now())
   form      Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
-  tasks     Task[]
-  projects  Project[]
+  tasks            Task[]
+  projects         Project[]
+  status           VersionStatus     @default(DRAFT)
+  publishedSchemas PublishedSchema[]
 
   @@index([formId, version], name: "formVersionIndex")
 }
@@ -475,6 +483,7 @@ model PublishedSchema {
 
   // Internal tracking
   originFormVersionId Int? // Link back to the STAPLE workspace draft
+  originFormVersion   FormVersion? @relation(fields: [originFormVersionId], references: [id], onDelete: SetNull)
   createdAt           DateTime @default(now())
 
   @@unique([familyId, version])

@@ -143,6 +143,7 @@ const supportedPropertyParameters = new Set([
   "$schema",
   "meta",
   "additionalProperties",
+  "ontologyId",
 ])
 
 const supportedUiParameters = new Set([

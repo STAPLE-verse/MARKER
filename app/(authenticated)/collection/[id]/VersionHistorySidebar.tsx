@@ -71,7 +71,8 @@ export function VersionHistorySidebar({
                 <div className="flex justify-between items-start mb-1">
                   <div className="font-semibold flex items-center gap-2">
                     v{v.version}
-                    {isLatest && <Badge size="sm" variant="success">Latest</Badge>}
+                    {v.status === "PUBLISHED" && <Badge size="sm" variant="success">Published</Badge>}
+                    {isLatest && <Badge size="sm" variant="primary">Latest</Badge>}
                   </div>
                   <div className="text-xs text-base-content/50 whitespace-nowrap">
                     {new Date(v.createdAt).toLocaleDateString()}

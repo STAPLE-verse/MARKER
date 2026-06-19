@@ -29,9 +29,9 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
   const schemaJson = (selectedVersion.schema || {}) as Record<string, unknown>;
   const uiSchemaJson = (selectedVersion.uiSchema || {}) as Record<string, unknown>;
   
-  // In Phase 1, we only have Drafts
-  const type: string = "Draft";
-  const pid = null;
+  // Real status from Prisma FormVersion
+  const type = selectedVersion.status === "PUBLISHED" ? "Published" : "Draft";
+  const pid = selectedVersion.publishedSchemas?.[0]?.pid || null;
 
   // Real publish logic will trigger on the dedicated /publish page
 
@@ -79,7 +79,7 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
                     <>
                       <Link href={`/collection/${form.id}/edit`}>
                         <Button variant="primary" outline size="sm">
-                          Edit
+                          Edit Structure
                         </Button>
                       </Link>
                       <Link href={`/collection/${form.id}/publish`}>
@@ -89,11 +89,20 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
                       </Link>
                     </>
                   ) : (
-                    <Link href={`/schemas/${pid}`}>
-                      <Button variant="secondary" size="sm">
-                        View Public URL
-                      </Button>
-                    </Link>
+                    <>
+                      <Link href={`/collection/${form.id}/edit`}>
+                        <Button variant="secondary" outline size="sm">
+                          View Structure
+                        </Button>
+                      </Link>
+                      {pid && (
+                        <Link href={`/schemas/${pid}`}>
+                          <Button variant="secondary" size="sm">
+                            View Public URL
+                          </Button>
+                        </Link>
+                      )}
+                    </>
                   )}
                 </>
               )}

@@ -12,6 +12,10 @@ export const saveFormVersion = authenticatedAction(saveFormVersionSchema, async 
   // Extract the title from the JSON schema to keep the database record in sync
   const schemaTitle = extractSchemaTitle(input.schema);
 
+  if (latestVersion.status === "PUBLISHED") {
+    throw new Error("Cannot edit a published form version. Please create a new draft version.");
+  }
+
   // Background Auto-Save mechanism:
   // We update the latest version in-place to prevent database bloat during active editing.
   // Explicit version bumping is handled manually by the user via createFormCheckpoint.

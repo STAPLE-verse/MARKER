@@ -12,7 +12,8 @@ export async function getFormById(formId: number, userId: number): Promise<FormW
     include: {
       versions: {
         orderBy: { version: 'desc' },
-        where: { archived: false }
+        where: { archived: false },
+        include: { publishedSchemas: true }
       }
     }
   })

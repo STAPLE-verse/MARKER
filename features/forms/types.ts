@@ -12,7 +12,10 @@ export type FormWithLatestVersion = Prisma.FormGetPayload<{
 export type FormWithAllVersions = Prisma.FormGetPayload<{
   include: {
     versions: {
-      orderBy: { version: 'desc' }
+      orderBy: { version: 'desc' },
+      include: {
+        publishedSchemas: true
+      }
     }
   }
 }>
