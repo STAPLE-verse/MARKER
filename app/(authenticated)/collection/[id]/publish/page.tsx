@@ -16,8 +16,7 @@ export default async function PublishSchemaPage({ params }: { params: Promise<{ 
   return (
     <PublishSchemaClient 
       formId={form.id} 
-      formName={latestVersion.name || "Untitled Form"}
-      formVersion={latestVersion.version}
+      version={latestVersion}
       currentUser={{ 
         name: authorName || "", 
         orcid: user?.orcid || "",

@@ -8,20 +8,20 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { BackButton } from "@/components/ui/BackButton";
-import { Badge } from "@/components/ui/Badge";
 import { Form } from "@/components/ui/Form";
 import { Stepper } from "@/components/ui/Stepper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { publishFormSchema, PublishFormInput } from "@/features/forms/schemas";
 import { publishSchema } from "@/features/forms/actions";
+import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
+import { FormVersionDTO } from "@/features/forms/types";
 import { Step1FairMetadata } from "./components/Step1FairMetadata";
 import { Step2Contributors } from "./components/Step2Contributors";
 import { Step3Review } from "./components/Step3Review";
 
 interface PublishSchemaClientProps {
   formId: number;
-  formName: string;
-  formVersion: number;
+  version: FormVersionDTO;
   currentUser: {
     name: string;
     orcid: string;
@@ -29,8 +29,9 @@ interface PublishSchemaClientProps {
   };
 }
 
-export default function PublishSchemaClient({ formId, formName, formVersion, currentUser }: PublishSchemaClientProps) {
+export default function PublishSchemaClient({ formId, version, currentUser }: PublishSchemaClientProps) {
   const router = useRouter();
+  const formVersion = version.version;
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -94,16 +95,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion, cur
       }
     >
         <PageHeader
-          title={
-            <div className="flex items-center gap-3 flex-nowrap">
-              <span className="truncate" title={`Publishing: ${formName}`}>
-                <span className="text-base-content/50 font-normal">Publishing:</span> {formName}
-              </span>
-              <Badge variant="primary" outline className="shrink-0 mt-0.5">
-                v{formVersion}
-              </Badge>
-            </div>
-          }
+          title={<SchemaHeaderTitle version={version} prefix="Publishing" />}
         />
 
         <div className="w-full flex justify-center mb-6 mt-2">

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
-import { SchemaStatusBadges } from "@/features/forms/components/SchemaStatusBadges";
+import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
 import { FormVersionDTO } from "@/features/forms/types";
 
 interface SchemaDetailHeaderProps {
@@ -24,20 +24,12 @@ export function SchemaDetailHeader({
   onClone,
   isCloning,
 }: SchemaDetailHeaderProps) {
-  const name = version.name || "Untitled Form";
   const isPublished = version.status === "PUBLISHED";
   const pid = version.publishedSchema?.pid || null;
 
   return (
     <PageHeader
-      title={
-        <div className="flex items-center gap-3 flex-nowrap">
-          <span className="truncate" title={name}>
-            {name}
-          </span>
-          <SchemaStatusBadges version={version} />
-        </div>
-      }
+      title={<SchemaHeaderTitle version={version} />}
       description={pid ? <span className="font-mono text-primary text-xs">PID: {pid}</span> : null}
     >
       <div className="flex gap-2 items-center">

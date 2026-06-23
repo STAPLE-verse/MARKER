@@ -8,22 +8,19 @@ import { FormStudioProvider, FormStudioUI, useFormStudio } from "@/features/form
 import { saveFormVersion, createFormCheckpoint } from "@/features/forms/actions";
 import { Alert } from "@/components/ui/Alert";
 import { BackButton } from "@/components/ui/BackButton";
-import { Badge } from "@/components/ui/Badge";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
+import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
 import { useFormDraft, FormDraftData } from "@/features/forms/hooks/useFormDraft";
+import { FormVersionDTO } from "@/features/forms/types";
 
 interface SchemaEditClientProps {
   formId: number;
-  formName: string;
-  formVersion: number;
   totalVersions: number;
-  initialSchema: Record<string, unknown>;
-  initialUiSchema: Record<string, unknown>;
+  version: FormVersionDTO;
 }
 
 interface EditPageContentProps {
-  formName: string;
-  formVersion: number;
+  version: FormVersionDTO;
   totalVersions: number;
   isSaving: boolean;
   draftToRestore: FormDraftData | null;
@@ -35,7 +32,7 @@ interface EditPageContentProps {
   onCancel: () => void;
 }
 
-export default function SchemaEditClient({ formId, formName, formVersion, totalVersions, initialSchema, initialUiSchema }: SchemaEditClientProps) {
+export default function SchemaEditClient({ formId, totalVersions, version }: SchemaEditClientProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   
@@ -49,7 +46,7 @@ export default function SchemaEditClient({ formId, formName, formVersion, totalV
     discardDraft,
     saveDraft,
     clearDraft
-  } = useFormDraft(formId, initialSchema, initialUiSchema);
+  } = useFormDraft(formId, version.schema, version.uiSchema);
 
   const handleAutoSave = (state: { schema: object; uiSchema: object; formData: object }) => {
     saveDraft(state.schema, state.uiSchema);
@@ -100,8 +97,7 @@ export default function SchemaEditClient({ formId, formName, formVersion, totalV
   return (
     <FormStudioProvider key={studioKey} initialSchema={currentSchema} initialUiSchema={currentUiSchema}>
       <EditPageContent 
-        formName={formName}
-        formVersion={formVersion}
+        version={version}
         totalVersions={totalVersions}
         isSaving={isSaving}
         draftToRestore={draftToRestore}
@@ -129,16 +125,7 @@ function EditPageContent(props: EditPageContentProps) {
     >
       <div className="flex-none mb-2">
         <PageHeader
-              title={
-                <div className="flex items-center gap-3 flex-nowrap">
-                  <span className="truncate" title={`Form Builder: ${props.formName}`}>
-                    <span className="text-base-content/50 font-normal">Form Builder:</span> {props.formName}
-                  </span>
-                  <Badge variant="primary" outline className="shrink-0 mt-0.5">
-                    Draft {props.formVersion}
-                  </Badge>
-                </div>
-              }
+              title={<SchemaHeaderTitle version={props.version} prefix="Form Builder" />}
             >
               <div className="flex gap-2 items-center">
                 <Button size="sm" variant="primary" outline onClick={() => props.handleSave(state)} disabled={props.isSaving}>
