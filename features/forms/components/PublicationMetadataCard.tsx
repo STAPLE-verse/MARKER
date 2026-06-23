@@ -1,21 +1,9 @@
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-
-interface Contributor {
-  name: string;
-  role: string;
-  orcid?: string | null;
-}
+import { PublishedSchemaSummaryDTO } from "@/features/forms/types";
 
 interface PublicationMetadataCardProps {
-  publishedSchema: {
-    license: string;
-    domain?: string | null;
-    language: string;
-    releaseNotes?: string | null;
-    keywords?: string[];
-    contributors?: any;
-  };
+  publishedSchema: PublishedSchemaSummaryDTO;
 }
 
 export function PublicationMetadataCard({ publishedSchema }: PublicationMetadataCardProps) {
@@ -44,7 +32,7 @@ export function PublicationMetadataCard({ publishedSchema }: PublicationMetadata
             </div>
           )}
 
-          {Array.isArray(publishedSchema.keywords) && publishedSchema.keywords.length > 0 && (
+          {publishedSchema.keywords.length > 0 && (
             <div className="md:col-span-3 mt-2">
               <h4 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-2">Keywords</h4>
               <div className="flex flex-wrap gap-2">
@@ -57,11 +45,11 @@ export function PublicationMetadataCard({ publishedSchema }: PublicationMetadata
             </div>
           )}
           
-          {Array.isArray(publishedSchema.contributors) && publishedSchema.contributors.length > 0 && (
+          {publishedSchema.contributors.length > 0 && (
             <div className="md:col-span-3 mt-2">
               <h4 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-2">Contributors</h4>
               <div className="flex flex-wrap gap-2">
-                {(publishedSchema.contributors as Contributor[]).map((c, i) => (
+                {publishedSchema.contributors.map((c, i) => (
                   <Badge key={i} variant="primary" outline className="py-3 px-3 shadow-sm bg-base-100 gap-2 border-primary/30">
                     <span className="font-semibold text-primary">{c.name}</span>
                     <span className="text-base-content/60 text-xs font-medium uppercase tracking-wider">{c.role}</span>

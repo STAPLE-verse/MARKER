@@ -184,3 +184,56 @@ When a schema is exported or downloaded from MARKER, it is packaged into a unifi
 }
 ```
 This architecture ensures 100% interoperability: external validators can ignore the `@context` and `uiSchema` keys and run directly against the `schema` object, while MARKER/STAPLE can instantly reconstruct both the data validation rules and the intended visual UX.
+
+## 8. Application Conventions (MARKER)
+
+These conventions were adopted while building the Forms feature. They apply to every feature module under `features/` and exist to keep the code consistent as the surface area grows.
+
+### 8.1 Feature Module Layout: `actions/` + `queries/`
+
+Each feature exposes its data layer through two server-side folders, each with a barrel (`index.ts`):
+
+- **`features/<feature>/actions/`** — All write paths (Server Actions). Every file carries the `"use server"` directive and is safe to import from client components. There is **no separate `mutations/` folder**; "action" is the single term for a server-side write.
+- **`features/<feature>/queries/`** — All read paths and server-only page loaders (e.g. `loadOwnedForm`). These are plain server functions and must **not** be imported into client components.
+
+Consumers import from the barrel, never from deep file paths:
+
+```ts
+// Client component
+import { deleteForm, publishSchema } from "@/features/forms/actions"
+// Server component / page
+import { getUserForms, loadOwnedForm } from "@/features/forms/queries"
+```
+
+`schemas.ts` (Zod) and `types.ts` (TypeScript) remain client-safe single-file modules and are imported directly.
+
+### 8.2 Client-Facing DTOs (Server → Client Boundary)
+
+Queries that feed client components **must map raw Prisma payloads into flat, serializable DTOs** declared in `types.ts` (e.g. `FormDetailDTO`, `PublishedSchemaSummaryDTO`, `ContributorDTO`). This:
+
+- keeps Prisma internals and unused columns out of the browser bundle,
+- gives client components a stable, strongly-typed contract, and
+- eliminates `as any` casts when reading `Json` columns (`contributors`, `ontologyRefs`, etc.).
+
+Raw `Prisma.*GetPayload` types stay server-side only.
+
+### 8.3 Shared Page Loaders
+
+Repeated route boilerplate (auth check → id parsing → ownership lookup → `notFound()`) is centralized in a single loader per resource. `loadOwnedForm(idParam)` is the canonical example for owned-form routes (`/collection/[id]`, `.../edit`, `.../publish`). Pages stay declarative and authorization stays in one place.
+
+### 8.4 Forms: react-hook-form + Zod is the Standard
+
+All forms use **`react-hook-form` with `zodResolver`**, the shared `components/ui/Form` wrapper, and a Zod schema defined in the feature's `schemas.ts`. Hand-rolled `useState` form state and untyped submit handlers are not used. The same Zod schema validates on the client (resolver) and again on the server (inside `authenticatedAction`).
+
+### 8.5 Identifiers & Immutability Safety
+
+- **PIDs** are generated with `nanoid` (collision-resistant alphabet) via `utils/id.ts`. Publishing **retries on a PID primary-key collision**, while a `familyId + version` uniqueness clash is surfaced as a friendly "this version already exists" error rather than a raw DB exception.
+- The definition of a form's **"latest version" is consistent everywhere**: queries and the publish action all filter `versions` by `archived: false` and order by `version desc`.
+
+### 8.6 Transactional Writes
+
+Any operation that performs more than one dependent write uses `prisma.$transaction([...])` so the database can never be left in a partially-mutated state (e.g. soft-deleting a `Form` and its `FormVersion` rows together, or minting a `PublishedSchema` while locking its `FormVersion`). Single nested `create` calls are already atomic and do not need an explicit transaction.
+
+### 8.7 Deferred Decisions
+
+The following were explicitly deferred for separate discussion and are **not** yet standardized: the long-term server-side authorization pattern (query-level filtering vs. the `getAuthorizedLatestVersion` throw-helper), a standardized error-handling / user-feedback (toast) strategy across action call sites, deeper JSON-Schema (draft-07) input validation on save, and how to split the large `UserSchemaDetailsClient` component.

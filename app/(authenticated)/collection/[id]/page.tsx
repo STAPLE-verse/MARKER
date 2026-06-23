@@ -1,17 +1,9 @@
-import { notFound } from "next/navigation";
-import { requirePageAuth } from "@/utils/auth";
-import { getFormById } from "@/features/forms/queries/getFormById";
+import { loadOwnedForm } from "@/features/forms/queries";
 import UserSchemaDetailsClient from "./UserSchemaDetailsClient";
 
 export default async function UserSchemaDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await requirePageAuth();
-
-  const resolvedParams = await params;
-  const formId = parseInt(resolvedParams.id, 10);
-  if (isNaN(formId)) return notFound();
-
-  const form = await getFormById(formId, userId);
-  if (!form || form.versions.length === 0) return notFound();
+  const { id } = await params;
+  const { form } = await loadOwnedForm(id);
 
   return <UserSchemaDetailsClient form={form} />;
 }

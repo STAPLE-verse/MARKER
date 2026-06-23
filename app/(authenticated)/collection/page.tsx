@@ -1,5 +1,5 @@
 import { requirePageAuth } from "@/utils/auth";
-import { getUserForms } from "@/features/forms/queries/getUserForms";
+import { getUserForms } from "@/features/forms/queries";
 import CollectionClient, { CollectionSchemaRow } from "./CollectionClient";
 
 export default async function CollectionPage() {

@@ -1,18 +1,10 @@
-import { notFound } from "next/navigation";
-import { requirePageAuth } from "@/utils/auth";
-import { getFormById } from "@/features/forms/queries/getFormById";
+import { loadOwnedForm } from "@/features/forms/queries";
 import { getUserProfile } from "@/features/users/queries/getUserProfile";
 import PublishSchemaClient from "./PublishSchemaClient";
 
 export default async function PublishSchemaPage({ params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await requirePageAuth();
-
-  const resolvedParams = await params;
-  const formId = parseInt(resolvedParams.id, 10);
-  if (isNaN(formId)) return notFound();
-
-  const form = await getFormById(formId, userId);
-  if (!form || form.versions.length === 0) return notFound();
+  const { id } = await params;
+  const { userId, form } = await loadOwnedForm(id);
 
   const latestVersion = form.versions[0];
 

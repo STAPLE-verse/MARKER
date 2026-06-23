@@ -13,7 +13,7 @@ import { Form } from "@/components/ui/Form";
 import { Stepper } from "@/components/ui/Stepper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { publishFormSchema, PublishFormInput } from "@/features/forms/schemas";
-import { publishSchema } from "@/features/forms/actions/publishSchema";
+import { publishSchema } from "@/features/forms/actions";
 import { Step1FairMetadata } from "./components/Step1FairMetadata";
 import { Step2Contributors } from "./components/Step2Contributors";
 import { Step3Review } from "./components/Step3Review";
@@ -47,7 +47,8 @@ export default function PublishSchemaClient({ formId, formName, formVersion, cur
       }],
       keywords: [],
       version: "1.0.0",
-      releaseNotes: ""
+      releaseNotes: "",
+      relatedPublicationDoi: ""
     }
   });
 
@@ -66,7 +67,7 @@ export default function PublishSchemaClient({ formId, formName, formVersion, cur
   };
   const handlePrev = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
-  const handlePublish = async (data: any) => {
+  const handlePublish = async (data: PublishFormInput) => {
     if (currentStep !== 3) return;
     setIsSubmitting(true);
     

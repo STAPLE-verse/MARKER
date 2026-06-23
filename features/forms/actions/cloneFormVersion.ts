@@ -3,11 +3,7 @@
 import { prisma } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
-import { z } from "zod"
-
-const cloneFormVersionSchema = z.object({
-  versionId: z.number(),
-})
+import { cloneFormVersionSchema } from "../schemas"
 
 export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, async ({ input, userId }) => {
   const version = await prisma.formVersion.findUnique({
@@ -25,13 +21,13 @@ export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, asyn
 
   const newName = `Copy of ${version.name || "Untitled Form"}`;
 
-  // If schema is an object and has a title, update it too
+  // If the schema is an object with a title, rename it to match the new copy
   let newSchema = version.schema;
-  if (newSchema && typeof newSchema === 'object') {
-    newSchema = { ...(newSchema as any), title: newName };
+  if (newSchema && typeof newSchema === "object") {
+    newSchema = { ...(newSchema as Record<string, unknown>), title: newName };
   }
 
-  // Create new Form and initial FormVersion in a transaction
+  // A nested create is atomic: the new Form and its initial FormVersion persist together
   const newForm = await prisma.form.create({
     data: {
       app: "marker",
@@ -40,8 +36,8 @@ export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, asyn
         create: {
           name: newName,
           version: 1,
-          schema: newSchema || {},
-          uiSchema: version.uiSchema || {}
+          schema: newSchema ?? {},
+          uiSchema: version.uiSchema ?? {}
         }
       }
     }

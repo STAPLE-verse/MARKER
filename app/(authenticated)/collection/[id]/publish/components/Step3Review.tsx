@@ -1,4 +1,5 @@
 import { useFormContext } from "react-hook-form";
+import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { WizardStep } from "@/components/ui/WizardStep";
 import { Alert } from "@/components/ui/Alert";
@@ -40,6 +41,16 @@ export function Step3Review({ formVersion }: Step3ReviewProps) {
         error={errors.releaseNotes?.message}
         {...register("releaseNotes")}
       />
+
+      <div className="mt-6">
+        <Input
+          label="Related Publication DOI (Optional)"
+          placeholder="e.g. 10.1000/xyz123"
+          helperText="Link this schema to a published paper or dataset to strengthen its provenance."
+          error={errors.relatedPublicationDoi?.message}
+          {...register("relatedPublicationDoi")}
+        />
+      </div>
     </WizardStep>
   );
 }

@@ -6,7 +6,7 @@ import { DataTable, ColumnDef } from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
 import { Modal, ModalActions } from "@/components/ui/Modal";
 import Link from "next/link";
-import { deleteForm } from "@/features/forms/mutations/deleteForm";
+import { deleteForm } from "@/features/forms/actions";
 
 export interface CollectionSchemaRow {
   id: number;

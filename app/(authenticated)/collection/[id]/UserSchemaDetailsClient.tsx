@@ -7,17 +7,17 @@ import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import Link from "next/link";
-import { FormWithAllVersions } from "@/features/forms/types";
+import { FormDetailDTO } from "@/features/forms/types";
 import { FormStudioProvider, FormPreview } from "@/features/form-builder";
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
 import { BackButton } from "@/components/ui/BackButton";
 import { Badge } from "@/components/ui/Badge";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
-import { cloneFormVersion } from "@/features/forms/mutations/cloneFormVersion";
+import { cloneFormVersion } from "@/features/forms/actions";
 
 interface UserSchemaDetailsClientProps {
-  form: FormWithAllVersions;
+  form: FormDetailDTO;
 }
 
 export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClientProps) {
@@ -30,12 +30,12 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
   const [selectedVersion, setSelectedVersion] = useState(form.versions[0]);
 
   const isViewingLatest = selectedVersion.id === form.versions[0].id;
-  const schemaJson = (selectedVersion.schema || {}) as Record<string, unknown>;
-  const uiSchemaJson = (selectedVersion.uiSchema || {}) as Record<string, unknown>;
+  const schemaJson = selectedVersion.schema;
+  const uiSchemaJson = selectedVersion.uiSchema;
   
   // Real status from Prisma FormVersion
   const type = selectedVersion.status === "PUBLISHED" ? "Published" : "Draft";
-  const publishedSchema = selectedVersion.publishedSchemas?.[0];
+  const publishedSchema = selectedVersion.publishedSchema;
   const pid = publishedSchema?.pid || null;
 
   const handleClone = async () => {
@@ -140,7 +140,7 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
           )}
 
           <div className="space-y-6 mt-8">
-            {publishedSchema && <PublicationMetadataCard publishedSchema={publishedSchema as any} />}
+            {publishedSchema && <PublicationMetadataCard publishedSchema={publishedSchema} />}
 
             <Card bordered>
               <CardBody>

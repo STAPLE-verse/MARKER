@@ -1,9 +1,9 @@
 import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/Sidebar";
 import { ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/components/ui/Badge";
-import { FormWithAllVersions } from "@/features/forms/types";
+import { FormVersionDTO } from "@/features/forms/types";
 
-type FormVersionType = FormWithAllVersions["versions"][0];
+type FormVersionType = FormVersionDTO;
 
 interface VersionHistorySidebarProps {
   isHistoryOpen: boolean;
@@ -70,7 +70,7 @@ export function VersionHistorySidebar({
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="font-semibold flex items-center gap-2">
-                    {v.status === "PUBLISHED" ? `v${v.publishedSchemas?.[0]?.version || v.version}` : `Draft ${v.version}`}
+                    {v.status === "PUBLISHED" ? `v${v.publishedSchema?.version || v.version}` : `Draft ${v.version}`}
                     {v.status === "PUBLISHED" && <Badge size="sm" variant="success">Published</Badge>}
                     {v.status === "DRAFT" && <Badge size="sm" variant="warning">Draft</Badge>}
                     {isLatest && <Badge size="sm" variant="primary">Latest</Badge>}

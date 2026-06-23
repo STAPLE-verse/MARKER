@@ -21,6 +21,12 @@ export const deleteFormSchema = z.object({
 
 export type DeleteFormInput = z.infer<typeof deleteFormSchema>
 
+export const cloneFormVersionSchema = z.object({
+  versionId: z.number(),
+})
+
+export type CloneFormVersionInput = z.infer<typeof cloneFormVersionSchema>
+
 export const publishFormSchema = z.object({
   domain: z.string().min(1, "Please select a domain/discipline"),
   language: z.string().min(1, "Please select a primary language"),
@@ -35,6 +41,7 @@ export const publishFormSchema = z.object({
   keywords: z.array(z.string()).min(1, "Please provide at least one keyword"),
   version: z.string().regex(/^\d+\.\d+\.\d+$/, "Must be a valid semantic version (e.g., 1.0.0)"),
   releaseNotes: z.string().optional(),
+  relatedPublicationDoi: z.string().optional(),
 })
 
 export type PublishFormInput = z.infer<typeof publishFormSchema>

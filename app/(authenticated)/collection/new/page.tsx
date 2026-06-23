@@ -1,31 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useRouter } from "next/navigation";
-import { createForm } from "@/features/forms/mutations/createForm";
+import { Form } from "@/components/ui/Form";
+import { createForm } from "@/features/forms/actions";
+import { createFormSchema, CreateFormInput } from "@/features/forms/schemas";
 
 export default function NewSchemaPage() {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [isPending, setIsPending] = useState(false);
 
-  const handleCreateDraft = async () => {
+  const form = useForm<CreateFormInput>({
+    resolver: zodResolver(createFormSchema),
+    defaultValues: { title: "", description: "" },
+  });
+
+  const {
+    register,
+    formState: { errors, isSubmitting },
+  } = form;
+
+  const handleCreateDraft = async (data: CreateFormInput) => {
     try {
-      setIsPending(true);
-      const formId = await createForm({ title, description });
+      const formId = await createForm(data);
       router.push(`/collection/${formId}/edit`);
     } catch (error) {
       console.error("Failed to create draft:", error);
-      setIsPending(false);
     }
   };
-
-
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl animate-in fade-in duration-300">
@@ -43,29 +49,28 @@ export default function NewSchemaPage() {
       <Card bordered>
         <CardBody>
           <CardTitle className="text-xl">Schema Information</CardTitle>
-          <form action={handleCreateDraft} className="space-y-4 mt-2">
-            <Input 
-              label="Draft Name" 
-              placeholder="e.g. Cognitive Assessment Form" 
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required 
+          <Form form={form} onSubmit={handleCreateDraft} className="space-y-4 mt-2">
+            <Input
+              label="Draft Name"
+              placeholder="e.g. Cognitive Assessment Form"
+              error={errors.title?.message}
+              {...register("title")}
             />
-            <Input 
-              label="Description (Optional)" 
-              placeholder="Internal notes for this draft..." 
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+            <Input
+              label="Description (Optional)"
+              placeholder="Internal notes for this draft..."
+              error={errors.description?.message}
+              {...register("description")}
             />
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="ghost" type="button" onClick={() => router.push("/collection")} disabled={isPending}>
+              <Button variant="ghost" type="button" onClick={() => router.push("/collection")} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" disabled={isPending}>
-                {isPending ? "Creating..." : "Create Draft & Open Builder"}
+              <Button variant="primary" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Creating..." : "Create Draft & Open Builder"}
               </Button>
             </div>
-          </form>
+          </Form>
         </CardBody>
       </Card>
     </div>
