@@ -234,6 +234,38 @@ All forms use **`react-hook-form` with `zodResolver`**, the shared `components/u
 
 Any operation that performs more than one dependent write uses `prisma.$transaction([...])` so the database can never be left in a partially-mutated state (e.g. soft-deleting a `Form` and its `FormVersion` rows together, or minting a `PublishedSchema` while locking its `FormVersion`). Single nested `create` calls are already atomic and do not need an explicit transaction.
 
-### 8.7 Deferred Decisions
+### 8.7 Component Layering & Client Logic
 
-The following were explicitly deferred for separate discussion and are **not** yet standardized: the long-term server-side authorization pattern (query-level filtering vs. the `getAuthorizedLatestVersion` throw-helper), a standardized error-handling / user-feedback (toast) strategy across action call sites, deeper JSON-Schema (draft-07) input validation on save, and how to split the large `UserSchemaDetailsClient` component.
+Components live in one of three layers, chosen by how much they "know". This keeps the eventual `@staple-verse/ui` and `@staple-verse/form-builder` packages cleanly extractable.
+
+| Layer | May know about | Must NOT import | Packageable as |
+|---|---|---|---|
+| `components/ui/` | props + design tokens only | `features/*`, `next/*` (Link/router), server actions, Prisma/DTO types | `@staple-verse/ui` |
+| `features/<f>/components/` | the feature's domain (DTOs, schema/uiSchema); presentational | server actions, `useRouter` (kept thin) | reusable within MARKER/STAPLE |
+| route folder (e.g. `collection/[id]/`) | everything — wires hooks, actions, and routes | — | not packageable (page-specific) |
+
+**`ui/` litmus test:** if a component imports `next/link`, `useRouter`, a server action, or a `*DTO` type, it does **not** belong in `components/ui/`.
+
+**Container / Presenter split.** Each route has one "smart" client container that owns state + action wiring (e.g. `UserSchemaDetailsClient`). Everything else is presentational and prop-driven. The detail page was decomposed this way into `features/forms/components/*` (`SchemaStatusBadges`, `SchemaSourceViewer`, `SchemaPreviewPanel`, `SchemaDescriptionCard`, `OlderVersionBanner`) plus route-local composition (`SchemaDetailHeader`, `SchemaViewerCard`).
+
+**Client logic → hooks.** Server-action wrappers and reused/side-effectful logic are extracted into `features/<f>/hooks/` (e.g. `useCloneForm`, `useVersionSelection`). Trivial local UI state (a single `useState` for an active tab) stays inline — do **not** extract it. Hooks that wrap a server action are the designated seam for the future standardized error/toast strategy.
+
+**Pending-state idioms.** Use `useTransition` for imperative, button-triggered action calls (gives `isPending` for free, keeps navigation responsive); use `useActionState` for `<form action>` submissions. Avoid hand-rolled `useState(isLoading)` booleans.
+
+### 8.8 Package Boundaries (Shared NPM Packages)
+
+The shared packages have a strict one-way dependency graph:
+
+```
+MARKER app ──▶ @staple-verse/form-builder
+MARKER app ──▶ @staple-verse/ui
+(the two packages do NOT depend on each other)
+```
+
+- **`@staple-verse/form-builder` is self-contained** and must **not** import `@staple-verse/ui` components. It currently imports nothing from `components/ui/` — preserve this. A consumer must be able to install the form builder without also pulling in the UI library.
+- **Visual consistency comes from the shared Tailwind/DaisyUI theme**, not from sharing React component code across packages. Two visually-identical pieces of chrome on different sides of a package boundary (e.g. the tab strips in `FormStudio` vs. the schema detail page) are **intentionally independent implementations**, not duplication to eliminate.
+- **`components/ui/` promotion criterion:** a component graduates into `ui/` only when it is design-system-generic **and** has multiple *app-level* consumers. A use inside `form-builder` does **not** count toward this (it lives on the other side of the boundary). This is why the schema detail tab strip is kept route-local rather than promoted.
+
+### 8.9 Deferred Decisions
+
+The following were explicitly deferred for separate discussion and are **not** yet standardized: the long-term server-side authorization pattern (query-level filtering vs. the `getAuthorizedLatestVersion` throw-helper), a standardized error-handling / user-feedback (toast) strategy across action call sites, and deeper JSON-Schema (draft-07) input validation on save.
