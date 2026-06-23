@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
+import { ActionError } from "@/utils/action-result"
 import { cloneFormVersionSchema } from "../schemas"
 
 export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, async ({ input, userId }) => {
@@ -12,11 +13,11 @@ export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, asyn
   });
 
   if (!version) {
-    throw new Error("Form version not found");
+    throw new ActionError("NOT_FOUND", "Form version not found");
   }
 
   if (version.form.userId !== userId) {
-    throw new Error("Unauthorized");
+    throw new ActionError("FORBIDDEN", "You do not have permission to clone this form");
   }
 
   const newName = `Copy of ${version.name || "Untitled Form"}`;

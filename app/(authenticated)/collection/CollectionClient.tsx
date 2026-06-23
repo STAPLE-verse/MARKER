@@ -6,7 +6,7 @@ import { DataTable, ColumnDef } from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
 import { Modal, ModalActions } from "@/components/ui/Modal";
 import Link from "next/link";
-import { deleteForm } from "@/features/forms/actions";
+import { useDeleteForm } from "@/features/forms/hooks/useDeleteForm";
 
 export interface CollectionSchemaRow {
   id: number;
@@ -23,19 +23,13 @@ interface CollectionClientProps {
 export default function CollectionClient({ schemas }: CollectionClientProps) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedSchema, setSelectedSchema] = useState<CollectionSchemaRow | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { remove, isDeleting } = useDeleteForm({
+    onSuccess: () => setDeleteModalOpen(false),
+  });
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!selectedSchema) return;
-    try {
-      setIsDeleting(true);
-      await deleteForm({ formId: selectedSchema.id });
-      setDeleteModalOpen(false);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsDeleting(false);
-    }
+    remove(selectedSchema.id);
   };
 
   const columns: ColumnDef<CollectionSchemaRow>[] = [

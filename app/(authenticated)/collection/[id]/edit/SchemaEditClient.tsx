@@ -1,16 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { FormStudioProvider, FormStudioUI, useFormStudio } from "@/features/form-builder";
-import { saveFormVersion, createFormCheckpoint } from "@/features/forms/actions";
 import { Alert } from "@/components/ui/Alert";
 import { BackButton } from "@/components/ui/BackButton";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
 import { useFormDraft, FormDraftData } from "@/features/forms/hooks/useFormDraft";
+import { useSaveForm } from "@/features/forms/hooks/useSaveForm";
 import { FormVersionDTO } from "@/features/forms/types";
 
 interface SchemaEditClientProps {
@@ -27,15 +26,14 @@ interface EditPageContentProps {
   restoreDraft: () => void;
   discardDraft: () => void;
   handleAutoSave: (state: { schema: object; uiSchema: object; formData: object }) => void;
-  handleSave: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>;
-  handleSaveNewVersion: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>;
+  handleSave: (state: { schema: object; uiSchema: object; formData: object }) => void;
+  handleSaveNewVersion: (state: { schema: object; uiSchema: object; formData: object }) => void;
   onCancel: () => void;
 }
 
 export default function SchemaEditClient({ formId, totalVersions, version }: SchemaEditClientProps) {
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
-  
+
   const {
     draftLoaded,
     draftToRestore,
@@ -48,42 +46,13 @@ export default function SchemaEditClient({ formId, totalVersions, version }: Sch
     clearDraft
   } = useFormDraft(formId, version.schema, version.uiSchema);
 
+  const { save: handleSave, saveAsNewVersion: handleSaveNewVersion, isSaving } = useSaveForm(
+    formId,
+    { onSuccess: clearDraft }
+  );
+
   const handleAutoSave = (state: { schema: object; uiSchema: object; formData: object }) => {
     saveDraft(state.schema, state.uiSchema);
-  };
-
-  const handleSave = async (state: { schema: object; uiSchema: object; formData: object }) => {
-    try {
-      setIsSaving(true);
-      await saveFormVersion({
-        formId,
-        schema: state.schema,
-        uiSchema: state.uiSchema,
-      });
-      clearDraft();
-      router.push(`/collection/${formId}`);
-    } catch (error) {
-      console.error("Failed to save schema:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSaveNewVersion = async (state: { schema: object; uiSchema: object; formData: object }) => {
-    try {
-      setIsSaving(true);
-      await createFormCheckpoint({
-        formId,
-        schema: state.schema,
-        uiSchema: state.uiSchema,
-      });
-      clearDraft();
-      router.push(`/collection/${formId}`);
-    } catch (error) {
-      console.error("Failed to save schema as new version:", error);
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   if (!draftLoaded) {

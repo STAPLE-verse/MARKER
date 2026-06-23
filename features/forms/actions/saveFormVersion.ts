@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db"
 import { authenticatedAction } from "@/utils/safe-action"
+import { ActionError } from "@/utils/action-result"
 import { saveFormVersionSchema } from "../schemas"
 import { extractSchemaTitle } from "@/utils/schema"
 import { getAuthorizedLatestVersion } from "../queries/getAuthorizedLatestVersion"
@@ -13,7 +14,7 @@ export const saveFormVersion = authenticatedAction(saveFormVersionSchema, async 
   const schemaTitle = extractSchemaTitle(input.schema);
 
   if (latestVersion.status === "PUBLISHED") {
-    throw new Error("Cannot edit a published form version. Please create a new draft version.");
+    throw new ActionError("CONFLICT", "Cannot edit a published form version. Please create a new draft version.");
   }
 
   // Background Auto-Save mechanism:

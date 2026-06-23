@@ -1,14 +1,16 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { cloneFormVersion } from "@/features/forms/actions";
+import { runAction } from "@/lib/action";
+import { toast } from "@/lib/toast";
 
 /**
  * Wraps the `cloneFormVersion` server action for button-triggered cloning.
  *
  * Uses `useTransition` (the modern idiom for imperative action calls) so callers
  * get a `isCloning` pending flag without manual `useState`, and navigation stays
- * responsive. This hook is also the single seam where the standardized
- * error/toast strategy will be wired in later.
+ * responsive. This hook is the seam where the standardized error/toast strategy
+ * is applied (see docs/architecture.md §8.9).
  */
 export function useCloneForm() {
   const router = useRouter();
@@ -16,12 +18,13 @@ export function useCloneForm() {
 
   const clone = (versionId: number) => {
     startCloning(async () => {
-      try {
-        const newFormId = await cloneFormVersion({ versionId });
-        router.push(`/collection/${newFormId}`);
-      } catch (error) {
-        console.error("Failed to clone form", error);
+      const res = await runAction(cloneFormVersion({ versionId }));
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
       }
+      toast.success("Form cloned");
+      router.push(`/collection/${res.data}`);
     });
   };
 

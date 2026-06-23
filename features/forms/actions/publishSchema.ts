@@ -3,6 +3,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { authenticatedAction } from "@/utils/safe-action";
+import { ActionError } from "@/utils/action-result";
 import { publishSchemaActionSchema } from "../schemas";
 import { revalidatePath } from "next/cache";
 import { generatePID } from "@/utils/id";
@@ -34,13 +35,13 @@ export const publishSchema = authenticatedAction(
     });
 
     if (!form || form.versions.length === 0) {
-      throw new Error("Form not found or has no versions.");
+      throw new ActionError("NOT_FOUND", "Form not found or has no versions.");
     }
 
     const latestVersion = form.versions[0];
 
     if (latestVersion.status === "PUBLISHED") {
-      throw new Error("This version is already published.");
+      throw new ActionError("CONFLICT", "This version is already published.");
     }
 
     const familyId = `family_${form.id}`;
@@ -92,7 +93,8 @@ export const publishSchema = authenticatedAction(
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
           const target = JSON.stringify(error.meta?.target ?? "");
           if (target.includes("familyId") || target.includes("version")) {
-            throw new Error(
+            throw new ActionError(
+              "CONFLICT",
               `Version ${input.version} has already been published for this schema. Please choose a higher version number.`
             );
           }
@@ -104,6 +106,7 @@ export const publishSchema = authenticatedAction(
       }
     }
 
-    throw new Error("Failed to generate a unique PID for the schema. Please try again.", { cause: lastError });
+    console.error("PID generation exhausted attempts", lastError);
+    throw new ActionError("UNKNOWN", "Failed to generate a unique PID for the schema. Please try again.");
   }
 );

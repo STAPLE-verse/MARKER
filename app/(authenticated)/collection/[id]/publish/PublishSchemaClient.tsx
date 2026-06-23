@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { useForm } from "react-hook-form";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -12,7 +11,7 @@ import { Form } from "@/components/ui/Form";
 import { Stepper } from "@/components/ui/Stepper";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { publishFormSchema, PublishFormInput } from "@/features/forms/schemas";
-import { publishSchema } from "@/features/forms/actions";
+import { usePublishSchema } from "@/features/forms/hooks/usePublishSchema";
 import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
 import { FormVersionDTO } from "@/features/forms/types";
 import { Step1FairMetadata } from "./components/Step1FairMetadata";
@@ -30,10 +29,8 @@ interface PublishSchemaClientProps {
 }
 
 export default function PublishSchemaClient({ formId, version, currentUser }: PublishSchemaClientProps) {
-  const router = useRouter();
   const formVersion = version.version;
   const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<PublishFormInput>({
     resolver: zodResolver(publishFormSchema),
@@ -53,6 +50,8 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
     }
   });
 
+  const { publish, isPublishing } = usePublishSchema(formId, form);
+
   const handleNext = async () => {
     // Manually trigger validation on the current step fields before proceeding
     let isValid = false;
@@ -68,22 +67,9 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
   };
   const handlePrev = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
-  const handlePublish = async (data: PublishFormInput) => {
+  const handlePublish = (data: PublishFormInput) => {
     if (currentStep !== 3) return;
-    setIsSubmitting(true);
-    
-    try {
-      const response = await publishSchema({
-        ...data,
-        formId
-      });
-      
-      router.push(`/collection/${formId}?published=${response.pid}`);
-    } catch (error) {
-      console.error("Failed to publish schema:", error);
-      setIsSubmitting(false);
-      // TODO: Add toast notification for errors
-    }
+    publish(data);
   };
 
   return (
@@ -132,7 +118,7 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
 
           {/* Wizard Navigation Footer */}
           <div className="flex justify-between items-center mb-8">
-            <Button variant="ghost" onClick={handlePrev} disabled={currentStep === 1 || isSubmitting} type="button">
+            <Button variant="ghost" onClick={handlePrev} disabled={currentStep === 1 || isPublishing} type="button">
               ← Back
             </Button>
             
@@ -153,9 +139,9 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
                 variant="accent" 
                 type="button" 
                 onClick={form.handleSubmit(handlePublish)} 
-                disabled={isSubmitting}
+                disabled={isPublishing}
               >
-                {isSubmitting ? (
+                {isPublishing ? (
                   <><span className="loading loading-spinner loading-sm"></span> Publishing...</>
                 ) : (
                   "Publish & Freeze Version"

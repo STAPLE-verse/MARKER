@@ -223,7 +223,7 @@ Repeated route boilerplate (auth check → id parsing → ownership lookup → `
 
 ### 8.4 Forms: react-hook-form + Zod is the Standard
 
-All forms use **`react-hook-form` with `zodResolver`**, the shared `components/ui/Form` wrapper, and a Zod schema defined in the feature's `schemas.ts`. Hand-rolled `useState` form state and untyped submit handlers are not used. The same Zod schema validates on the client (resolver) and again on the server (inside `authenticatedAction`).
+All forms use **`react-hook-form` with `zodResolver`**, the shared `components/ui/Form` wrapper, and a Zod schema defined in the feature's `schemas.ts`. Hand-rolled `useState` form state and untyped submit handlers are not used. The same Zod schema validates on the client (resolver) and again on the server (inside `authenticatedAction`); server-side validation failures come back as `fieldErrors` on the typed `ActionResult` and are mapped back onto the form (see §8.9.3–§8.9.6).
 
 ### 8.5 Identifiers & Immutability Safety
 
@@ -248,7 +248,7 @@ Components live in one of three layers, chosen by how much they "know". This kee
 
 **Container / Presenter split.** Each route has one "smart" client container that owns state + action wiring (e.g. `UserSchemaDetailsClient`). Everything else is presentational and prop-driven. The detail page was decomposed this way into `features/forms/components/*` (`SchemaStatusBadges`, `SchemaSourceViewer`, `SchemaPreviewPanel`, `SchemaDescriptionCard`, `OlderVersionBanner`) plus route-local composition (`SchemaDetailHeader`, `SchemaViewerCard`).
 
-**Client logic → hooks.** Server-action wrappers and reused/side-effectful logic are extracted into `features/<f>/hooks/` (e.g. `useCloneForm`, `useVersionSelection`). Trivial local UI state (a single `useState` for an active tab) stays inline — do **not** extract it. Hooks that wrap a server action are the designated seam for the future standardized error/toast strategy.
+**Client logic → hooks.** Server-action wrappers and reused/side-effectful logic are extracted into `features/<f>/hooks/` (e.g. `useCloneForm`, `useVersionSelection`). Trivial local UI state (a single `useState` for an active tab) stays inline — do **not** extract it. Hooks that wrap a server action are the seam where the standardized error/feedback strategy is applied — see §8.9.
 
 **Pending-state idioms.** Use `useTransition` for imperative, button-triggered action calls (gives `isPending` for free, keeps navigation responsive); use `useActionState` for `<form action>` submissions. Avoid hand-rolled `useState(isLoading)` booleans.
 
@@ -266,6 +266,151 @@ MARKER app ──▶ @staple-verse/ui
 - **Visual consistency comes from the shared Tailwind/DaisyUI theme**, not from sharing React component code across packages. Two visually-identical pieces of chrome on different sides of a package boundary (e.g. the tab strips in `FormStudio` vs. the schema detail page) are **intentionally independent implementations**, not duplication to eliminate.
 - **`components/ui/` promotion criterion:** a component graduates into `ui/` only when it is design-system-generic **and** has multiple *app-level* consumers. A use inside `form-builder` does **not** count toward this (it lives on the other side of the boundary). This is why the schema detail tab strip is kept route-local rather than promoted.
 
-### 8.9 Deferred Decisions
+### 8.9 Error Handling & User Feedback
 
-The following were explicitly deferred for separate discussion and are **not** yet standardized: the long-term server-side authorization pattern (query-level filtering vs. the `getAuthorizedLatestVersion` throw-helper), a standardized error-handling / user-feedback (toast) strategy across action call sites, and deeper JSON-Schema (draft-07) input validation on save.
+This is the **standardized** strategy for surfacing failures and confirmations across the app. It supersedes the ad-hoc `console.error` swallowing that existed in early forms call sites.
+
+#### 8.9.1 Mental model: expected vs. unexpected errors
+
+We follow the Next.js taxonomy (App Router *Error Handling* guide). The axis that decides **where** an error is shown is **expected vs. unexpected**, not "validation vs. action":
+
+- **Expected errors** — validation failures, permission/business-rule violations, "not found", conflicts. These are part of normal operation. They are **modeled as return values, never thrown across the action boundary**, and rendered as explicit UI (inline or toast).
+- **Unexpected exceptions** — bugs, infra/DB failures. These are surfaced via **error boundaries** (`error.tsx` / `global-error.tsx`) for render/loader paths. On the action-call path they are normalized to a generic `UNKNOWN` result, logged server-side, and shown as a generic toast — the action layer itself does not leak raw exception text to users.
+
+#### 8.9.2 The four feedback surfaces
+
+| Surface | Used for | Lifetime | Implementation |
+|---|---|---|---|
+| **Inline field error** | Field-level validation (expected, field-scoped) | Persistent until corrected | `react-hook-form` `setError` / `zodResolver`; rendered next to the input |
+| **Inline form-level alert** | Expected errors that **block** the current form and the user must read (e.g. failed login, "this version is already published") | Persistent | `components/ui/Alert` (`alert alert-error`) at the top of the form |
+| **Toast** | Success confirmations, and **transient / recoverable** operation errors not tied to a single field | Auto-dismiss (~4s) | `react-hot-toast` engine rendered through a DaisyUI component (§8.9.5) |
+| **Error boundary** | Unexpected exceptions during render / data loading | Until retry/navigation | `app/**/error.tsx`, `app/global-error.tsx` with `unstable_retry` |
+
+Rule of thumb: **field validation → inline field**; **blocking expected error → inline alert**; **success or transient failure → toast**; **unexpected during render → error boundary**.
+
+#### 8.9.3 The action contract: typed result envelope (Option B)
+
+Server actions **do not throw for expected errors**. Every action returns a discriminated-union `ActionResult` so a single call can carry both field errors (for inline display) and a top-level message (for a toast/alert). This is the long-term contract for all of `features/<feature>/actions/`.
+
+```ts
+// utils/action-result.ts
+export type ActionErrorCode =
+  | "VALIDATION"    // input failed Zod; carries fieldErrors
+  | "UNAUTHORIZED"  // not signed in
+  | "FORBIDDEN"     // signed in but not allowed
+  | "NOT_FOUND"
+  | "CONFLICT"      // e.g. version already exists, optimistic-lock clash
+  | "UNKNOWN";      // unexpected; generic message, logged server-side
+
+export type FieldErrors<TInput> = Partial<Record<keyof TInput, string[]>>;
+
+export type ActionResult<TData, TInput = unknown> =
+  | { ok: true; data: TData }
+  | {
+      ok: false;
+      code: ActionErrorCode;
+      error: string;                 // user-safe, human-readable summary
+      fieldErrors?: FieldErrors<TInput>;
+    };
+
+// Thrown *inside* handlers/helpers to signal an expected error with a code.
+// Anything that is NOT an ActionError is treated as unexpected (UNKNOWN).
+export class ActionError extends Error {
+  constructor(public code: ActionErrorCode, message: string) {
+    super(message);
+    this.name = "ActionError";
+  }
+}
+```
+
+#### 8.9.4 `authenticatedAction` returns the envelope
+
+The wrapper (`utils/safe-action.ts`) is the single place that turns auth checks, Zod validation, and thrown `ActionError`s into the envelope. Handlers stay focused on business logic and may `throw new ActionError(...)` for expected failures; truly unexpected throws are caught, logged, and collapsed to `UNKNOWN` (never surfacing internal detail).
+
+```ts
+// utils/safe-action.ts
+export function authenticatedAction<TInput, TOutput>(
+  schema: z.ZodType<TInput>,
+  handler: (args: { input: TInput; userId: number }) => Promise<TOutput>,
+) {
+  return async (input: unknown): Promise<ActionResult<TOutput, TInput>> => {
+    try {
+      const { userId } = await requireAuth(); // throws -> caught -> UNAUTHORIZED
+
+      const parsed = schema.safeParse(input);
+      if (!parsed.success) {
+        return {
+          ok: false,
+          code: "VALIDATION",
+          error: "Please fix the highlighted fields.",
+          fieldErrors: parsed.error.flatten().fieldErrors as FieldErrors<TInput>,
+        };
+      }
+
+      const data = await handler({ input: parsed.data, userId });
+      return { ok: true, data };
+    } catch (e) {
+      return normalizeActionError(e); // ActionError -> its code+message; else log + UNKNOWN
+    }
+  };
+}
+```
+
+- Authorization helpers (e.g. `getAuthorizedLatestVersion`) throw **`ActionError`** with the right code (`FORBIDDEN`, `NOT_FOUND`, …) instead of bare `Error`, so their messages reach the user safely.
+- `normalizeActionError` maps `ActionError` → `{ ok: false, code, error: e.message }`; everything else is `console.error`-logged (server) and returned as `{ ok: false, code: "UNKNOWN", error: "Something went wrong. Please try again." }`.
+- This aligns the forms actions with the auth actions (`features/auth/actions.ts`), which already return `{ error }`. Auth should migrate to the same `ActionResult` shape over time.
+
+#### 8.9.5 Toast infrastructure (DaisyUI-styled, shared-ready)
+
+We use **`react-hot-toast` as a headless engine** but render every toast through our **own DaisyUI component**, so styling matches the design system and the visual piece is promotable to `@staple-verse/ui` (and reusable by STAPLE, which already uses `react-hot-toast`).
+
+- **`components/ui/Toast.tsx`** — presentational, prop-only. Renders a DaisyUI `alert alert-{variant}` (+ Heroicon) from the toast's `type`/`message`. Shares the visual language of `components/ui/Alert.tsx`. Packageable as `@staple-verse/ui`.
+- **`components/ui/Toaster.tsx`** — `"use client"`. Mounts `react-hot-toast`'s `<Toaster>` and uses its **render-prop** (`{(t) => <Toast t={t} />}`) so even plain `toast.success()/error()` calls render with our DaisyUI component globally.
+- **Mount point** — once in `app/layout.tsx` (root layout, inside `<body>`). Mounting at the root — not in a nested layout — ensures auth/public pages also get toasts (STAPLE's mistake was mounting only in its inner `Layout`).
+- **`lib/toast.ts`** — re-exports `toast` and a thin `useToast()` (`{ success, error, promise }`). Call sites import from `@/lib/toast`, **never** from `react-hot-toast` directly, so the engine can be swapped from one place.
+
+> Layering note (§8.7/§8.8): `Toast`/`Toaster` are design-system-generic and belong in `components/ui/`; the `lib/toast` wrapper, the `ActionResult` contract, and error normalization are **app-level** and must not be pulled into `@staple-verse/ui`. `react-hot-toast@^2.6` is React 19 compatible.
+
+#### 8.9.6 The call-site seam: action-wrapper hooks
+
+Hooks in `features/<f>/hooks/` that wrap an action remain the **single seam** where results are turned into feedback. With the envelope there is no `try/catch` for expected errors — the hook branches on `res.ok`:
+
+```ts
+// features/forms/hooks/useCloneForm.ts (shape)
+const clone = (versionId: number) =>
+  startCloning(async () => {
+    const res = await cloneFormVersion({ versionId });
+    if (!res.ok) {
+      toast.error(res.error);          // transient operation error -> toast
+      return;
+    }
+    toast.success("Form cloned");      // success -> toast
+    router.push(`/collection/${res.data}`);
+  });
+```
+
+For **form** submissions, the same envelope feeds both surfaces: top-level `error` → toast or form alert, and `fieldErrors` → mapped back into `react-hook-form` so they appear inline:
+
+```ts
+const res = await saveFormVersion(values);
+if (!res.ok) {
+  if (res.fieldErrors) applyFieldErrors(form, res.fieldErrors); // -> setError per field
+  else toast.error(res.error);
+  return;
+}
+toast.success("Saved");
+```
+
+Conventions:
+- Every imperative action call goes through a `use*` hook; no action is `await`ed inline in a route component (`createForm`, `deleteForm`, `saveFormVersion`, `createFormCheckpoint`, `publishSchema` each get a hook).
+- Pending state comes from `useTransition` (§8.7), not hand-rolled `useState(isLoading)`.
+- Success is **always** confirmed (toast or redirect-with-feedback). The publish flow surfaces success on redirect rather than silently relying on the `?published=` param.
+- `console.error` is no longer a user-facing strategy; it is only acceptable as server-side logging inside `normalizeActionError`.
+
+#### 8.9.7 Accessibility
+
+Inline alerts and field errors use `role="alert"` / `aria-live` and are the primary channel for anything the user **must** act on. Toasts are treated as **non-essential, supplementary** feedback (they auto-dismiss and can be missed), so a blocking error is never *only* a toast.
+
+### 8.10 Deferred Decisions
+
+The following were explicitly deferred for separate discussion and are **not** yet standardized: the long-term server-side authorization pattern (query-level filtering vs. the `getAuthorizedLatestVersion` throw-helper — note it will throw typed `ActionError`s per §8.9.4 regardless), and deeper JSON-Schema (draft-07) input validation on save.

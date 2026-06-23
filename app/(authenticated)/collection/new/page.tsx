@@ -8,7 +8,7 @@ import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Form } from "@/components/ui/Form";
-import { createForm } from "@/features/forms/actions";
+import { useCreateForm } from "@/features/forms/hooks/useCreateForm";
 import { createFormSchema, CreateFormInput } from "@/features/forms/schemas";
 
 export default function NewSchemaPage() {
@@ -21,17 +21,10 @@ export default function NewSchemaPage() {
 
   const {
     register,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = form;
 
-  const handleCreateDraft = async (data: CreateFormInput) => {
-    try {
-      const formId = await createForm(data);
-      router.push(`/collection/${formId}/edit`);
-    } catch (error) {
-      console.error("Failed to create draft:", error);
-    }
-  };
+  const { create, isCreating } = useCreateForm(form);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl animate-in fade-in duration-300">
@@ -49,7 +42,7 @@ export default function NewSchemaPage() {
       <Card bordered>
         <CardBody>
           <CardTitle className="text-xl">Schema Information</CardTitle>
-          <Form form={form} onSubmit={handleCreateDraft} className="space-y-4 mt-2">
+          <Form form={form} onSubmit={create} className="space-y-4 mt-2">
             <Input
               label="Draft Name"
               placeholder="e.g. Cognitive Assessment Form"
@@ -63,11 +56,11 @@ export default function NewSchemaPage() {
               {...register("description")}
             />
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="ghost" type="button" onClick={() => router.push("/collection")} disabled={isSubmitting}>
+              <Button variant="ghost" type="button" onClick={() => router.push("/collection")} disabled={isCreating}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Draft & Open Builder"}
+              <Button variant="primary" type="submit" disabled={isCreating}>
+                {isCreating ? "Creating..." : "Create Draft & Open Builder"}
               </Button>
             </div>
           </Form>
