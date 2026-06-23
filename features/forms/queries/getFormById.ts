@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db"
 import { ContributorDTO, FormDetailDTO } from "../types"
+import { nonArchivedVersionsArgs } from "./versionSelectors"
 
 function mapContributors(raw: unknown): ContributorDTO[] {
   if (!Array.isArray(raw)) return []
@@ -22,8 +23,7 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
     },
     include: {
       versions: {
-        orderBy: { version: 'desc' },
-        where: { archived: false },
+        ...nonArchivedVersionsArgs,
         include: { publishedSchemas: true }
       }
     }

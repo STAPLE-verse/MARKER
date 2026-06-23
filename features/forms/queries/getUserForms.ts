@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db"
 import { FormWithLatestVersion } from "../types"
+import { latestVersionArgs } from "./versionSelectors"
 
 export async function getUserForms(userId: number): Promise<FormWithLatestVersion[]> {
   return prisma.form.findMany({
@@ -9,10 +10,7 @@ export async function getUserForms(userId: number): Promise<FormWithLatestVersio
       archived: false 
     },
     include: {
-      versions: {
-        orderBy: { version: 'desc' },
-        take: 1
-      }
+      versions: latestVersionArgs
     },
     orderBy: { updatedAt: 'desc' }
   })

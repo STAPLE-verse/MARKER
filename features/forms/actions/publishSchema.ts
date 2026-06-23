@@ -8,6 +8,7 @@ import { publishSchemaActionSchema } from "../schemas";
 import { revalidatePath } from "next/cache";
 import { generatePID } from "@/utils/id";
 import { extractOntologyIds, extractSchemaDescription } from "@/utils/schema";
+import { getAuthorizedLatestVersion } from "../queries/getAuthorizedLatestVersion";
 
 // How many times to regenerate a PID if we hit an (astronomically unlikely) collision.
 const MAX_PID_ATTEMPTS = 5;
@@ -15,30 +16,11 @@ const MAX_PID_ATTEMPTS = 5;
 export const publishSchema = authenticatedAction(
   publishSchemaActionSchema,
   async ({ input, userId }) => {
-    // 1. Fetch the form and its latest non-archived version to ensure ownership
-    //    and get the raw JSON. The `archived: false` filter mirrors getFormById so
-    //    "latest version" means the same thing everywhere.
-    const form = await prisma.form.findFirst({
-      where: {
-        id: input.formId,
-        userId: userId,
-        app: "marker",
-        archived: false
-      },
-      include: {
-        versions: {
-          where: { archived: false },
-          orderBy: { version: 'desc' },
-          take: 1
-        }
-      }
-    });
-
-    if (!form || form.versions.length === 0) {
-      throw new ActionError("NOT_FOUND", "Form not found or has no versions.");
-    }
-
-    const latestVersion = form.versions[0];
+    // 1. Authorize and load the latest version through the shared write-side
+    //    helper (architecture.md §8.10): it enforces ownership, tenancy, archived
+    //    state, and has-versions with granular ActionErrors. The PUBLISHED guard
+    //    below is publish-specific business logic, so it stays in the action.
+    const { form, latestVersion } = await getAuthorizedLatestVersion(input.formId, userId);
 
     if (latestVersion.status === "PUBLISHED") {
       throw new ActionError("CONFLICT", "This version is already published.");
