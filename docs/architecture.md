@@ -547,3 +547,7 @@ From detail (/collection/[id]):
 ```
 
 **Save Changes** is for frequent, low-ceremony persistence during a long session. **Done** is the primary finish action. **+ New version** on the detail page is the only UI path for starting a new revision in history (`createFormVersionFromLatest`). The `createFormCheckpoint` action remains in the codebase for potential future flows but is not exposed in the editor UI.
+
+Version-history selection is URL state, not component-local state. `/collection/[id]`
+shows the latest version; `/collection/[id]?version=[formVersionId]` shows a
+historical version. Invalid IDs redirect to the canonical latest-version URL.

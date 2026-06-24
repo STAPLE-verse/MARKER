@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { FormDetailDTO } from "@/features/forms/types";
+import { FormDetailDTO, FormVersionDTO } from "@/features/forms/types";
 import { BackButton } from "@/components/ui/BackButton";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
 import { SchemaDescriptionCard } from "@/features/forms/components/SchemaDescriptionCard";
 import { OlderVersionBanner } from "@/features/forms/components/OlderVersionBanner";
-import { useVersionSelection } from "@/features/forms/hooks/useVersionSelection";
 import { useCloneForm } from "@/features/forms/hooks/useCloneForm";
 import { useCreateFormVersion } from "@/features/forms/hooks/useCreateFormVersion";
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
@@ -16,10 +15,14 @@ import { SchemaViewerCard } from "./SchemaViewerCard";
 
 interface UserSchemaDetailsClientProps {
   form: FormDetailDTO;
+  selectedVersion: FormVersionDTO;
 }
 
-export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClientProps) {
-  const { selectedVersion, selectVersion, isViewingLatest } = useVersionSelection(form);
+export default function UserSchemaDetailsClient({
+  form,
+  selectedVersion,
+}: UserSchemaDetailsClientProps) {
+  const isViewingLatest = selectedVersion.id === form.versions[0].id;
   const { clone, isCloning } = useCloneForm();
   const { createVersion, isCreating } = useCreateFormVersion(form.id);
 
@@ -37,7 +40,7 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
           setIsHistoryOpen={setIsHistoryOpen}
           versions={form.versions}
           selectedVersion={selectedVersion}
-          setSelectedVersion={selectVersion}
+          formId={form.id}
           onNewVersion={createVersion}
           isCreatingVersion={isCreating}
         />

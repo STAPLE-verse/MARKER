@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/Sidebar";
 import { DashedAddButton } from "@/components/ui/DashedAddButton";
 import { ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -11,7 +12,7 @@ interface VersionHistorySidebarProps {
   setIsHistoryOpen: (open: boolean) => void;
   versions: FormVersionType[];
   selectedVersion: FormVersionType;
-  setSelectedVersion: (version: FormVersionType) => void;
+  formId: number;
   onNewVersion: () => void;
   isCreatingVersion: boolean;
 }
@@ -21,7 +22,7 @@ export function VersionHistorySidebar({
   setIsHistoryOpen,
   versions,
   selectedVersion,
-  setSelectedVersion,
+  formId,
   onNewVersion,
   isCreatingVersion,
 }: VersionHistorySidebarProps) {
@@ -70,14 +71,17 @@ export function VersionHistorySidebar({
             const isLatest = v.id === versions[0].id;
             const isSelected = v.id === selectedVersion.id;
             return (
-              <div 
-                key={v.id} 
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                  isSelected 
-                    ? "border-primary bg-primary/5 ring-1 ring-primary/20" 
+              <Link
+                key={v.id}
+                href={isLatest ? `/collection/${formId}` : `/collection/${formId}?version=${v.id}`}
+                prefetch={false}
+                scroll={false}
+                aria-current={isSelected ? "page" : undefined}
+                className={`block p-4 rounded-xl border cursor-pointer transition-all ${
+                  isSelected
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                     : "border-base-300 hover:border-base-content/30 bg-base-100"
                 }`}
-                onClick={() => setSelectedVersion(v)}
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="font-semibold flex items-center gap-2">
@@ -93,7 +97,7 @@ export function VersionHistorySidebar({
                 <div className="text-sm text-base-content/70 truncate">
                   {v.name || "Untitled Draft"}
                 </div>
-              </div>
+              </Link>
             )
           })}
         </SidebarContent>
