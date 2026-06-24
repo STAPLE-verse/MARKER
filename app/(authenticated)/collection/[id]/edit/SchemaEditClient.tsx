@@ -39,9 +39,10 @@ interface EditPageContentProps {
   draftToRestore: FormDraftData | null;
   restoreDraft: () => void;
   discardDraft: () => void;
+  clearDraft: () => void;
   handleAutoSave: (state: { schema: object; uiSchema: object; formData: object }) => void;
   handleSave: (state: { schema: object; uiSchema: object; formData: object }) => void;
-  handleSaveNewVersion: (state: { schema: object; uiSchema: object; formData: object }) => void;
+  handleDone: (state: { schema: object; uiSchema: object; formData: object }, isDirty: boolean) => void;
 }
 
 export default function SchemaEditClient({ formId, version }: SchemaEditClientProps) {
@@ -73,13 +74,9 @@ export default function SchemaEditClient({ formId, version }: SchemaEditClientPr
     [clearDraft]
   );
 
-  const { save: handleSave, saveAsNewVersion: handleSaveNewVersion, isSaving } = useSaveForm(
-    formId,
-    {
-      onSaveSuccess: handleSaveSuccess,
-      onCheckpointSuccess: clearDraft,
-    }
-  );
+  const { save: handleSave, done: handleDone, isSaving } = useSaveForm(formId, {
+    onSaveSuccess: handleSaveSuccess,
+  });
 
   const handleAutoSave = (state: { schema: object; uiSchema: object; formData: object }) => {
     saveDraft(state.schema, state.uiSchema);
@@ -107,9 +104,10 @@ export default function SchemaEditClient({ formId, version }: SchemaEditClientPr
         draftToRestore={draftToRestore}
         restoreDraft={restoreDraft}
         discardDraft={discardDraft}
+        clearDraft={clearDraft}
         handleAutoSave={handleAutoSave}
         handleSave={handleSave}
-        handleSaveNewVersion={handleSaveNewVersion}
+        handleDone={handleDone}
       />
     </FormStudioProvider>
   );
@@ -132,38 +130,55 @@ function EditPageContent(props: EditPageContentProps) {
 
   useUnsavedChangesGuard(isDirty);
 
-  const handleCancel = () => {
-    if (!confirmLeaveWithUnsavedChanges(isDirty)) return;
+  const handleBack = () => {
+    if (isDirty) {
+      if (!confirmLeaveWithUnsavedChanges(isDirty)) return;
+      props.clearDraft();
+    }
     router.push(`/collection/${props.formId}`);
   };
+
+  const saveDisabled = props.isSaving || !isDirty;
 
   return (
     <FormPageLayout
       backButton={
-        <BackButton onClick={handleCancel} disabled={props.isSaving}>
-          Cancel Editing
+        <BackButton onClick={handleBack} disabled={props.isSaving}>
+          Back to Schema
         </BackButton>
       }
     >
       <div className="flex-none mb-2">
         <PageHeader title={<SchemaHeaderTitle version={props.version} prefix="Form Builder" />}>
           <div className="flex gap-2 items-center">
-            <Button
-              size="sm"
-              variant="primary"
-              outline
-              onClick={() => props.handleSave(state)}
-              disabled={props.isSaving || !isDirty}
+            <div
+              className="tooltip tooltip-bottom inline-block"
+              data-tip={
+                saveDisabled
+                  ? "All changes are saved to your collection"
+                  : "Save changes and continue working"
+              }
             >
-              Save Changes
-            </Button>
+              <span className={saveDisabled ? "inline-block cursor-not-allowed" : "inline-block"}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  outline
+                  onClick={() => props.handleSave(state)}
+                  disabled={saveDisabled}
+                  className={saveDisabled ? "pointer-events-none" : undefined}
+                >
+                  Save Changes
+                </Button>
+              </span>
+            </div>
             <Button
               size="sm"
               variant="primary"
-              onClick={() => props.handleSaveNewVersion(state)}
+              onClick={() => props.handleDone(state, isDirty)}
               disabled={props.isSaving}
             >
-              Save as New Version
+              Done
             </Button>
           </div>
         </PageHeader>
@@ -195,14 +210,6 @@ function EditPageContent(props: EditPageContentProps) {
       )}
 
       <div className="flex-1 w-full min-h-0 relative mt-4">
-        {props.isSaving && (
-          <div className="absolute inset-0 z-50 bg-base-100/50 backdrop-blur-sm flex items-center justify-center">
-            <div className="flex items-center gap-3 bg-base-100 p-4 rounded-xl shadow-xl border border-base-300">
-              <span className="loading loading-spinner text-primary"></span>
-              <span className="font-medium">Saving…</span>
-            </div>
-          </div>
-        )}
         <FormStudioUI onAutoSave={props.handleAutoSave} saveStatus={saveStatus} />
       </div>
     </FormPageLayout>

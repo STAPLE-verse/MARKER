@@ -480,8 +480,9 @@ Nothing downstream of the editor (publish, clone, collection list, detail view) 
 5. **Any successful DB write clears the buffer** for that form/version (`saveFormVersion`, `createFormCheckpoint`, `publishSchema`).
 6. **The save-status indicator reflects DB sync only** — not buffer writes. States: `Unsaved changes` (editor ≠ last DB save) → `Saving…` (DB write in flight) → `All changes saved` (editor = DB). The word "locally" does not appear in save-status copy.
 7. **Save Changes does not navigate.** `saveFormVersion` (in-place overwrite of the latest draft) keeps the user in the editor. On success: update the DB baseline ref, clear the buffer, toast confirmation, pill → "All changes saved."
-8. **Save as New Version navigates to the detail page.** `createFormCheckpoint` marks the end of an editing pass. On success: clear the buffer, toast (include the new draft number when available), redirect to `/collection/[id]`.
-9. **New version from the history sidebar always copies the latest.** The **+** control in `VersionHistorySidebar` is always visible regardless of which version is currently selected in the detail view. It creates a new `FormVersion` row as a **copy of the latest non-archived head** (never an empty schema), then opens `/collection/[id]/edit`. This lets users start a fresh editing session on a new revision without going through "Save as New Version" inside the builder.
+8. **Done finishes the session.** If the editor is synced with the DB, **Done** navigates immediately to `/collection/[id]`. If dirty, **Done** calls `saveFormVersion` first, then navigates on success. **Done** is always enabled (except while a save is in flight).
+9. **Back to Schema** is the leave-without-saving path. When dirty, confirm and clear the recovery buffer on OK before navigating. When synced, navigate immediately.
+10. **Version creation happens on the detail page only.** The editor does **not** expose "Save as New Version". The **+** control in `VersionHistorySidebar` creates a new `FormVersion` row as a **copy of the latest non-archived head** (never an empty schema), then opens `/collection/[id]/edit`.
 
 #### 8.11.3 Write cadence (what hits the DB vs the buffer)
 
@@ -489,7 +490,8 @@ Nothing downstream of the editor (publish, clone, collection list, detail view) 
 |---|---|---|
 | Debounced autosave (~1.5s while dirty) | localStorage buffer only | No |
 | **Save Changes** (`saveFormVersion`) | DB — overwrites latest draft in place | No |
-| **Save as New Version** (`createFormCheckpoint`) | DB — new `FormVersion` row | Yes → `/collection/[id]` |
+| **Done** | DB if dirty (`saveFormVersion`), then detail page; immediate navigate if synced | Yes → `/collection/[id]` |
+| **Back to Schema** | None (discards buffer if user confirms leave while dirty) | Yes → `/collection/[id]` |
 | **+ New version** (sidebar on detail page) | DB — new row copied from latest head | Yes → `/collection/[id]/edit` |
 | **Publish** (`publishSchema`) | DB — immutable `PublishedSchema` | Yes (publish flow) |
 
@@ -501,6 +503,7 @@ Autosave frequency must **not** be retargeted at the database. Long editing sess
 
 - The **route layer** (`SchemaEditClient` + hooks) owns `saveState` by comparing live editor state to a `lastDbSavedRef` baseline seeded from the loaded `FormVersion`.
 - `FormStudio` receives save state as a prop (or the status pill is rendered in the route, outside the package). Neutral copy only: "Unsaved changes" / "Saving…" / "All changes saved."
+- **In-flight DB saves** (`isSaving` from `useTransition` in `useSaveForm`) set `saveStatus` to `"saving"` on the pill (spinner + "Saving…"). Header actions (**Save Changes**, **Done**, **Back to Schema**) disable for the duration. Do **not** use a full-card blocking overlay — the pill and disabled buttons are sufficient feedback; the editor stays readable during the request.
 - The debounced buffer write inside `onAutoSave` is a **silent side effect** with no status pill of its own. Optional subordinate copy (e.g. a tooltip: "Backed up in browser · not yet saved to your collection") may appear only when dirty and must not compete with the DB-sync indicator.
 
 #### 8.11.5 Navigation guards
@@ -508,7 +511,7 @@ Autosave frequency must **not** be retargeted at the database. Long editing sess
 Because edits can live in the buffer while the DB is stale, the editor must warn before the user leaves with unsaved DB changes:
 
 - **`beforeunload`** when the editor is dirty relative to the last DB save.
-- **In-app route-change guard** (same dirty check) when navigating via Cancel / links.
+- **In-app route-change guard** (same dirty check) when navigating via **Back to Schema** or external links.
 
 This closes the gap where a user edits, assumes work is safe because the buffer captured it, leaves without clicking Save Changes, and later publish/clone reads stale DB content.
 
@@ -516,14 +519,15 @@ This closes the gap where a user edits, assumes work is safe because the buffer 
 
 When a valid buffer is detected on edit-page load, show an info alert with **Restore** / **Discard**. Restore copies buffer content into editor state and bumps `studioKey` to remount `FormStudioProvider` with the recovered props — the existing remount pattern is retained. Discard removes the buffer entry.
 
-#### 8.11.7 Versioning actions (summary)
+#### 8.11.7 Editor vs detail: action split
 
-Three complementary paths create or advance draft history:
+The editor and detail page have distinct responsibilities. Do not duplicate version-creation actions in the editor.
 
 ```
 During edit (/collection/[id]/edit):
   Save Changes        → overwrite latest head, stay in editor
-  Save as New Version → new FormVersion row, return to detail page
+  Done                → save if dirty, then return to detail; navigate immediately if synced
+  Back to Schema      → leave (confirm + discard buffer if dirty)
 
 From detail (/collection/[id]):
   Edit Structure      → open editor on latest head
@@ -531,4 +535,4 @@ From detail (/collection/[id]):
   Restore (older)     → (future) fork selected version into new head
 ```
 
-**Save Changes** is for frequent, low-ceremony persistence during a session. **Save as New Version** and **+ New version** are boundary actions that start a new revision in history — the former from inside the builder at end-of-session, the latter from the detail page without entering the builder first.
+**Save Changes** is for frequent, low-ceremony persistence during a long session. **Done** is the primary finish action. **+ New version** on the detail page is the only UI path for starting a new revision in history (`createFormVersionFromLatest`). The `createFormCheckpoint` action remains in the codebase for potential future flows but is not exposed in the editor UI.

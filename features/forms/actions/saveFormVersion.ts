@@ -19,7 +19,8 @@ export const saveFormVersion = authenticatedAction(saveFormVersionSchema, async 
 
   // Background Auto-Save mechanism:
   // We update the latest version in-place to prevent database bloat during active editing.
-  // Explicit version bumping is handled manually by the user via createFormCheckpoint.
+  // Explicit version bumping is handled from the detail page (+ New version) via
+  // createFormVersionFromLatest; createFormCheckpoint remains available for future flows.
   await prisma.formVersion.update({
     where: { id: latestVersion.id },
     data: {
