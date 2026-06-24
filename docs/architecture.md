@@ -410,7 +410,7 @@ toast.success("Saved");
 Conventions:
 - Every imperative action call goes through a `use*` hook; no action is `await`ed inline in a route component (`createForm`, `deleteForm`, `saveFormVersion`, `createFormCheckpoint`, `publishSchema` each get a hook).
 - Pending state comes from `useTransition` (§8.7), not hand-rolled `useState(isLoading)`.
-- Success is **always** confirmed (toast or redirect-with-feedback). The publish flow surfaces success on redirect rather than silently relying on the `?published=` param.
+- Success is **always** confirmed (toast or redirect-with-feedback). The publish flow surfaces success on redirect rather than silently relying on the `?published=` param. Form Studio save/checkpoint navigation semantics are specified separately in §8.11.
 - `console.error` is no longer a user-facing strategy; it is only acceptable as server-side logging inside `normalizeActionError`.
 
 #### 8.9.7 Error boundaries (render / data-loading path)
@@ -457,3 +457,78 @@ There are two ways to enforce ownership/tenancy on the server, and they are **as
 These remain open and are **not** yet standardized:
 - **Returning a DTO (rather than raw Prisma) from the throw-helper**, to bring it in line with the §8.2 boundary rule. Low priority while its consumers are server-only.
 - **Deeper JSON-Schema (draft-07) input validation on save.**
+
+### 8.11 Form Studio Editing: DB Truth & Recovery Buffer
+
+Form editing in MARKER can span long sessions. Users need protection against data loss (browser crash, accidental tab close) **without** writing to the database on every keystroke. This section defines the **precedence contract** between the database, the browser recovery buffer, and the editor UI. All form-editing code (`useFormDraft`, `useSaveForm`, `SchemaEditClient`, `FormStudio`) must follow it.
+
+#### 8.11.1 Two stores, one truth
+
+| Store | Role | Written by | Read by |
+|---|---|---|---|
+| **Database** (`FormVersion.schema` / `uiSchema`) | **Sole source of truth** | Explicit user actions only (`saveFormVersion`, `createFormCheckpoint`, `publishSchema`) | Detail page, publish, clone, edit page load |
+| **localStorage** (`marker-form-draft-${formId}-${versionId}`) | **Transient recovery buffer** | Debounced autosave (~1.5s after last change) while the editor is dirty | Restore prompt on next edit-session load only |
+
+Nothing downstream of the editor (publish, clone, collection list, detail view) ever reads localStorage. The buffer exists solely so unsaved edits survive a crash or refresh.
+
+#### 8.11.2 Precedence rules
+
+1. **The DB is always the source of truth.** It is what renders on load, what publish/clone/detail read, and the only state that counts as "saved."
+2. **localStorage is never a save.** It is a silent crash-recovery cache. The UI must not label a buffer write as "saved."
+3. **The buffer is dirty-only and version-scoped.** Write to localStorage only when the editor differs from the loaded DB baseline. If the editor matches the baseline, delete the buffer entry. The key includes both `formId` and `versionId`; the payload records `baseVersionId` (the DB head the buffer was based on).
+4. **A buffer is restorable only when it matches the current DB head.** On load, offer "Restore draft" only if a buffer exists, differs from the DB baseline, and `baseVersionId === version.id`. Otherwise treat it as stale (discard silently or warn — never apply it onto a different version).
+5. **Any successful DB write clears the buffer** for that form/version (`saveFormVersion`, `createFormCheckpoint`, `publishSchema`).
+6. **The save-status indicator reflects DB sync only** — not buffer writes. States: `Unsaved changes` (editor ≠ last DB save) → `Saving…` (DB write in flight) → `All changes saved` (editor = DB). The word "locally" does not appear in save-status copy.
+7. **Save Changes does not navigate.** `saveFormVersion` (in-place overwrite of the latest draft) keeps the user in the editor. On success: update the DB baseline ref, clear the buffer, toast confirmation, pill → "All changes saved."
+8. **Save as New Version navigates to the detail page.** `createFormCheckpoint` marks the end of an editing pass. On success: clear the buffer, toast (include the new draft number when available), redirect to `/collection/[id]`.
+9. **New version from the history sidebar always copies the latest.** The **+** control in `VersionHistorySidebar` is always visible regardless of which version is currently selected in the detail view. It creates a new `FormVersion` row as a **copy of the latest non-archived head** (never an empty schema), then opens `/collection/[id]/edit`. This lets users start a fresh editing session on a new revision without going through "Save as New Version" inside the builder.
+
+#### 8.11.3 Write cadence (what hits the DB vs the buffer)
+
+| Trigger | Target | Navigates away? |
+|---|---|---|
+| Debounced autosave (~1.5s while dirty) | localStorage buffer only | No |
+| **Save Changes** (`saveFormVersion`) | DB — overwrites latest draft in place | No |
+| **Save as New Version** (`createFormCheckpoint`) | DB — new `FormVersion` row | Yes → `/collection/[id]` |
+| **+ New version** (sidebar on detail page) | DB — new row copied from latest head | Yes → `/collection/[id]/edit` |
+| **Publish** (`publishSchema`) | DB — immutable `PublishedSchema` | Yes (publish flow) |
+
+Autosave frequency must **not** be retargeted at the database. Long editing sessions rely on the buffer for crash protection; the DB is updated only on explicit user intent.
+
+#### 8.11.4 Save-status ownership (`FormStudio` boundary)
+
+`@staple-verse/form-builder` is app-agnostic (§8.8) and must not reference "database" or MARKER-specific persistence. Therefore:
+
+- The **route layer** (`SchemaEditClient` + hooks) owns `saveState` by comparing live editor state to a `lastDbSavedRef` baseline seeded from the loaded `FormVersion`.
+- `FormStudio` receives save state as a prop (or the status pill is rendered in the route, outside the package). Neutral copy only: "Unsaved changes" / "Saving…" / "All changes saved."
+- The debounced buffer write inside `onAutoSave` is a **silent side effect** with no status pill of its own. Optional subordinate copy (e.g. a tooltip: "Backed up in browser · not yet saved to your collection") may appear only when dirty and must not compete with the DB-sync indicator.
+
+#### 8.11.5 Navigation guards
+
+Because edits can live in the buffer while the DB is stale, the editor must warn before the user leaves with unsaved DB changes:
+
+- **`beforeunload`** when the editor is dirty relative to the last DB save.
+- **In-app route-change guard** (same dirty check) when navigating via Cancel / links.
+
+This closes the gap where a user edits, assumes work is safe because the buffer captured it, leaves without clicking Save Changes, and later publish/clone reads stale DB content.
+
+#### 8.11.6 Restore flow
+
+When a valid buffer is detected on edit-page load, show an info alert with **Restore** / **Discard**. Restore copies buffer content into editor state and bumps `studioKey` to remount `FormStudioProvider` with the recovered props — the existing remount pattern is retained. Discard removes the buffer entry.
+
+#### 8.11.7 Versioning actions (summary)
+
+Three complementary paths create or advance draft history:
+
+```
+During edit (/collection/[id]/edit):
+  Save Changes        → overwrite latest head, stay in editor
+  Save as New Version → new FormVersion row, return to detail page
+
+From detail (/collection/[id]):
+  Edit Structure      → open editor on latest head
+  + (sidebar)         → copy latest → new FormVersion row → open editor
+  Restore (older)     → (future) fork selected version into new head
+```
+
+**Save Changes** is for frequent, low-ceremony persistence during a session. **Save as New Version** and **+ New version** are boundary actions that start a new revision in history — the former from inside the builder at end-of-session, the latter from the detail page without entering the builder first.

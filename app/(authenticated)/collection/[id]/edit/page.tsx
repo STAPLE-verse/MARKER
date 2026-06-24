@@ -11,7 +11,6 @@ export default async function SchemaEditPage({ params }: { params: Promise<{ id:
   return (
     <SchemaEditClient 
       formId={form.id} 
-      totalVersions={form.versions.length}
       version={latestVersion}
     />
   );

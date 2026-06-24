@@ -13,7 +13,7 @@ export const createFormCheckpoint = authenticatedAction(saveFormVersionSchema, a
   const schemaTitle = extractSchemaTitle(input.schema);
 
   // Create a new FormVersion row to act as an explicit checkpoint
-  await prisma.formVersion.create({
+  const newVersion = await prisma.formVersion.create({
     data: {
       formId: input.formId,
       version: latestVersion.version + 1,
@@ -23,8 +23,9 @@ export const createFormCheckpoint = authenticatedAction(saveFormVersionSchema, a
     }
   })
 
+  revalidatePath(`/collection/${input.formId}`)
   revalidatePath(`/collection/${input.formId}/edit`)
   revalidatePath("/collection")
   
-  return { success: true }
+  return { version: newVersion.version }
 })

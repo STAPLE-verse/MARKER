@@ -1,4 +1,5 @@
 import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/Sidebar";
+import { DashedAddButton } from "@/components/ui/DashedAddButton";
 import { ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/components/ui/Badge";
 import { FormVersionDTO } from "@/features/forms/types";
@@ -11,6 +12,8 @@ interface VersionHistorySidebarProps {
   versions: FormVersionType[];
   selectedVersion: FormVersionType;
   setSelectedVersion: (version: FormVersionType) => void;
+  onNewVersion: () => void;
+  isCreatingVersion: boolean;
 }
 
 export function VersionHistorySidebar({
@@ -19,6 +22,8 @@ export function VersionHistorySidebar({
   versions,
   selectedVersion,
   setSelectedVersion,
+  onNewVersion,
+  isCreatingVersion,
 }: VersionHistorySidebarProps) {
   return (
     <Sidebar 
@@ -55,6 +60,12 @@ export function VersionHistorySidebar({
       
       {isHistoryOpen ? (
         <SidebarContent className="space-y-3 bg-base-200/30">
+          <DashedAddButton
+            onClick={onNewVersion}
+            disabled={isCreatingVersion}
+            title="New draft version (copy of latest)"
+            aria-label="New draft version"
+          />
           {versions.map((v) => {
             const isLatest = v.id === versions[0].id;
             const isSelected = v.id === selectedVersion.id;

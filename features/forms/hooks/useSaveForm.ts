@@ -10,42 +10,54 @@ interface SaveState {
   formData: object;
 }
 
+interface UseSaveFormOptions {
+  /** Called after a successful in-place save (Save Changes). Does not navigate. */
+  onSaveSuccess?: (state: SaveState) => void;
+  /** Called after a successful checkpoint before navigating to the detail page. */
+  onCheckpointSuccess?: () => void;
+}
+
 /**
  * Wraps the form-builder save paths (`saveFormVersion` and
- * `createFormCheckpoint`) for a given draft. On success it clears the local
- * draft, confirms with a toast, and returns to the form detail page; on failure
- * it surfaces the error as a toast (see docs/architecture.md §8.9).
+ * `createFormCheckpoint`) for a given draft (architecture.md §8.11).
+ *
+ * - Save Changes persists to the DB and keeps the user in the editor.
+ * - Save as New Version creates a checkpoint and returns to the detail page.
  */
-export function useSaveForm(formId: number, options?: { onSuccess?: () => void }) {
+export function useSaveForm(formId: number, options?: UseSaveFormOptions) {
   const router = useRouter();
   const [isSaving, startSaving] = useTransition();
 
-  const run = (
-    promise: ReturnType<typeof saveFormVersion>,
-    successMessage: string
-  ) =>
+  const save = (state: SaveState) =>
     startSaving(async () => {
-      const res = await runAction(promise);
+      const res = await runAction(
+        saveFormVersion({ formId, schema: state.schema, uiSchema: state.uiSchema })
+      );
       if (!res.ok) {
         toast.error(res.error);
         return;
       }
-      options?.onSuccess?.();
-      toast.success(successMessage);
-      router.push(`/collection/${formId}`);
+      options?.onSaveSuccess?.(state);
+      toast.success("Changes saved");
     });
 
-  const save = (state: SaveState) =>
-    run(
-      saveFormVersion({ formId, schema: state.schema, uiSchema: state.uiSchema }),
-      "Changes saved"
-    );
-
   const saveAsNewVersion = (state: SaveState) =>
-    run(
-      createFormCheckpoint({ formId, schema: state.schema, uiSchema: state.uiSchema }),
-      "New version saved"
-    );
+    startSaving(async () => {
+      const res = await runAction(
+        createFormCheckpoint({ formId, schema: state.schema, uiSchema: state.uiSchema })
+      );
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      options?.onCheckpointSuccess?.();
+      const versionLabel =
+        res.data && typeof res.data === "object" && "version" in res.data
+          ? `Draft ${res.data.version}`
+          : "New version";
+      toast.success(`${versionLabel} saved`);
+      router.push(`/collection/${formId}`);
+    });
 
   return { save, saveAsNewVersion, isSaving };
 }

@@ -21,6 +21,12 @@ export const deleteFormSchema = z.object({
 
 export type DeleteFormInput = z.infer<typeof deleteFormSchema>
 
+export const formIdActionSchema = z.object({
+  formId: z.number(),
+})
+
+export type FormIdActionInput = z.infer<typeof formIdActionSchema>
+
 export const cloneFormVersionSchema = z.object({
   versionId: z.number(),
 })

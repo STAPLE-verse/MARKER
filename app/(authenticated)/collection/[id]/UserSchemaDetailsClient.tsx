@@ -9,6 +9,7 @@ import { SchemaDescriptionCard } from "@/features/forms/components/SchemaDescrip
 import { OlderVersionBanner } from "@/features/forms/components/OlderVersionBanner";
 import { useVersionSelection } from "@/features/forms/hooks/useVersionSelection";
 import { useCloneForm } from "@/features/forms/hooks/useCloneForm";
+import { useCreateFormVersion } from "@/features/forms/hooks/useCreateFormVersion";
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
 import { SchemaDetailHeader } from "./SchemaDetailHeader";
 import { SchemaViewerCard } from "./SchemaViewerCard";
@@ -20,6 +21,7 @@ interface UserSchemaDetailsClientProps {
 export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClientProps) {
   const { selectedVersion, selectVersion, isViewingLatest } = useVersionSelection(form);
   const { clone, isCloning } = useCloneForm();
+  const { createVersion, isCreating } = useCreateFormVersion(form.id);
 
   // History sidebar is open by default
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -36,6 +38,8 @@ export default function UserSchemaDetailsClient({ form }: UserSchemaDetailsClien
           versions={form.versions}
           selectedVersion={selectedVersion}
           setSelectedVersion={selectVersion}
+          onNewVersion={createVersion}
+          isCreatingVersion={isCreating}
         />
       }
     >

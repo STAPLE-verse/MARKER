@@ -19,17 +19,31 @@ const JsonEditor = dynamic(() => import("./JsonEditor"), {
 })
 import type { Mods } from "./types"
 
-interface FormStudioProps {
-  initialSchema?: string | object
-  initialUiSchema?: string | object
+export type FormStudioSaveStatus = "synced" | "unsaved" | "saving"
+
+interface FormStudioUIProps {
   onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void> | void
   onSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
   onSaveNewVersion?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>
   onCancel?: () => void
   mods?: Mods
+  /** When provided, the route layer owns save-status semantics (§8.11.4). */
+  saveStatus?: FormStudioSaveStatus
 }
 
-export function FormStudioUI({ onAutoSave, onSave, onSaveNewVersion, onCancel, mods }: { onAutoSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void> | void; onSave?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; onSaveNewVersion?: (state: { schema: object; uiSchema: object; formData: object }) => Promise<void>; onCancel?: () => void; mods?: Mods }) {
+interface FormStudioProps extends FormStudioUIProps {
+  initialSchema?: string | object
+  initialUiSchema?: string | object
+}
+
+export function FormStudioUI({
+  onAutoSave,
+  onSave,
+  onSaveNewVersion,
+  onCancel,
+  mods,
+  saveStatus,
+}: FormStudioUIProps) {
   const { state, setSchema, setUiSchema } = useFormStudio()
   const [activeTab, setActiveTab] = useState<"builder" | "json" | "preview">("builder")
   
@@ -40,41 +54,35 @@ export function FormStudioUI({ onAutoSave, onSave, onSaveNewVersion, onCancel, m
     setHasVisitedJson(true)
   }
 
-  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved")
   const isInitialMount = useRef(true)
-  const lastSavedStateRef = useRef<string>("")
+  const lastBufferedStateRef = useRef<string>("")
 
-  // Debounced auto-save effect
+  // Debounced recovery-buffer write (silent — no status pill updates)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false
-      lastSavedStateRef.current = JSON.stringify({ schema: state.schema, uiSchema: state.uiSchema })
+      lastBufferedStateRef.current = JSON.stringify({ schema: state.schema, uiSchema: state.uiSchema })
       return
     }
     if (!onAutoSave) return
 
     const currentStateStr = JSON.stringify({ schema: state.schema, uiSchema: state.uiSchema })
     
-    // If the JSON hasn't actually changed, ignore the aggressive React render and return early
-    if (currentStateStr === lastSavedStateRef.current) {
+    if (currentStateStr === lastBufferedStateRef.current) {
       return
     }
 
-    setSaveStatus("unsaved")
     const handler = setTimeout(async () => {
-      setSaveStatus("saving")
       try {
         await onAutoSave(state)
-        lastSavedStateRef.current = currentStateStr // Cache the successfully saved state
-        setSaveStatus("saved")
+        lastBufferedStateRef.current = currentStateStr
       } catch (e) {
-        console.error("Auto-save failed", e)
-        setSaveStatus("unsaved")
+        console.error("Recovery buffer write failed", e)
       }
     }, 1500)
 
     return () => clearTimeout(handler)
-  }, [state.schema, state.uiSchema, onAutoSave])
+  }, [state.schema, state.uiSchema, onAutoSave, state])
 
   return (
     <div className="flex flex-col w-full h-full animate-in fade-in duration-300 bg-base-100 border border-base-200 rounded-xl shadow-sm overflow-hidden">
@@ -101,18 +109,25 @@ export function FormStudioUI({ onAutoSave, onSave, onSaveNewVersion, onCancel, m
         </div>
 
         <div className="flex items-center gap-3 pb-3">
-          {onAutoSave && (
-            <div className="flex items-center mr-1 bg-base-100 px-3 py-1.5 rounded-full border border-base-300 shadow-sm min-w-[130px] justify-center transition-all">
-              {saveStatus === "saved" && (
+          {saveStatus !== undefined && (
+            <div
+              className="flex items-center mr-1 bg-base-100 px-3 py-1.5 rounded-full border border-base-300 shadow-sm min-w-[160px] justify-center transition-all"
+              title={
+                saveStatus === "unsaved"
+                  ? "Backed up in browser · not yet saved to your collection"
+                  : undefined
+              }
+            >
+              {saveStatus === "synced" && (
                 <span className="text-xs font-medium text-base-content/60 flex items-center gap-1.5">
                   <CheckCircleIcon className="w-4 h-4 text-success/80" />
-                  Saved locally
+                  All changes saved
                 </span>
               )}
               {saveStatus === "saving" && (
                 <span className="text-xs font-medium text-base-content/70 flex items-center gap-1.5">
                   <span className="loading loading-spinner loading-xs text-primary"></span>
-                  Saving...
+                  Saving…
                 </span>
               )}
               {saveStatus === "unsaved" && (
@@ -175,7 +190,14 @@ export function FormStudioUI({ onAutoSave, onSave, onSaveNewVersion, onCancel, m
 export default function FormStudio(props: FormStudioProps) {
   return (
     <FormStudioProvider initialSchema={props.initialSchema} initialUiSchema={props.initialUiSchema}>
-      <FormStudioUI onAutoSave={props.onAutoSave} onSave={props.onSave} onSaveNewVersion={props.onSaveNewVersion} onCancel={props.onCancel} mods={props.mods} />
+      <FormStudioUI
+        onAutoSave={props.onAutoSave}
+        onSave={props.onSave}
+        onSaveNewVersion={props.onSaveNewVersion}
+        onCancel={props.onCancel}
+        mods={props.mods}
+        saveStatus={props.saveStatus}
+      />
     </FormStudioProvider>
   )
 }
