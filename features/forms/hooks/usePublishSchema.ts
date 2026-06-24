@@ -6,20 +6,30 @@ import { PublishFormInput } from "@/features/forms/schemas";
 import { runAction } from "@/lib/action";
 import { applyFieldErrors } from "@/lib/form-errors";
 import { toast } from "@/lib/toast";
+import { toIsoTimestamp } from "@/features/forms/utils/timestamps";
 
 /**
- * Wraps the `publishSchema` server action for the publish wizard. On success it
- * confirms with a toast and returns to the (now published) form detail page; on
- * failure it maps server-side field errors back onto the wizard form (inline)
- * and otherwise surfaces a toast (see docs/architecture.md §8.9).
+ * Wraps the `publishSchema` server action for the publish wizard.
  */
-export function usePublishSchema(formId: number, form: UseFormReturn<PublishFormInput>) {
+export function usePublishSchema(
+  formId: number,
+  formVersionId: number,
+  expectedUpdatedAt: Date | string,
+  form: UseFormReturn<PublishFormInput>
+) {
   const router = useRouter();
   const [isPublishing, startPublishing] = useTransition();
 
   const publish = (data: PublishFormInput) => {
     startPublishing(async () => {
-      const res = await runAction(publishSchema({ ...data, formId }));
+      const res = await runAction(
+        publishSchema({
+          ...data,
+          formId,
+          formVersionId,
+          expectedUpdatedAt: toIsoTimestamp(expectedUpdatedAt),
+        })
+      );
       if (!res.ok) {
         if (!applyFieldErrors(form, res.fieldErrors)) {
           toast.error(res.error);

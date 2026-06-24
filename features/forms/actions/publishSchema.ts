@@ -1,77 +1,86 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/db";
+import { Prisma, VersionStatus } from "@prisma/client";
 import { authenticatedAction } from "@/utils/safe-action";
 import { ActionError } from "@/utils/action-result";
 import { publishSchemaActionSchema } from "../schemas";
 import { revalidatePath } from "next/cache";
 import { generatePID } from "@/utils/id";
 import { extractOntologyIds, extractSchemaDescription } from "@/utils/schema";
-import { getAuthorizedLatestVersion } from "../queries/getAuthorizedLatestVersion";
+import {
+  CONCURRENT_EDIT_MESSAGE,
+  parseExpectedUpdatedAt,
+  withLockedEditableFormVersionHead,
+} from "../queries/formVersionConcurrency";
 
-// How many times to regenerate a PID if we hit an (astronomically unlikely) collision.
 const MAX_PID_ATTEMPTS = 5;
 
 export const publishSchema = authenticatedAction(
   publishSchemaActionSchema,
   async ({ input, userId }) => {
-    // 1. Authorize and load the latest version through the shared write-side
-    //    helper (architecture.md §8.10): it enforces ownership, tenancy, archived
-    //    state, and has-versions with granular ActionErrors. The PUBLISHED guard
-    //    below is publish-specific business logic, so it stays in the action.
-    const { form, latestVersion } = await getAuthorizedLatestVersion(input.formId, userId);
+    const expectedUpdatedAt = parseExpectedUpdatedAt(input.expectedUpdatedAt);
 
-    if (latestVersion.status === "PUBLISHED") {
-      throw new ActionError("CONFLICT", "This version is already published.");
-    }
-
-    const familyId = `family_${form.id}`;
-
-    // 2. Create the immutable PublishedSchema snapshot and lock the FormVersion.
-    //    PIDs come from a collision-resistant generator, but we still retry on the
-    //    off chance of a primary-key collision. A familyId+version clash is a real
-    //    user error (re-publishing an existing version) and is surfaced as such.
     let lastError: unknown;
     for (let attempt = 0; attempt < MAX_PID_ATTEMPTS; attempt++) {
       const pid = generatePID("ps");
       try {
-        const [publishedSchema] = await prisma.$transaction([
-          prisma.publishedSchema.create({
-            data: {
-              pid,
-              title: latestVersion.name || "Untitled Schema",
-              description: extractSchemaDescription(latestVersion.schema),
-              schemaJson: latestVersion.schema ?? {},
-              uiSchema: latestVersion.uiSchema ?? {},
-              source: "native",
-              version: input.version,
-              familyId,
-              license: input.license,
-              releaseNotes: input.releaseNotes,
-              relatedPublicationDoi: input.relatedPublicationDoi,
-              keywords: input.keywords,
-              domain: input.domain,
-              language: input.language,
-              ontologyRefs: extractOntologyIds(latestVersion.schema),
-              authorId: userId,
-              contributors: input.contributors.map(c => ({
-                name: c.name,
-                role: c.role,
-                orcid: c.orcid || null
-              })),
-              originFormVersionId: latestVersion.id
+        const publishedSchema = await withLockedEditableFormVersionHead(
+          input.formId,
+          userId,
+          input.formVersionId,
+          expectedUpdatedAt,
+          async (tx, { form, latestVersion }) => {
+            const familyId = `family_${form.id}`;
+            const locked = await tx.formVersion.updateMany({
+              where: {
+                id: input.formVersionId,
+                formId: input.formId,
+                updatedAt: expectedUpdatedAt,
+                archived: false,
+                status: VersionStatus.DRAFT,
+              },
+              data: { status: VersionStatus.PUBLISHED },
+            });
+
+            if (locked.count === 0) {
+              throw new ActionError("CONFLICT", CONCURRENT_EDIT_MESSAGE);
             }
-          }),
-          prisma.formVersion.update({
-            where: { id: latestVersion.id },
-            data: { status: "PUBLISHED" }
-          })
-        ]);
+
+            return tx.publishedSchema.create({
+              data: {
+                pid,
+                title: latestVersion.name || "Untitled Schema",
+                description: extractSchemaDescription(latestVersion.schema),
+                schemaJson: latestVersion.schema ?? {},
+                uiSchema: latestVersion.uiSchema ?? {},
+                source: "native",
+                version: input.version,
+                familyId,
+                license: input.license,
+                releaseNotes: input.releaseNotes,
+                relatedPublicationDoi: input.relatedPublicationDoi,
+                keywords: input.keywords,
+                domain: input.domain,
+                language: input.language,
+                ontologyRefs: extractOntologyIds(latestVersion.schema),
+                authorId: userId,
+                contributors: input.contributors.map((c) => ({
+                  name: c.name,
+                  role: c.role,
+                  orcid: c.orcid || null,
+                })),
+                originFormVersionId: latestVersion.id,
+              },
+            });
+          }
+        );
 
         revalidatePath(`/collection/${input.formId}`);
         return { success: true, pid: publishedSchema.pid };
       } catch (error) {
+        if (error instanceof ActionError) {
+          throw error;
+        }
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
           const target = JSON.stringify(error.meta?.target ?? "");
           if (target.includes("familyId") || target.includes("version")) {
@@ -80,7 +89,6 @@ export const publishSchema = authenticatedAction(
               `Version ${input.version} has already been published for this schema. Please choose a higher version number.`
             );
           }
-          // Otherwise treat it as a PID collision and try again with a fresh PID.
           lastError = error;
           continue;
         }

@@ -24,6 +24,7 @@ import {
   useUnsavedChangesGuard,
   confirmLeaveWithUnsavedChanges,
 } from "@/features/forms/hooks/useUnsavedChangesGuard";
+import { toIsoTimestamp } from "@/features/forms/utils/timestamps";
 import { FormVersionDTO } from "@/features/forms/types";
 
 interface SchemaEditClientProps {
@@ -31,10 +32,16 @@ interface SchemaEditClientProps {
   version: FormVersionDTO;
 }
 
+interface DbBaseline {
+  schema: Record<string, unknown>;
+  uiSchema: Record<string, unknown>;
+  updatedAt: string;
+}
+
 interface EditPageContentProps {
   formId: number;
   version: FormVersionDTO;
-  dbBaseline: { schema: Record<string, unknown>; uiSchema: Record<string, unknown> };
+  dbBaseline: DbBaseline;
   isSaving: boolean;
   draftToRestore: FormDraftData | null;
   restoreDraft: () => void;
@@ -46,9 +53,10 @@ interface EditPageContentProps {
 }
 
 export default function SchemaEditClient({ formId, version }: SchemaEditClientProps) {
-  const [dbBaseline, setDbBaseline] = useState({
+  const [dbBaseline, setDbBaseline] = useState<DbBaseline>({
     schema: version.schema,
     uiSchema: version.uiSchema,
+    updatedAt: toIsoTimestamp(version.updatedAt),
   });
 
   const {
@@ -64,19 +72,32 @@ export default function SchemaEditClient({ formId, version }: SchemaEditClientPr
   } = useFormDraft(formId, version.id, dbBaseline);
 
   const handleSaveSuccess = useCallback(
-    (state: { schema: object; uiSchema: object }) => {
+    (state: { schema: object; uiSchema: object }, result: { updatedAt: string }) => {
       setDbBaseline({
         schema: state.schema as Record<string, unknown>,
         uiSchema: state.uiSchema as Record<string, unknown>,
+        updatedAt: result.updatedAt,
       });
       clearDraft();
     },
     [clearDraft]
   );
 
-  const { save: handleSave, done: handleDone, isSaving } = useSaveForm(formId, {
+  const { save: handleSave, done: handleDoneInternal, isSaving } = useSaveForm({
+    buildSaveInput: (state) => ({
+      formId,
+      formVersionId: version.id,
+      expectedUpdatedAt: dbBaseline.updatedAt,
+      schema: state.schema as Record<string, unknown>,
+      uiSchema: state.uiSchema as Record<string, unknown>,
+    }),
     onSaveSuccess: handleSaveSuccess,
   });
+
+  const handleDone = (
+    state: { schema: object; uiSchema: object; formData: object },
+    isDirty: boolean
+  ) => handleDoneInternal(state, isDirty, formId);
 
   const handleAutoSave = (state: { schema: object; uiSchema: object; formData: object }) => {
     saveDraft(state.schema, state.uiSchema);

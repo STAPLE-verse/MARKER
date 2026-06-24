@@ -326,13 +326,14 @@ model FormVersion {
   uiSchema  Json?
   archived  Boolean   @default(false)
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
   form      Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
   tasks            Task[]
   projects         Project[]
   status           VersionStatus     @default(DRAFT)
   publishedSchemas PublishedSchema[]
 
-  @@index([formId, version], name: "formVersionIndex")
+  @@unique([formId, version])
 }
 
 model Notification {

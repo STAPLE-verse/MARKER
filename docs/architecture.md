@@ -515,6 +515,17 @@ Because edits can live in the buffer while the DB is stale, the editor must warn
 
 This closes the gap where a user edits, assumes work is safe because the buffer captured it, leaves without clicking Save Changes, and later publish/clone reads stale DB content.
 
+#### 8.11.5.1 Optimistic concurrency (`formVersionId` + `updatedAt`)
+
+`saveFormVersion` and `publishSchema` must receive **`formVersionId`** (the head the client loaded) and **`expectedUpdatedAt`** (ISO timestamp from that load). The server:
+
+1. Performs the normal authorization check, then starts a transaction and locks the parent `Form` row with `SELECT ... FOR UPDATE`.
+2. Re-authorizes and reloads the latest version while holding that lock. All head-sensitive writes (`saveFormVersion`, `publishSchema`, and version creation) use this same lock.
+3. Rejects with **`CONFLICT`** if `formVersionId !== latestVersion.id` (head moved — e.g. **+ New version** in another tab).
+4. Applies writes with **`updateMany`** conditioned on `id`, `formId`, and `updatedAt === expectedUpdatedAt` so concurrent edits to the **same head** also return **`CONFLICT`** instead of last-write-wins.
+
+On successful `saveFormVersion`, return the new **`updatedAt`** ISO string so the client updates its baseline for the next save. `FormVersion.updatedAt` is maintained by Prisma `@updatedAt`.
+
 #### 8.11.6 Restore flow
 
 When a valid buffer is detected on edit-page load, show an info alert with **Restore** / **Discard**. Restore copies buffer content into editor state and bumps `studioKey` to remount `FormStudioProvider` with the recovered props — the existing remount pattern is retained. Discard removes the buffer entry.

@@ -1,6 +1,9 @@
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db"
 import { ActionError } from "@/utils/action-result"
 import { latestVersionArgs } from "./versionSelectors"
+
+type FormQueryClient = Pick<Prisma.TransactionClient, "form">
 
 /**
  * Write-side authorization helper (architecture.md §8.10).
@@ -10,9 +13,13 @@ import { latestVersionArgs } from "./versionSelectors"
  * coded `ActionError` for each failure mode. This is the single entry point for
  * authorizing mutations, so the FORBIDDEN-vs-NOT_FOUND policy lives here only.
  */
-export async function getAuthorizedLatestVersion(formId: number, userId: number) {
+export async function getAuthorizedLatestVersion(
+  formId: number,
+  userId: number,
+  db: FormQueryClient = prisma
+) {
   // We fetch strictly by ID first so we can give granular, helpful error messages
-  const form = await prisma.form.findUnique({
+  const form = await db.form.findUnique({
     where: { id: formId },
     include: { versions: latestVersionArgs }
   })

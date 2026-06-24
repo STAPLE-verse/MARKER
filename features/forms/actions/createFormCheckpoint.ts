@@ -1,31 +1,38 @@
 "use server"
 
-import { prisma } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
 import { saveFormVersionSchema } from "../schemas"
 import { extractSchemaTitle } from "@/utils/schema"
-import { getAuthorizedLatestVersion } from "../queries/getAuthorizedLatestVersion"
+import {
+  parseExpectedUpdatedAt,
+  withLockedEditableFormVersionHead,
+} from "../queries/formVersionConcurrency"
 
 export const createFormCheckpoint = authenticatedAction(saveFormVersionSchema, async ({ input, userId }) => {
-  const { latestVersion } = await getAuthorizedLatestVersion(input.formId, userId);
+  const expectedUpdatedAt = parseExpectedUpdatedAt(input.expectedUpdatedAt)
+  const schemaTitle = extractSchemaTitle(input.schema)
 
-  const schemaTitle = extractSchemaTitle(input.schema);
-
-  // Create a new FormVersion row to act as an explicit checkpoint
-  const newVersion = await prisma.formVersion.create({
-    data: {
-      formId: input.formId,
-      version: latestVersion.version + 1,
-      name: schemaTitle,
-      schema: input.schema,
-      uiSchema: input.uiSchema || {}
-    }
-  })
+  const newVersion = await withLockedEditableFormVersionHead(
+    input.formId,
+    userId,
+    input.formVersionId,
+    expectedUpdatedAt,
+    (tx, { latestVersion }) =>
+      tx.formVersion.create({
+        data: {
+          formId: input.formId,
+          version: latestVersion.version + 1,
+          name: schemaTitle,
+          schema: input.schema,
+          uiSchema: input.uiSchema || {},
+        },
+      })
+  )
 
   revalidatePath(`/collection/${input.formId}`)
   revalidatePath(`/collection/${input.formId}/edit`)
   revalidatePath("/collection")
-  
+
   return { version: newVersion.version }
 })

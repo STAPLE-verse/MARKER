@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "FormVersion" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

@@ -41,6 +41,7 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
         version: v.version,
         status: v.status,
         createdAt: v.createdAt,
+        updatedAt: v.updatedAt,
         schema: (v.schema ?? {}) as Record<string, unknown>,
         uiSchema: (v.uiSchema ?? {}) as Record<string, unknown>,
         publishedSchema: published

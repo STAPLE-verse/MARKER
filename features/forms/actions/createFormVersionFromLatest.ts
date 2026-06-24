@@ -1,10 +1,9 @@
 "use server";
 
-import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { authenticatedAction } from "@/utils/safe-action";
 import { formIdActionSchema } from "../schemas";
-import { getAuthorizedLatestVersion } from "../queries/getAuthorizedLatestVersion";
+import { withLockedAuthorizedLatestVersion } from "../queries/formVersionConcurrency";
 
 /**
  * Creates a new FormVersion copied from the latest non-archived head, then
@@ -13,17 +12,20 @@ import { getAuthorizedLatestVersion } from "../queries/getAuthorizedLatestVersio
 export const createFormVersionFromLatest = authenticatedAction(
   formIdActionSchema,
   async ({ input, userId }) => {
-    const { latestVersion } = await getAuthorizedLatestVersion(input.formId, userId);
-
-    const newVersion = await prisma.formVersion.create({
-      data: {
-        formId: input.formId,
-        version: latestVersion.version + 1,
-        name: latestVersion.name,
-        schema: latestVersion.schema ?? {},
-        uiSchema: latestVersion.uiSchema ?? {},
-      },
-    });
+    const newVersion = await withLockedAuthorizedLatestVersion(
+      input.formId,
+      userId,
+      (tx, { latestVersion }) =>
+        tx.formVersion.create({
+          data: {
+            formId: input.formId,
+            version: latestVersion.version + 1,
+            name: latestVersion.name,
+            schema: latestVersion.schema ?? {},
+            uiSchema: latestVersion.uiSchema ?? {},
+          },
+        })
+    );
 
     revalidatePath(`/collection/${input.formId}`);
     revalidatePath(`/collection/${input.formId}/edit`);

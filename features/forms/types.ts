@@ -41,6 +41,7 @@ export interface FormVersionDTO {
   version: number
   status: VersionStatus
   createdAt: Date
+  updatedAt: Date
   schema: Record<string, unknown>
   uiSchema: Record<string, unknown>
   publishedSchema: PublishedSchemaSummaryDTO | null

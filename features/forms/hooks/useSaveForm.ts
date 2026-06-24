@@ -1,6 +1,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { saveFormVersion } from "@/features/forms/actions";
+import { SaveFormVersionInput } from "@/features/forms/schemas";
 import { runAction } from "@/lib/action";
 import { toast } from "@/lib/toast";
 
@@ -10,30 +11,32 @@ interface SaveState {
   formData: object;
 }
 
+interface SaveSuccessResult {
+  updatedAt: string;
+}
+
 interface UseSaveFormOptions {
+  buildSaveInput: (state: SaveState) => SaveFormVersionInput;
   /** Called after a successful in-place save. Does not navigate. */
-  onSaveSuccess?: (state: SaveState) => void;
+  onSaveSuccess?: (state: SaveState, result: SaveSuccessResult) => void;
 }
 
 /**
  * Wraps `saveFormVersion` for the Form Studio edit page (architecture.md §8.11).
- *
- * - Save Changes persists to the DB and keeps the user in the editor.
- * - Done saves if dirty, then returns to the detail page; if already synced, navigates immediately.
  */
-export function useSaveForm(formId: number, options?: UseSaveFormOptions) {
+export function useSaveForm(options: UseSaveFormOptions) {
   const router = useRouter();
   const [isSaving, startSaving] = useTransition();
 
   const persist = async (state: SaveState): Promise<boolean> => {
-    const res = await runAction(
-      saveFormVersion({ formId, schema: state.schema, uiSchema: state.uiSchema })
-    );
+    const res = await runAction(saveFormVersion(options.buildSaveInput(state)));
     if (!res.ok) {
       toast.error(res.error);
       return false;
     }
-    options?.onSaveSuccess?.(state);
+    if (res.data && typeof res.data === "object" && "updatedAt" in res.data) {
+      options.onSaveSuccess?.(state, { updatedAt: res.data.updatedAt as string });
+    }
     toast.success("Changes saved");
     return true;
   };
@@ -43,7 +46,7 @@ export function useSaveForm(formId: number, options?: UseSaveFormOptions) {
       await persist(state);
     });
 
-  const done = (state: SaveState, isDirty: boolean) => {
+  const done = (state: SaveState, isDirty: boolean, formId: number) => {
     if (!isDirty) {
       router.push(`/collection/${formId}`);
       return;

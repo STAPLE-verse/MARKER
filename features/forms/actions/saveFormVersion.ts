@@ -1,34 +1,51 @@
 "use server"
 
-import { prisma } from "@/lib/db"
+import { VersionStatus } from "@prisma/client"
 import { authenticatedAction } from "@/utils/safe-action"
 import { ActionError } from "@/utils/action-result"
 import { saveFormVersionSchema } from "../schemas"
 import { extractSchemaTitle } from "@/utils/schema"
-import { getAuthorizedLatestVersion } from "../queries/getAuthorizedLatestVersion"
+import {
+  CONCURRENT_EDIT_MESSAGE,
+  parseExpectedUpdatedAt,
+  withLockedEditableFormVersionHead,
+} from "../queries/formVersionConcurrency"
 
 export const saveFormVersion = authenticatedAction(saveFormVersionSchema, async ({ input, userId }) => {
-  const { latestVersion } = await getAuthorizedLatestVersion(input.formId, userId);
+  const expectedUpdatedAt = parseExpectedUpdatedAt(input.expectedUpdatedAt)
+  const schemaTitle = extractSchemaTitle(input.schema)
 
-  // Extract the title from the JSON schema to keep the database record in sync
-  const schemaTitle = extractSchemaTitle(input.schema);
+  return withLockedEditableFormVersionHead(
+    input.formId,
+    userId,
+    input.formVersionId,
+    expectedUpdatedAt,
+    async (tx) => {
+      const result = await tx.formVersion.updateMany({
+        where: {
+          id: input.formVersionId,
+          formId: input.formId,
+          updatedAt: expectedUpdatedAt,
+          archived: false,
+          status: VersionStatus.DRAFT,
+        },
+        data: {
+          name: schemaTitle,
+          schema: input.schema,
+          uiSchema: input.uiSchema || {},
+        },
+      })
 
-  if (latestVersion.status === "PUBLISHED") {
-    throw new ActionError("CONFLICT", "Cannot edit a published form version. Please create a new draft version.");
-  }
+      if (result.count === 0) {
+        throw new ActionError("CONFLICT", CONCURRENT_EDIT_MESSAGE)
+      }
 
-  // Background Auto-Save mechanism:
-  // We update the latest version in-place to prevent database bloat during active editing.
-  // Explicit version bumping is handled from the detail page (+ New version) via
-  // createFormVersionFromLatest; createFormCheckpoint remains available for future flows.
-  await prisma.formVersion.update({
-    where: { id: latestVersion.id },
-    data: {
-      name: schemaTitle,
-      schema: input.schema,
-      uiSchema: input.uiSchema || {}
+      const saved = await tx.formVersion.findUniqueOrThrow({
+        where: { id: input.formVersionId },
+        select: { updatedAt: true },
+      })
+
+      return { updatedAt: saved.updatedAt.toISOString() }
     }
-  })
-  
-  return { success: true }
+  )
 })

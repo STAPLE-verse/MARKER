@@ -50,7 +50,7 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
     }
   });
 
-  const { publish, isPublishing } = usePublishSchema(formId, form);
+  const { publish, isPublishing } = usePublishSchema(formId, version.id, version.updatedAt, form);
 
   const handleNext = async () => {
     // Manually trigger validation on the current step fields before proceeding

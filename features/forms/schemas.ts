@@ -7,7 +7,15 @@ export const createFormSchema = z.object({
 
 export type CreateFormInput = z.infer<typeof createFormSchema>
 
-export const saveFormVersionSchema = z.object({
+/** Optimistic concurrency: the head version the client loaded and its last-known `updatedAt`. */
+export const formVersionConcurrencySchema = z.object({
+  formVersionId: z.number(),
+  expectedUpdatedAt: z.string().datetime(),
+})
+
+export type FormVersionConcurrencyInput = z.infer<typeof formVersionConcurrencySchema>
+
+export const saveFormVersionSchema = formVersionConcurrencySchema.extend({
   formId: z.number(),
   schema: z.record(z.string(), z.any()),
   uiSchema: z.record(z.string(), z.any()).optional(),
@@ -54,6 +62,8 @@ export type PublishFormInput = z.infer<typeof publishFormSchema>
 
 export const publishSchemaActionSchema = publishFormSchema.extend({
   formId: z.number(),
+  formVersionId: z.number(),
+  expectedUpdatedAt: z.string().datetime(),
 });
 
 export type PublishSchemaActionInput = z.infer<typeof publishSchemaActionSchema>
