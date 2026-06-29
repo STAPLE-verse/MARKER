@@ -41,6 +41,30 @@ export const cloneFormVersionSchema = z.object({
 
 export type CloneFormVersionInput = z.infer<typeof cloneFormVersionSchema>
 
+export const draftCatalogContributorSchema = z.object({
+  name: z.string().optional(),
+  role: z.string().optional(),
+  orcid: z.string().optional().nullable(),
+})
+
+export const draftCatalogMetadataSchema = z.object({
+  domain: z.string().optional().nullable(),
+  language: z.string().optional().nullable(),
+  license: z.string().optional().nullable(),
+  contributors: z.array(draftCatalogContributorSchema).optional(),
+  keywords: z.array(z.string()).optional(),
+})
+
+export type DraftCatalogMetadataInput = z.infer<typeof draftCatalogMetadataSchema>
+
+export const savePublicationMetadataSchema = draftCatalogMetadataSchema.extend({
+  formId: z.number(),
+  formVersionId: z.number(),
+  expectedMetadataUpdatedAt: z.string().datetime().optional(),
+})
+
+export type SavePublicationMetadataInput = z.infer<typeof savePublicationMetadataSchema>
+
 export const publishFormSchema = z.object({
   domain: z.string().min(1, "Please select a domain/discipline"),
   language: z.string().min(1, "Please select a primary language"),

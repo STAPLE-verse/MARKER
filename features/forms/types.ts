@@ -35,6 +35,18 @@ export interface PublishedSchemaSummaryDTO {
   contributors: ContributorDTO[]
 }
 
+export interface CatalogMetadataDTO {
+  domain: string | null
+  language: string | null
+  license: string | null
+  keywords: string[]
+  contributors: ContributorDTO[]
+}
+
+export interface PublicationMetadataDTO extends CatalogMetadataDTO {
+  updatedAt: Date
+}
+
 export interface FormVersionDTO {
   id: number
   name: string
@@ -45,6 +57,7 @@ export interface FormVersionDTO {
   schema: Record<string, unknown>
   uiSchema: Record<string, unknown>
   publishedSchema: PublishedSchemaSummaryDTO | null
+  publicationMetadata: PublicationMetadataDTO | null
 }
 
 export interface FormDetailDTO {
