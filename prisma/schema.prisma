@@ -318,22 +318,38 @@ enum VersionStatus {
 }
 
 model FormVersion {
-  id        Int       @id @default(autoincrement())
-  name      String
-  formId    Int
-  version   Int
-  schema    Json
-  uiSchema  Json?
-  archived  Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  form      Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
-  tasks            Task[]
-  projects         Project[]
-  status           VersionStatus     @default(DRAFT)
-  publishedSchemas PublishedSchema[]
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  formId              Int
+  version             Int
+  schema              Json
+  uiSchema            Json?
+  archived            Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @default(now()) @updatedAt
+  form                Form                 @relation(fields: [formId], references: [id], onDelete: Cascade)
+  tasks               Task[]
+  projects            Project[]
+  status              VersionStatus        @default(DRAFT)
+  publishedSchemas    PublishedSchema[]
+  publicationMetadata PublicationMetadata?
 
   @@unique([formId, version])
+}
+
+model PublicationMetadata {
+  id            Int         @id @default(autoincrement())
+  formVersionId Int         @unique
+  formVersion   FormVersion @relation(fields: [formVersionId], references: [id], onDelete: Cascade)
+
+  domain       String?
+  language     String?
+  license      String?
+  keywords     String[] @default([])
+  contributors Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Notification {
