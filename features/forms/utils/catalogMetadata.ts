@@ -9,6 +9,13 @@ export type CatalogMetadataLike = {
   contributors?: unknown
 }
 
+export const DEFAULT_PUBLICATION_METADATA: CatalogMetadataLike = {
+  language: "en",
+  license: "CC-BY 4.0",
+  keywords: [],
+  contributors: [],
+}
+
 function normalizeNullableString(value: unknown): string | null {
   if (typeof value !== "string") return null
   const trimmed = value.trim()
@@ -67,6 +74,10 @@ export function normalizeCatalogMetadata(input: CatalogMetadataLike | null | und
   }
 }
 
+export function contributorsToJson(contributors: ContributorDTO[]): Prisma.InputJsonValue {
+  return contributors as unknown as Prisma.InputJsonValue
+}
+
 export function copyMetadataFields(input: CatalogMetadataLike | null | undefined): Prisma.PublicationMetadataCreateWithoutFormVersionInput {
   const metadata = normalizeCatalogMetadata(input)
 
@@ -75,6 +86,6 @@ export function copyMetadataFields(input: CatalogMetadataLike | null | undefined
     language: metadata.language,
     license: metadata.license,
     keywords: metadata.keywords,
-    contributors: metadata.contributors as unknown as Prisma.InputJsonValue,
+    contributors: contributorsToJson(metadata.contributors),
   }
 }

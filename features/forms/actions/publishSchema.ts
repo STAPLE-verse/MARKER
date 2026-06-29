@@ -12,6 +12,7 @@ import {
   parseExpectedUpdatedAt,
   withLockedEditableFormVersionHead,
 } from "../queries/formVersionConcurrency";
+import { copyMetadataFields, normalizeCatalogMetadata } from "../utils/catalogMetadata";
 
 const MAX_PID_ATTEMPTS = 5;
 
@@ -31,6 +32,8 @@ export const publishSchema = authenticatedAction(
           expectedUpdatedAt,
           async (tx, { form, latestVersion }) => {
             const familyId = `family_${form.id}`;
+            const catalogMetadata = normalizeCatalogMetadata(input);
+            const publicationMetadataFields = copyMetadataFields(catalogMetadata);
             const locked = await tx.formVersion.updateMany({
               where: {
                 id: input.formVersionId,
@@ -46,6 +49,15 @@ export const publishSchema = authenticatedAction(
               throw new ActionError("CONFLICT", CONCURRENT_EDIT_MESSAGE);
             }
 
+            await tx.publicationMetadata.upsert({
+              where: { formVersionId: latestVersion.id },
+              create: {
+                formVersion: { connect: { id: latestVersion.id } },
+                ...publicationMetadataFields,
+              },
+              update: publicationMetadataFields,
+            });
+
             return tx.publishedSchema.create({
               data: {
                 pid,
@@ -56,15 +68,15 @@ export const publishSchema = authenticatedAction(
                 source: "native",
                 version: input.version,
                 familyId,
-                license: input.license,
+                license: catalogMetadata.license ?? input.license,
                 releaseNotes: input.releaseNotes,
                 relatedPublicationDoi: input.relatedPublicationDoi,
-                keywords: input.keywords,
-                domain: input.domain,
-                language: input.language,
+                keywords: catalogMetadata.keywords,
+                domain: catalogMetadata.domain,
+                language: catalogMetadata.language ?? input.language,
                 ontologyRefs: extractOntologyIds(latestVersion.schema),
                 authorId: userId,
-                contributors: input.contributors.map((c) => ({
+                contributors: catalogMetadata.contributors.map((c) => ({
                   name: c.name,
                   role: c.role,
                   orcid: c.orcid || null,

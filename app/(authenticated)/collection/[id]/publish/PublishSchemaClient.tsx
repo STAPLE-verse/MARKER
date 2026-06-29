@@ -31,19 +31,28 @@ interface PublishSchemaClientProps {
 export default function PublishSchemaClient({ formId, version, currentUser }: PublishSchemaClientProps) {
   const formVersion = version.version;
   const [currentStep, setCurrentStep] = useState(1);
+  const publicationMetadata = version.publicationMetadata;
+  const contributorDefaults =
+    publicationMetadata?.contributors && publicationMetadata.contributors.length > 0
+      ? publicationMetadata.contributors.map((contributor) => ({
+          name: contributor.name,
+          role: contributor.role,
+          orcid: contributor.orcid ?? "",
+        }))
+      : [{
+          name: currentUser.name,
+          role: "Author",
+          orcid: currentUser.orcid,
+        }];
 
   const form = useForm<PublishFormInput>({
     resolver: zodResolver(publishFormSchema),
     defaultValues: {
-      domain: "",
-      language: "",
-      license: "CC-BY 4.0",
-      contributors: [{ 
-        name: currentUser.name, 
-        role: "Author", 
-        orcid: currentUser.orcid 
-      }],
-      keywords: [],
+      domain: publicationMetadata?.domain ?? "",
+      language: publicationMetadata?.language ?? "en",
+      license: publicationMetadata?.license ?? "CC-BY 4.0",
+      contributors: contributorDefaults,
+      keywords: publicationMetadata?.keywords ?? [],
       version: "1.0.0",
       releaseNotes: "",
       relatedPublicationDoi: ""

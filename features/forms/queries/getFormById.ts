@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db"
 import { FormDetailDTO } from "../types"
 import { nonArchivedVersionsArgs } from "./versionSelectors"
-import { mapContributors, normalizeKeywords } from "../utils/catalogMetadata"
+import { mapContributors, normalizeCatalogMetadata, normalizeKeywords } from "../utils/catalogMetadata"
 
 export async function getFormById(formId: number, userId: number): Promise<FormDetailDTO | null> {
   const form = await prisma.form.findFirst({
@@ -40,11 +40,7 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
         uiSchema: (v.uiSchema ?? {}) as Record<string, unknown>,
         publicationMetadata: publicationMetadata
           ? {
-              domain: publicationMetadata.domain,
-              language: publicationMetadata.language,
-              license: publicationMetadata.license,
-              keywords: normalizeKeywords(publicationMetadata.keywords),
-              contributors: mapContributors(publicationMetadata.contributors),
+              ...normalizeCatalogMetadata(publicationMetadata),
               updatedAt: publicationMetadata.updatedAt,
             }
           : null,
@@ -56,7 +52,7 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
               domain: published.domain,
               language: published.language,
               releaseNotes: published.releaseNotes,
-              keywords: published.keywords,
+              keywords: normalizeKeywords(published.keywords),
               contributors: mapContributors(published.contributors),
             }
           : null,

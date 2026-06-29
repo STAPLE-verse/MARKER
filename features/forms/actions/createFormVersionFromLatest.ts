@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { authenticatedAction } from "@/utils/safe-action";
 import { formIdActionSchema } from "../schemas";
 import { withLockedAuthorizedLatestVersion } from "../queries/formVersionConcurrency";
+import { copyMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/catalogMetadata";
 
 /**
  * Creates a new FormVersion copied from the latest non-archived head, then
@@ -15,16 +16,24 @@ export const createFormVersionFromLatest = authenticatedAction(
     const newVersion = await withLockedAuthorizedLatestVersion(
       input.formId,
       userId,
-      (tx, { latestVersion }) =>
-        tx.formVersion.create({
+      async (tx, { latestVersion }) => {
+        const latestMetadata = await tx.publicationMetadata.findUnique({
+          where: { formVersionId: latestVersion.id },
+        });
+
+        return tx.formVersion.create({
           data: {
             formId: input.formId,
             version: latestVersion.version + 1,
             name: latestVersion.name,
             schema: latestVersion.schema ?? {},
             uiSchema: latestVersion.uiSchema ?? {},
+            publicationMetadata: {
+              create: copyMetadataFields(latestMetadata ?? DEFAULT_PUBLICATION_METADATA),
+            },
           },
-        })
+        });
+      }
     );
 
     revalidatePath(`/collection/${input.formId}`);
