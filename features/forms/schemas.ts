@@ -41,37 +41,37 @@ export const cloneFormVersionSchema = z.object({
 
 export type CloneFormVersionInput = z.infer<typeof cloneFormVersionSchema>
 
-export const draftCatalogContributorSchema = z.object({
+export const draftPublicationContributorSchema = z.object({
   name: z.string().optional(),
   role: z.string().optional(),
   orcid: z.string().optional().nullable(),
 })
 
-export const strictCatalogContributorSchema = draftCatalogContributorSchema.extend({
+export const strictPublicationContributorSchema = draftPublicationContributorSchema.extend({
   name: z.string().min(1, "Name is required"),
   role: z.string().min(1, "Role is required"),
   orcid: z.string().optional(),
 })
 
-export const draftCatalogMetadataSchema = z.object({
+export const draftPublicationMetadataSchema = z.object({
   domain: z.string().optional().nullable(),
   language: z.string().optional().nullable(),
   license: z.string().optional().nullable(),
-  contributors: z.array(draftCatalogContributorSchema).optional(),
+  contributors: z.array(draftPublicationContributorSchema).optional(),
   keywords: z.array(z.string()).optional(),
 })
 
-export const strictCatalogMetadataSchema = draftCatalogMetadataSchema.extend({
+export const strictPublicationMetadataSchema = draftPublicationMetadataSchema.extend({
   domain: z.string().min(1, "Please select a domain/discipline"),
   language: z.string().min(1, "Please select a primary language"),
   license: z.string().min(1, "License is required"),
-  contributors: z.array(strictCatalogContributorSchema).min(1, "At least one contributor is required"),
+  contributors: z.array(strictPublicationContributorSchema).min(1, "At least one contributor is required"),
   keywords: z.array(z.string()).min(1, "Please provide at least one keyword"),
 })
 
-export type DraftCatalogMetadataInput = z.infer<typeof draftCatalogMetadataSchema>
+export type DraftPublicationMetadataInput = z.infer<typeof draftPublicationMetadataSchema>
 
-export const savePublicationMetadataSchema = draftCatalogMetadataSchema.extend({
+export const savePublicationMetadataSchema = draftPublicationMetadataSchema.extend({
   formId: z.number(),
   formVersionId: z.number(),
   expectedMetadataUpdatedAt: z.string().datetime().optional(),
@@ -79,7 +79,7 @@ export const savePublicationMetadataSchema = draftCatalogMetadataSchema.extend({
 
 export type SavePublicationMetadataInput = z.infer<typeof savePublicationMetadataSchema>
 
-export const publishFormSchema = strictCatalogMetadataSchema.extend({
+export const publishFormSchema = strictPublicationMetadataSchema.extend({
   version: z.string().regex(/^\d+\.\d+\.\d+$/, "Must be a valid semantic version (e.g., 1.0.0)"),
   releaseNotes: z.string().optional(),
   relatedPublicationDoi: z.string().optional(),

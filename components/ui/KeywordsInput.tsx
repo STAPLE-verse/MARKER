@@ -1,39 +1,46 @@
 import React from "react";
 import { WithContext as ReactTags, SEPARATORS } from "react-tag-input";
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import { Control, Controller, FieldErrors, FieldValues, Path } from "react-hook-form";
 
-export type Tag = {
-  id: string;
-  text: string;
-  className?: string;
-  [key: string]: string | undefined;
-};
+type ReactTag = NonNullable<React.ComponentProps<typeof ReactTags>["tags"]>[number];
+type KeywordTag = ReactTag & { text: string };
 
-interface KeywordsInputProps {
-  name: string;
-  control: Control<any>;
+function getTagText(tag: ReactTag): string {
+  return tag.text || tag.id;
+}
+
+function toKeywordTag(tag: ReactTag): KeywordTag {
+  return {
+    ...tag,
+    text: getTagText(tag),
+  };
+}
+
+interface KeywordsInputProps<TFieldValues extends FieldValues> {
+  name: Path<TFieldValues>;
+  control: Control<TFieldValues>;
   label: string;
   placeholder?: string;
   description?: string;
-  errors?: FieldErrors<any>;
+  errors?: FieldErrors<TFieldValues>;
 }
 
-export const KeywordsInput: React.FC<KeywordsInputProps> = ({
+export function KeywordsInput<TFieldValues extends FieldValues>({
   name,
   control,
   label,
   placeholder = "Add tags...",
   description,
   errors,
-}) => {
+}: KeywordsInputProps<TFieldValues>) {
   return (
     <Controller
       control={control}
       name={name}
       render={({ field: { value, onChange } }) => {
         // Map string[] to Tag[]
-        const tags: Tag[] = Array.isArray(value) 
-          ? value.map((t: string) => ({ id: t, text: t }))
+        const tags: KeywordTag[] = Array.isArray(value) 
+          ? value.map((t: string) => ({ id: t, text: t, className: "" }))
           : [];
 
         const handleDelete = (index: number) => {
@@ -41,17 +48,18 @@ export const KeywordsInput: React.FC<KeywordsInputProps> = ({
           onChange(newTags.map(t => t.text));
         };
 
-        const handleAddition = (tag: Tag) => {
+        const handleAddition = (tag: ReactTag) => {
+          const text = getTagText(tag);
           // Prevent duplicates
-          if (!tags.find(t => t.text === tag.text)) {
-            onChange([...tags.map(t => t.text), tag.text]);
+          if (!tags.find(t => t.text === text)) {
+            onChange([...tags.map(t => t.text), text]);
           }
         };
 
-        const handleDrag = (tag: Tag, currPos: number, newPos: number) => {
+        const handleDrag = (tag: ReactTag, currPos: number, newPos: number) => {
           const newTags = [...tags];
           newTags.splice(currPos, 1);
-          newTags.splice(newPos, 0, tag);
+          newTags.splice(newPos, 0, toKeywordTag(tag));
           onChange(newTags.map(t => t.text));
         };
 
@@ -103,4 +111,4 @@ export const KeywordsInput: React.FC<KeywordsInputProps> = ({
       }}
     />
   );
-};
+}

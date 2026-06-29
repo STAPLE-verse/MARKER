@@ -35,7 +35,7 @@ export interface PublishedSchemaSummaryDTO {
   contributors: ContributorDTO[]
 }
 
-export interface CatalogMetadataDTO {
+export interface PublicationMetadataFieldsDTO {
   domain: string | null
   language: string | null
   license: string | null
@@ -43,7 +43,7 @@ export interface CatalogMetadataDTO {
   contributors: ContributorDTO[]
 }
 
-export interface PublicationMetadataDTO extends CatalogMetadataDTO {
+export interface PublicationMetadataDTO extends PublicationMetadataFieldsDTO {
   updatedAt: Date
 }
 

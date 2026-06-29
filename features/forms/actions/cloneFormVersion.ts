@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
 import { ActionError } from "@/utils/action-result"
 import { cloneFormVersionSchema } from "../schemas"
-import { copyMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/catalogMetadata"
+import { copyPublicationMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/publicationMetadata"
 
 export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, async ({ input, userId }) => {
   const version = await prisma.formVersion.findUnique({
@@ -44,7 +44,7 @@ export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, asyn
           schema: newSchema ?? {},
           uiSchema: version.uiSchema ?? {},
           publicationMetadata: {
-            create: copyMetadataFields(version.publicationMetadata ?? DEFAULT_PUBLICATION_METADATA),
+            create: copyPublicationMetadataFields(version.publicationMetadata ?? DEFAULT_PUBLICATION_METADATA),
           },
         }
       }

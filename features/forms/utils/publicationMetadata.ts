@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client"
-import type { CatalogMetadataDTO, ContributorDTO } from "../types"
+import type { PublicationMetadataFieldsDTO, ContributorDTO } from "../types"
 
-export type CatalogMetadataLike = {
+export type PublicationMetadataLike = {
   domain?: unknown
   language?: unknown
   license?: unknown
@@ -9,7 +9,7 @@ export type CatalogMetadataLike = {
   contributors?: unknown
 }
 
-export const DEFAULT_PUBLICATION_METADATA: CatalogMetadataLike = {
+export const DEFAULT_PUBLICATION_METADATA: PublicationMetadataLike = {
   language: "en",
   license: "CC-BY 4.0",
   keywords: [],
@@ -64,7 +64,7 @@ export function mapContributors(raw: unknown): ContributorDTO[] {
     })
 }
 
-export function normalizeCatalogMetadata(input: CatalogMetadataLike | null | undefined): CatalogMetadataDTO {
+export function normalizePublicationMetadata(input: PublicationMetadataLike | null | undefined): PublicationMetadataFieldsDTO {
   return {
     domain: normalizeNullableString(input?.domain),
     language: normalizeNullableString(input?.language),
@@ -78,8 +78,8 @@ export function contributorsToJson(contributors: ContributorDTO[]): Prisma.Input
   return contributors as unknown as Prisma.InputJsonValue
 }
 
-export function copyMetadataFields(input: CatalogMetadataLike | null | undefined): Prisma.PublicationMetadataCreateWithoutFormVersionInput {
-  const metadata = normalizeCatalogMetadata(input)
+export function copyPublicationMetadataFields(input: PublicationMetadataLike | null | undefined): Prisma.PublicationMetadataCreateWithoutFormVersionInput {
+  const metadata = normalizePublicationMetadata(input)
 
   return {
     domain: metadata.domain,

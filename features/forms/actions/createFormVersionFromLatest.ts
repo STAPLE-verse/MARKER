@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { authenticatedAction } from "@/utils/safe-action";
 import { formIdActionSchema } from "../schemas";
 import { withLockedAuthorizedLatestVersion } from "../queries/formVersionConcurrency";
-import { copyMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/catalogMetadata";
+import { copyPublicationMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/publicationMetadata";
 
 /**
  * Creates a new FormVersion copied from the latest non-archived head, then
@@ -29,7 +29,7 @@ export const createFormVersionFromLatest = authenticatedAction(
             schema: latestVersion.schema ?? {},
             uiSchema: latestVersion.uiSchema ?? {},
             publicationMetadata: {
-              create: copyMetadataFields(latestMetadata ?? DEFAULT_PUBLICATION_METADATA),
+              create: copyPublicationMetadataFields(latestMetadata ?? DEFAULT_PUBLICATION_METADATA),
             },
           },
         });

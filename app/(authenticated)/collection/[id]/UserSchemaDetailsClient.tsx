@@ -4,6 +4,8 @@ import { useState } from "react";
 import { FormDetailDTO, FormVersionDTO } from "@/features/forms/types";
 import { BackButton } from "@/components/ui/BackButton";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
+import { DraftPublicationMetadataCard } from "@/features/forms/components/DraftPublicationMetadataCard";
+import { DraftPublicationMetadataReadOnly } from "@/features/forms/components/DraftPublicationMetadataReadOnly";
 import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
 import { SchemaDescriptionCard } from "@/features/forms/components/SchemaDescriptionCard";
 import { OlderVersionBanner } from "@/features/forms/components/OlderVersionBanner";
@@ -30,6 +32,8 @@ export default function UserSchemaDetailsClient({
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
 
   const publishedSchema = selectedVersion.publishedSchema;
+  const isLatestDraft = isViewingLatest && selectedVersion.status === "DRAFT";
+  const isHistoricalDraft = !isViewingLatest && selectedVersion.status === "DRAFT";
 
   return (
     <FormPageLayout
@@ -58,6 +62,12 @@ export default function UserSchemaDetailsClient({
 
       <div className="space-y-6 mt-8">
         {publishedSchema && <PublicationMetadataCard publishedSchema={publishedSchema} />}
+        {isLatestDraft && (
+          <DraftPublicationMetadataCard formId={form.id} version={selectedVersion} />
+        )}
+        {isHistoricalDraft && (
+          <DraftPublicationMetadataReadOnly metadata={selectedVersion.publicationMetadata} />
+        )}
 
         <SchemaDescriptionCard schema={selectedVersion.schema} />
 

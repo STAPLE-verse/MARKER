@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
 import { createFormSchema } from "../schemas"
-import { copyMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/catalogMetadata"
+import { copyPublicationMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/publicationMetadata"
 
 export const createForm = authenticatedAction(createFormSchema, async ({ input, userId }) => {
   const user = await prisma.user.findUnique({
@@ -35,7 +35,7 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
           },
           uiSchema: {},
           publicationMetadata: {
-            create: copyMetadataFields({
+            create: copyPublicationMetadataFields({
               ...DEFAULT_PUBLICATION_METADATA,
               contributors: authorName
                 ? [{

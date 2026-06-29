@@ -12,7 +12,7 @@ import {
   parseExpectedUpdatedAt,
   withLockedEditableFormVersionHead,
 } from "../queries/formVersionConcurrency";
-import { copyMetadataFields, normalizeCatalogMetadata } from "../utils/catalogMetadata";
+import { copyPublicationMetadataFields, normalizePublicationMetadata } from "../utils/publicationMetadata";
 
 const MAX_PID_ATTEMPTS = 5;
 
@@ -32,8 +32,8 @@ export const publishSchema = authenticatedAction(
           expectedUpdatedAt,
           async (tx, { form, latestVersion }) => {
             const familyId = `family_${form.id}`;
-            const catalogMetadata = normalizeCatalogMetadata(input);
-            const publicationMetadataFields = copyMetadataFields(catalogMetadata);
+            const publicationMetadata = normalizePublicationMetadata(input);
+            const publicationMetadataFields = copyPublicationMetadataFields(publicationMetadata);
             const locked = await tx.formVersion.updateMany({
               where: {
                 id: input.formVersionId,
@@ -68,15 +68,15 @@ export const publishSchema = authenticatedAction(
                 source: "native",
                 version: input.version,
                 familyId,
-                license: catalogMetadata.license ?? input.license,
+                license: publicationMetadata.license ?? input.license,
                 releaseNotes: input.releaseNotes,
                 relatedPublicationDoi: input.relatedPublicationDoi,
-                keywords: catalogMetadata.keywords,
-                domain: catalogMetadata.domain,
-                language: catalogMetadata.language ?? input.language,
+                keywords: publicationMetadata.keywords,
+                domain: publicationMetadata.domain,
+                language: publicationMetadata.language ?? input.language,
                 ontologyRefs: extractOntologyIds(latestVersion.schema),
                 authorId: userId,
-                contributors: catalogMetadata.contributors.map((c) => ({
+                contributors: publicationMetadata.contributors.map((c) => ({
                   name: c.name,
                   role: c.role,
                   orcid: c.orcid || null,
