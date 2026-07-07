@@ -4,6 +4,8 @@ import { Alert } from "@/components/ui/Alert"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Select } from "@/components/ui/Select"
+import { PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS } from "@/features/forms/constants/publicationMetadataOptions"
+import { DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE } from "@/features/forms/utils/publicationMetadata"
 
 interface PublicationContributorsFieldsProps<TFieldValues extends FieldValues> {
   register: UseFormRegister<TFieldValues>
@@ -45,12 +47,7 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
             />
             <Select
               label="Role"
-              options={[
-                { value: "Author", label: "Author" },
-                { value: "Maintainer", label: "Maintainer" },
-                { value: "Translator", label: "Translator" },
-                { value: "Data Curator", label: "Data Curator" },
-              ]}
+              options={PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS}
               {...register(`contributors.${index}.role` as Path<TFieldValues>)}
               error={contributorErrors?.[index]?.role?.message}
             />
@@ -80,7 +77,11 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
           outline
           size="sm"
           onClick={() =>
-            append({ name: "", role: "Author", orcid: "" } as FieldArray<TFieldValues, ArrayPath<TFieldValues>>)
+            append({
+              name: "",
+              role: DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
+              orcid: "",
+            } as FieldArray<TFieldValues, ArrayPath<TFieldValues>>)
           }
         >
           <PlusIcon className="w-4 h-4 mr-1" />

@@ -2,6 +2,7 @@ import { useTransition } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { savePublicationMetadata } from "@/features/forms/actions"
 import { DraftPublicationMetadataInput } from "@/features/forms/schemas"
+import type { PublicationMetadataFieldsDTO } from "@/features/forms/types"
 import { runAction } from "@/lib/action"
 import { applyFieldErrors } from "@/lib/form-errors"
 import { toast } from "@/lib/toast"
@@ -12,7 +13,7 @@ interface SavePublicationMetadataOptions {
   formVersionId: number
   metadataUpdatedAt?: Date | string | null
   form: UseFormReturn<DraftPublicationMetadataInput>
-  onSaveSuccess?: (updatedAt: string) => void
+  onSaveSuccess?: (saved: { updatedAt: string; metadata: PublicationMetadataFieldsDTO }) => void
 }
 
 export function useSavePublicationMetadata({
@@ -44,7 +45,7 @@ export function useSavePublicationMetadata({
         return
       }
 
-      onSaveSuccess?.(res.data.updatedAt)
+      onSaveSuccess?.(res.data)
       toast.success("Publication metadata saved")
     })
   }

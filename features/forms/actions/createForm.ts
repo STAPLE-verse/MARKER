@@ -4,7 +4,11 @@ import { prisma } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
 import { createFormSchema } from "../schemas"
-import { copyPublicationMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/publicationMetadata"
+import {
+  copyPublicationMetadataFields,
+  DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
+  DEFAULT_PUBLICATION_METADATA,
+} from "../utils/publicationMetadata"
 
 export const createForm = authenticatedAction(createFormSchema, async ({ input, userId }) => {
   const user = await prisma.user.findUnique({
@@ -40,7 +44,7 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
               contributors: authorName
                 ? [{
                     name: authorName,
-                    role: "Author",
+                    role: DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
                     orcid: user?.orcid ?? "",
                   }]
                 : [],

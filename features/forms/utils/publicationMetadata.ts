@@ -9,11 +9,29 @@ export type PublicationMetadataLike = {
   contributors?: unknown
 }
 
+export const DEFAULT_PUBLICATION_LANGUAGE = "en"
+export const DEFAULT_PUBLICATION_LICENSE = "CC-BY 4.0"
+export const DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE = "Author"
+
 export const DEFAULT_PUBLICATION_METADATA: PublicationMetadataLike = {
-  language: "en",
-  license: "CC-BY 4.0",
+  language: DEFAULT_PUBLICATION_LANGUAGE,
+  license: DEFAULT_PUBLICATION_LICENSE,
   keywords: [],
   contributors: [],
+}
+
+export interface PublicationMetadataFormContributor {
+  name: string
+  role: string
+  orcid: string
+}
+
+export interface PublicationMetadataFormValues {
+  domain: string
+  language: string
+  license: string
+  keywords: string[]
+  contributors: PublicationMetadataFormContributor[]
 }
 
 function normalizeNullableString(value: unknown): string | null {
@@ -71,6 +89,32 @@ export function normalizePublicationMetadata(input: PublicationMetadataLike | nu
     license: normalizeNullableString(input?.license),
     keywords: normalizeKeywords(input?.keywords),
     contributors: mapContributors(input?.contributors),
+  }
+}
+
+function contributorsToFormValues(contributors: ContributorDTO[]): PublicationMetadataFormContributor[] {
+  return contributors.map((contributor) => ({
+    name: contributor.name,
+    role: contributor.role,
+    orcid: contributor.orcid ?? "",
+  }))
+}
+
+export function publicationMetadataToFormValues(
+  input: PublicationMetadataLike | null | undefined,
+  options: { fallbackContributors?: ContributorDTO[] } = {}
+): PublicationMetadataFormValues {
+  const metadata = normalizePublicationMetadata(input)
+  const contributors = metadata.contributors.length
+    ? metadata.contributors
+    : options.fallbackContributors ?? []
+
+  return {
+    domain: metadata.domain ?? "",
+    language: metadata.language ?? DEFAULT_PUBLICATION_LANGUAGE,
+    license: metadata.license ?? DEFAULT_PUBLICATION_LICENSE,
+    keywords: metadata.keywords,
+    contributors: contributorsToFormValues(contributors),
   }
 }
 

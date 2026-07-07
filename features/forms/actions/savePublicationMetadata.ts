@@ -6,10 +6,19 @@ import { authenticatedAction } from "@/utils/safe-action"
 import { ActionError } from "@/utils/action-result"
 import { savePublicationMetadataSchema } from "../schemas"
 import { withLockedAuthorizedLatestVersion } from "../queries/formVersionConcurrency"
-import { copyPublicationMetadataFields } from "../utils/publicationMetadata"
+import { copyPublicationMetadataFields, normalizePublicationMetadata } from "../utils/publicationMetadata"
 
 const CONCURRENT_METADATA_EDIT_MESSAGE =
   "This publication metadata was updated in another window. Reload the page to see the latest changes."
+
+const publicationMetadataSelect = {
+  updatedAt: true,
+  domain: true,
+  language: true,
+  license: true,
+  keywords: true,
+  contributors: true,
+} as const
 
 export const savePublicationMetadata = authenticatedAction(
   savePublicationMetadataSchema,
@@ -44,7 +53,7 @@ export const savePublicationMetadata = authenticatedAction(
               formVersion: { connect: { id: input.formVersionId } },
               ...metadataFields,
             },
-            select: { updatedAt: true },
+            select: publicationMetadataSelect,
           })
         }
 
@@ -71,7 +80,7 @@ export const savePublicationMetadata = authenticatedAction(
 
         return tx.publicationMetadata.findUniqueOrThrow({
           where: { id: existing.id },
-          select: { updatedAt: true },
+          select: publicationMetadataSelect,
         })
       }
     )
@@ -79,6 +88,9 @@ export const savePublicationMetadata = authenticatedAction(
     revalidatePath(`/collection/${input.formId}`)
     revalidatePath(`/collection/${input.formId}/publish`)
 
-    return { updatedAt: saved.updatedAt.toISOString() }
+    return {
+      updatedAt: saved.updatedAt.toISOString(),
+      metadata: normalizePublicationMetadata(saved),
+    }
   }
 )

@@ -14,6 +14,10 @@ import { publishFormSchema, PublishFormInput } from "@/features/forms/schemas";
 import { usePublishSchema } from "@/features/forms/hooks/usePublishSchema";
 import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
 import { FormVersionDTO } from "@/features/forms/types";
+import {
+  DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
+  publicationMetadataToFormValues,
+} from "@/features/forms/utils/publicationMetadata";
 import { Step1FairMetadata } from "./components/Step1FairMetadata";
 import { Step2Contributors } from "./components/Step2Contributors";
 import { Step3Review } from "./components/Step3Review";
@@ -32,27 +36,18 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
   const formVersion = version.version;
   const [currentStep, setCurrentStep] = useState(1);
   const publicationMetadata = version.publicationMetadata;
-  const contributorDefaults =
-    publicationMetadata?.contributors && publicationMetadata.contributors.length > 0
-      ? publicationMetadata.contributors.map((contributor) => ({
-          name: contributor.name,
-          role: contributor.role,
-          orcid: contributor.orcid ?? "",
-        }))
-      : [{
-          name: currentUser.name,
-          role: "Author",
-          orcid: currentUser.orcid,
-        }];
+  const publicationMetadataDefaults = publicationMetadataToFormValues(publicationMetadata, {
+    fallbackContributors: [{
+      name: currentUser.name,
+      role: DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
+      orcid: currentUser.orcid,
+    }],
+  });
 
   const form = useForm<PublishFormInput>({
     resolver: zodResolver(publishFormSchema),
     defaultValues: {
-      domain: publicationMetadata?.domain ?? "",
-      language: publicationMetadata?.language ?? "en",
-      license: publicationMetadata?.license ?? "CC-BY 4.0",
-      contributors: contributorDefaults,
-      keywords: publicationMetadata?.keywords ?? [],
+      ...publicationMetadataDefaults,
       version: "1.0.0",
       releaseNotes: "",
       relatedPublicationDoi: ""
