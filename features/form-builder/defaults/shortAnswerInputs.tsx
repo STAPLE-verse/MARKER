@@ -180,7 +180,7 @@ const ShortAnswerField: CardComponentType = ({ parameters, onChange }) => {
           "text"
         }
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="input input-primary input-bordered w-full mt-2"
+        className="input input-primary input-bordered w-full"
       />
     </React.Fragment>
   )
@@ -195,7 +195,7 @@ const Password: CardComponentType = ({ parameters, onChange }) => {
         placeholder="Default"
         type="password"
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="input input-primary input-bordered w-full mt-2"
+        className="input input-primary input-bordered w-full"
       />
     </React.Fragment>
   )

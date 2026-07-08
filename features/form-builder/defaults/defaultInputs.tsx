@@ -23,7 +23,7 @@ const getInputCardBodyComponent = ({ type }: { type: React.HTMLInputTypeAttribut
           placeholder="Default"
           type={type}
           onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-          className="input input-primary input-bordered w-full mt-2"
+          className="input input-primary input-bordered w-full"
         />
       </React.Fragment>
     )

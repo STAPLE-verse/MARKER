@@ -88,7 +88,7 @@ const LongAnswer: CardComponentType = ({ parameters, onChange }) => {
         value={(parameters.default ?? "") as string | number | readonly string[]}
         placeholder="Default"
         onChange={(ev) => onChange({ ...parameters, default: ev.target.value })}
-        className="textarea textarea-primary textarea-bordered w-full mt-2"
+        className="textarea textarea-primary textarea-bordered w-full"
       />
     </React.Fragment>
   )

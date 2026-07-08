@@ -13,6 +13,11 @@ import {
 import type { Mods, ModLabels, FormInput, CardComponentPropsType } from "./types"
 import Tooltip from "./Tooltip"
 
+const entryRowClass = "card-entry-row flex flex-col gap-4"
+const entryClass = "card-entry flex w-full min-w-0 flex-col gap-2 pb-1"
+const entryLabelClass = "text-[18px] font-bold leading-6"
+const entryControlClass = "w-full"
+
 // specify the inputs required for any type of object
 export default function CardGeneralParameterInputs({
   parameters,
@@ -76,10 +81,10 @@ export default function CardGeneralParameterInputs({
 
   return (
     <React.Fragment>
-      <div className="card-entry-row">
+      <div className={entryRowClass}>
         {showObjectNameInput && (
-          <div className="card-entry">
-            <h5>
+          <div className={entryClass}>
+            <h5 className={entryLabelClass}>
               {`${objectNameLabel} `}
               <Tooltip
                 text={
@@ -94,7 +99,7 @@ export default function CardGeneralParameterInputs({
               />
             </h5>
 
-            <div className="form-control w-full mt-2">
+            <div className="form-control w-full">
               <input
                 value={keyState || ""}
                 placeholder="Key"
@@ -117,18 +122,18 @@ export default function CardGeneralParameterInputs({
                     onChange({ ...parameters })
                   }
                 }}
-                className={`input input-primary input-bordered w-full card-text ${keyError !== null ? 'input-error' : ''}`}
+                className={`input input-primary input-bordered ${entryControlClass} card-text ${keyError !== null ? 'input-error' : ''}`}
               />
               {keyError && (
-                <div className="label">
+                <div className="label px-0 pb-0 pt-1">
                   <span className="label-text-alt text-error">{keyError}</span>
                 </div>
               )}
             </div>
           </div>
         )}
-        <div className="card-entry">
-          <h5>
+        <div className={entryClass}>
+          <h5 className={entryLabelClass}>
             {`${displayNameLabel} `}
             <Tooltip
               text={
@@ -150,13 +155,13 @@ export default function CardGeneralParameterInputs({
             onBlur={(ev) => {
               onChange({ ...parameters, title: ev.target.value })
             }}
-            className="input input-primary input-bordered w-full mt-2 card-text"
+            className={`input input-primary input-bordered ${entryControlClass} card-text`}
           />
         </div>
       </div>
-      <div className="card-entry-row">
-        <div className="card-entry">
-          <h5>
+      <div className={`${entryRowClass} mt-4`}>
+        <div className={entryClass}>
+          <h5 className={entryLabelClass}>
             {`${descriptionLabel} `}
             <Tooltip
               text={
@@ -176,11 +181,11 @@ export default function CardGeneralParameterInputs({
           />
         </div>
         <div
-          className={classnames("card-entry", {
+          className={classnames(entryClass, {
             "wide-card-entry": !showObjectNameInput,
           })}
         >
-          <h5>
+          <h5 className={entryLabelClass}>
             {`${inputTypeLabel} `}
             <Tooltip
               text={
@@ -195,7 +200,7 @@ export default function CardGeneralParameterInputs({
             />
           </h5>
           <select
-            className="select select-primary select-bordered w-full mt-2 mb-2"
+            className={`select select-primary select-bordered ${entryControlClass}`}
             value={parameters.category}
             onChange={(e) => {
               const newCategory = e.target.value
@@ -228,7 +233,7 @@ export default function CardGeneralParameterInputs({
         </div>
       </div>
 
-      <div className="card-category-options">
+      <div className="card-category-options mt-4 pb-1">
         <GeneralParameterInputs
           category={parameters.category!}
           parameters={parameters}
@@ -238,9 +243,9 @@ export default function CardGeneralParameterInputs({
         />
       </div>
 
-      <div className="card-entry-row">
-        <div className="card-entry">
-          <h5>
+      <div className={`${entryRowClass} mt-4`}>
+        <div className={entryClass}>
+          <h5 className={entryLabelClass}>
             Ontology ID (Optional){` `}
             <Tooltip
               text="Bind this field to a standard ontology code (e.g., SNOMED:75367002). This drastically improves the reusability and semantic findability of your template!"
@@ -253,7 +258,7 @@ export default function CardGeneralParameterInputs({
             placeholder="e.g. NCIT:C25150"
             type="text"
             onChange={(ev) => onChange({ ...parameters, ontologyId: ev.target.value })}
-            className="input input-primary input-bordered w-full mt-2 card-text"
+            className={`input input-primary input-bordered ${entryControlClass} card-text`}
           />
         </div>
       </div>
