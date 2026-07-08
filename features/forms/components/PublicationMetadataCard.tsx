@@ -1,21 +1,23 @@
-import { Card, CardBody, CardTitle } from "@/components/ui/Card"
-import { PublishedSchemaSummaryDTO } from "@/features/forms/types"
+import { PublicationMetadataFieldsDTO } from "@/features/forms/types"
+import { PublicationMetadataCardShell } from "./PublicationMetadataCardShell"
 import { PublicationMetadataFieldsDisplay } from "./publication/PublicationMetadataFieldsDisplay"
 
 interface PublicationMetadataCardProps {
-  publishedSchema: PublishedSchemaSummaryDTO
+  metadata: PublicationMetadataFieldsDTO | null
+  releaseNotes?: string | null
+  collapsible?: boolean
+  defaultOpen?: boolean
 }
 
-export function PublicationMetadataCard({ publishedSchema }: PublicationMetadataCardProps) {
+export function PublicationMetadataCard({
+  metadata,
+  releaseNotes,
+  collapsible = true,
+  defaultOpen = true,
+}: PublicationMetadataCardProps) {
   return (
-    <Card bordered>
-      <CardBody>
-        <CardTitle className="text-xl border-b border-base-200 pb-2 mb-4">Publication Metadata</CardTitle>
-        <PublicationMetadataFieldsDisplay
-          metadata={publishedSchema}
-          releaseNotes={publishedSchema.releaseNotes}
-        />
-      </CardBody>
-    </Card>
+    <PublicationMetadataCardShell collapsible={collapsible} defaultOpen={defaultOpen}>
+      <PublicationMetadataFieldsDisplay metadata={metadata} releaseNotes={releaseNotes} />
+    </PublicationMetadataCardShell>
   )
 }

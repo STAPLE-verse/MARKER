@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/Button"
-import { Card, CardActions, CardBody, CardTitle } from "@/components/ui/Card"
+import { CardActions } from "@/components/ui/Card"
 import { Form } from "@/components/ui/Form"
 import { DraftPublicationMetadataInput, draftPublicationMetadataSchema } from "@/features/forms/schemas"
 import { FormVersionDTO } from "@/features/forms/types"
@@ -14,6 +14,7 @@ import {
   publicationMetadataToFormValues,
 } from "@/features/forms/utils/publicationMetadata"
 import { toIsoTimestamp } from "@/features/forms/utils/timestamps"
+import { PublicationMetadataCardShell } from "./PublicationMetadataCardShell"
 import { PublicationMetadataFieldsDisplay } from "./publication/PublicationMetadataFieldsDisplay"
 import { PublicationMetadataForm } from "./publication/PublicationMetadataForm"
 
@@ -73,37 +74,31 @@ export function DraftPublicationMetadataCard({ formId, version }: DraftPublicati
   }
 
   return (
-    <Card bordered>
-      <CardBody>
-        <CardTitle className="text-xl border-b border-base-200 pb-2 mb-4">
-          Publication Metadata
-        </CardTitle>
-
-        {isEditing ? (
-          <Form form={form} onSubmit={save} className="gap-6">
-            <fieldset disabled={isSaving} className="contents">
-              <PublicationMetadataForm form={form} />
-            </fieldset>
-            <CardActions>
-              <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSaving}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary" disabled={isSaving}>
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-            </CardActions>
-          </Form>
-        ) : (
-          <>
-            <PublicationMetadataFieldsDisplay metadata={committedMetadata} />
-            <CardActions>
-              <Button type="button" variant="primary" outline onClick={() => setIsEditing(true)}>
-                Edit metadata
-              </Button>
-            </CardActions>
-          </>
-        )}
-      </CardBody>
-    </Card>
+    <PublicationMetadataCardShell collapsible={!isEditing} defaultOpen>
+      {isEditing ? (
+        <Form form={form} onSubmit={save} className="gap-6">
+          <fieldset disabled={isSaving} className="contents">
+            <PublicationMetadataForm form={form} />
+          </fieldset>
+          <CardActions>
+            <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          </CardActions>
+        </Form>
+      ) : (
+        <>
+          <PublicationMetadataFieldsDisplay metadata={committedMetadata} />
+          <CardActions>
+            <Button type="button" variant="primary" outline onClick={() => setIsEditing(true)}>
+              Edit metadata
+            </Button>
+          </CardActions>
+        </>
+      )}
+    </PublicationMetadataCardShell>
   )
 }
