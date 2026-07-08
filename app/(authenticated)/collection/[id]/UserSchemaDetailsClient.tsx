@@ -19,11 +19,18 @@ interface UserSchemaDetailsClientProps {
   selectedVersion: FormVersionDTO;
 }
 
+function getVersionLabel(version: FormVersionDTO): string {
+  return version.status === "PUBLISHED"
+    ? `v${version.publishedSchema?.version || version.version}`
+    : `Draft ${version.version}`;
+}
+
 export default function UserSchemaDetailsClient({
   form,
   selectedVersion,
 }: UserSchemaDetailsClientProps) {
-  const isViewingLatest = selectedVersion.id === form.versions[0].id;
+  const latestVersion = form.versions[0];
+  const isViewingLatest = selectedVersion.id === latestVersion.id;
   const { clone, isCloning } = useCloneForm();
   const { createVersion, isCreating } = useCreateFormVersion(form.id);
   const { restoreVersion, isRestoring } = useRestoreFormVersion(form.id);
@@ -66,7 +73,11 @@ export default function UserSchemaDetailsClient({
         <SchemaViewerCard
           schema={selectedVersion.schema}
           uiSchema={selectedVersion.uiSchema}
+          latestSchema={latestVersion.schema}
+          latestUiSchema={latestVersion.uiSchema}
           isViewingLatest={isViewingLatest}
+          currentVersionLabel={getVersionLabel(selectedVersion)}
+          latestVersionLabel={getVersionLabel(latestVersion)}
         />
 
         {publishedSchema && (

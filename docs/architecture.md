@@ -252,7 +252,7 @@ Components live in one of three layers, chosen by how much they "know". This kee
 
 **`ui/` litmus test:** if a component imports `next/link`, `useRouter`, a server action, or a `*DTO` type, it does **not** belong in `components/ui/`.
 
-**Container / Presenter split.** Each route has one "smart" client container that owns state + action wiring (e.g. `UserSchemaDetailsClient`). Everything else is presentational and prop-driven. The detail page was decomposed this way into `features/forms/components/*` (`SchemaStatusBadges`, `SchemaSourceViewer`, `SchemaPreviewPanel`, `SchemaDescriptionCard`) plus route-local composition (`SchemaDetailHeader`, `SchemaViewerCard`).
+**Container / Presenter split.** Each route has one "smart" client container that owns state + action wiring (e.g. `UserSchemaDetailsClient`). Everything else is presentational and prop-driven. The detail page was decomposed this way into `features/forms/components/*` (`SchemaStatusBadges`, `SchemaSourceViewer`, `SchemaPreviewPanel`, `SchemaDescriptionCard`) plus route-local composition (`SchemaDetailHeader`, `SchemaViewerCard`, `SchemaDiffDialog`).
 
 **Client logic → hooks.** Server-action wrappers and reused/side-effectful logic are extracted into `features/<f>/hooks/` (e.g. `useCloneForm`, `useVersionSelection`). Trivial local UI state (a single `useState` for an active tab) stays inline — do **not** extract it. Hooks that wrap a server action are the seam where the standardized error/feedback strategy is applied — see §8.9.
 
