@@ -7,9 +7,9 @@ import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { DraftPublicationMetadataCard } from "@/features/forms/components/DraftPublicationMetadataCard";
 import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
 import { SchemaDescriptionCard } from "@/features/forms/components/SchemaDescriptionCard";
-import { OlderVersionBanner } from "@/features/forms/components/OlderVersionBanner";
 import { useCloneForm } from "@/features/forms/hooks/useCloneForm";
 import { useCreateFormVersion } from "@/features/forms/hooks/useCreateFormVersion";
+import { useRestoreFormVersion } from "@/features/forms/hooks/useRestoreFormVersion";
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
 import { SchemaDetailHeader } from "./SchemaDetailHeader";
 import { SchemaViewerCard } from "./SchemaViewerCard";
@@ -26,6 +26,7 @@ export default function UserSchemaDetailsClient({
   const isViewingLatest = selectedVersion.id === form.versions[0].id;
   const { clone, isCloning } = useCloneForm();
   const { createVersion, isCreating } = useCreateFormVersion(form.id);
+  const { restoreVersion, isRestoring } = useRestoreFormVersion(form.id);
 
   // History sidebar is open by default
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -55,9 +56,9 @@ export default function UserSchemaDetailsClient({
         isViewingLatest={isViewingLatest}
         onClone={() => clone(selectedVersion.id)}
         isCloning={isCloning}
+        onRestore={() => restoreVersion(selectedVersion.id)}
+        isRestoring={isRestoring}
       />
-
-      {!isViewingLatest && <OlderVersionBanner version={selectedVersion} />}
 
       <div className="space-y-6 mt-8">
         <SchemaDescriptionCard schema={selectedVersion.schema} />

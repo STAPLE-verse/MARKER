@@ -252,7 +252,7 @@ Components live in one of three layers, chosen by how much they "know". This kee
 
 **`ui/` litmus test:** if a component imports `next/link`, `useRouter`, a server action, or a `*DTO` type, it does **not** belong in `components/ui/`.
 
-**Container / Presenter split.** Each route has one "smart" client container that owns state + action wiring (e.g. `UserSchemaDetailsClient`). Everything else is presentational and prop-driven. The detail page was decomposed this way into `features/forms/components/*` (`SchemaStatusBadges`, `SchemaSourceViewer`, `SchemaPreviewPanel`, `SchemaDescriptionCard`, `OlderVersionBanner`) plus route-local composition (`SchemaDetailHeader`, `SchemaViewerCard`).
+**Container / Presenter split.** Each route has one "smart" client container that owns state + action wiring (e.g. `UserSchemaDetailsClient`). Everything else is presentational and prop-driven. The detail page was decomposed this way into `features/forms/components/*` (`SchemaStatusBadges`, `SchemaSourceViewer`, `SchemaPreviewPanel`, `SchemaDescriptionCard`) plus route-local composition (`SchemaDetailHeader`, `SchemaViewerCard`).
 
 **Client logic → hooks.** Server-action wrappers and reused/side-effectful logic are extracted into `features/<f>/hooks/` (e.g. `useCloneForm`, `useVersionSelection`). Trivial local UI state (a single `useState` for an active tab) stays inline — do **not** extract it. Hooks that wrap a server action are the seam where the standardized error/feedback strategy is applied — see §8.9.
 
@@ -543,10 +543,10 @@ During edit (/collection/[id]/edit):
 From detail (/collection/[id]):
   Edit Structure      → open editor on latest head
   + (sidebar)         → copy latest → new FormVersion row → open editor
-  Restore (older)     → (future) fork selected version into new head
+  Restore (older)     → copy selected historical version → new FormVersion row → open editor
 ```
 
-**Save Changes** is for frequent, low-ceremony persistence during a long session. **Done** is the primary finish action. **+ New version** on the detail page is the only UI path for starting a new revision in history (`createFormVersionFromLatest`). The `createFormCheckpoint` action remains in the codebase for potential future flows but is not exposed in the editor UI.
+**Save Changes** is for frequent, low-ceremony persistence during a long session. **Done** is the primary finish action. **+ New version** on the detail page copies the latest head (`createFormVersionFromLatest`), while **Restore as New Draft** copies the selected historical version into a new head without rewriting history. The `createFormCheckpoint` action remains in the codebase for potential future flows but is not exposed in the editor UI.
 
 Version-history selection is URL state, not component-local state. `/collection/[id]`
 shows the latest version; `/collection/[id]?version=[formVersionId]` shows a

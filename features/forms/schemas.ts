@@ -35,6 +35,13 @@ export const formIdActionSchema = z.object({
 
 export type FormIdActionInput = z.infer<typeof formIdActionSchema>
 
+export const restoreFormVersionAsDraftSchema = z.object({
+  formId: z.number(),
+  versionId: z.number(),
+})
+
+export type RestoreFormVersionAsDraftInput = z.infer<typeof restoreFormVersionAsDraftSchema>
+
 export const cloneFormVersionSchema = z.object({
   versionId: z.number(),
 })

@@ -10,6 +10,8 @@ interface SchemaDetailHeaderProps {
   isViewingLatest: boolean;
   onClone: () => void;
   isCloning: boolean;
+  onRestore: () => void;
+  isRestoring: boolean;
 }
 
 /**
@@ -23,6 +25,8 @@ export function SchemaDetailHeader({
   isViewingLatest,
   onClone,
   isCloning,
+  onRestore,
+  isRestoring,
 }: SchemaDetailHeaderProps) {
   const isPublished = version.status === "PUBLISHED";
   const pid = version.publishedSchema?.pid || null;
@@ -36,6 +40,11 @@ export function SchemaDetailHeader({
         <Button variant="secondary" outline size="sm" onClick={onClone} disabled={isCloning}>
           {isCloning ? "Cloning..." : "Clone"}
         </Button>
+        {!isViewingLatest && (
+          <Button variant="primary" size="sm" onClick={onRestore} disabled={isRestoring}>
+            {isRestoring ? "Restoring..." : "Restore as New Draft"}
+          </Button>
+        )}
         {isViewingLatest && (
           <>
             {!isPublished ? (
