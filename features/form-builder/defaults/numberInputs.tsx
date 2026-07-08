@@ -3,62 +3,67 @@ import FBCheckbox from "../checkbox/FBCheckbox"
 import Tooltip from "../Tooltip"
 import { getRandomId } from "../utils"
 import type { FormInput, CardComponentType } from "../types"
+import { fieldClass, fieldControlClass, fieldLabelClass, fieldStackClass } from "../fieldLayout"
 
 // specify the inputs required for a number type object
 const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) => {
   const [elementId] = useState(getRandomId())
   return (
-    <div>
-      <div className="text-[18px] font-bold">
-        Multiple of{" "}
-        <Tooltip
-          id={`${elementId}_multiple`}
-          type="help"
-          text="Require number to be a multiple of this number"
+    <div className={fieldStackClass}>
+      <div className={fieldClass}>
+        <div className={fieldLabelClass}>
+          Multiple of{" "}
+          <Tooltip
+            id={`${elementId}_multiple`}
+            type="help"
+            text="Require number to be a multiple of this number"
+          />
+        </div>
+        <input
+          value={parameters.multipleOf ? parameters.multipleOf : ""}
+          placeholder="ex: 2"
+          key="multipleOf"
+          type="number"
+          onChange={(ev) => {
+            let newVal: null | number = parseFloat(ev.target.value)
+            if (Number.isNaN(newVal)) newVal = null
+            onChange({
+              ...parameters,
+              multipleOf: newVal,
+            })
+          }}
+          className={`input input-primary input-bordered input-sm ${fieldControlClass}`}
         />
       </div>
-      <input
-        value={parameters.multipleOf ? parameters.multipleOf : ""}
-        placeholder="ex: 2"
-        key="multipleOf"
-        type="number"
-        onChange={(ev) => {
-          let newVal: null | number = parseFloat(ev.target.value)
-          if (Number.isNaN(newVal)) newVal = null
-          onChange({
-            ...parameters,
-            multipleOf: newVal,
-          })
-        }}
-        className="input input-primary input-bordered input-sm w-full mb-4"
-      />
-      <div className="text-[18px] font-bold">Minimum</div>
-      <input
-        value={parameters.minimum || parameters.exclusiveMinimum || ""}
-        placeholder="ex: 3"
-        key="minimum"
-        type="number"
-        onChange={(ev) => {
-          let newVal: null | number = parseFloat(ev.target.value)
-          if (Number.isNaN(newVal)) newVal = null
-          // change either min or exclusiveMin depending on which one is active
-          if (parameters.exclusiveMinimum) {
-            onChange({
-              ...parameters,
-              exclusiveMinimum: newVal,
-              minimum: null,
-            })
-          } else {
-            onChange({
-              ...parameters,
-              minimum: newVal,
-              exclusiveMinimum: null,
-            })
-          }
-        }}
-        className="input input-primary input-bordered input-sm w-full mb-4"
-      />
-      <div className="card-modal-boolean">
+      <div className={fieldClass}>
+        <div className={fieldLabelClass}>Minimum</div>
+        <input
+          value={parameters.minimum || parameters.exclusiveMinimum || ""}
+          placeholder="ex: 3"
+          key="minimum"
+          type="number"
+          onChange={(ev) => {
+            let newVal: null | number = parseFloat(ev.target.value)
+            if (Number.isNaN(newVal)) newVal = null
+            // change either min or exclusiveMin depending on which one is active
+            if (parameters.exclusiveMinimum) {
+              onChange({
+                ...parameters,
+                exclusiveMinimum: newVal,
+                minimum: null,
+              })
+            } else {
+              onChange({
+                ...parameters,
+                minimum: newVal,
+                exclusiveMinimum: null,
+              })
+            }
+          }}
+          className={`input input-primary input-bordered input-sm ${fieldControlClass}`}
+        />
+      </div>
+      <div className={`${fieldClass} card-modal-boolean`}>
         <FBCheckbox
           // @ts-ignore: suppress key error, can't change key assignment
           key="exclusiveMinimum"
@@ -83,33 +88,35 @@ const CardNumberParameterInputs: CardComponentType = ({ parameters, onChange }) 
           label="Exclusive Minimum"
         />
       </div>
-      <div className="text-[18px] font-bold">Maximum</div>
-      <input
-        value={parameters.maximum || parameters.exclusiveMaximum || ""}
-        placeholder="ex: 8"
-        key="maximum"
-        type="number"
-        onChange={(ev) => {
-          let newVal: null | number = parseFloat(ev.target.value)
-          if (Number.isNaN(newVal)) newVal = null
-          // change either max or exclusiveMax depending on which one is active
-          if (parameters.exclusiveMinimum) {
-            onChange({
-              ...parameters,
-              exclusiveMaximum: newVal,
-              maximum: null,
-            })
-          } else {
-            onChange({
-              ...parameters,
-              maximum: newVal,
-              exclusiveMaximum: null,
-            })
-          }
-        }}
-        className="input input-primary input-bordered input-sm w-full mb-4"
-      />
-      <div className="card-modal-boolean">
+      <div className={fieldClass}>
+        <div className={fieldLabelClass}>Maximum</div>
+        <input
+          value={parameters.maximum || parameters.exclusiveMaximum || ""}
+          placeholder="ex: 8"
+          key="maximum"
+          type="number"
+          onChange={(ev) => {
+            let newVal: null | number = parseFloat(ev.target.value)
+            if (Number.isNaN(newVal)) newVal = null
+            // change either max or exclusiveMax depending on which one is active
+            if (parameters.exclusiveMinimum) {
+              onChange({
+                ...parameters,
+                exclusiveMaximum: newVal,
+                maximum: null,
+              })
+            } else {
+              onChange({
+                ...parameters,
+                maximum: newVal,
+                exclusiveMaximum: null,
+              })
+            }
+          }}
+          className={`input input-primary input-bordered input-sm ${fieldControlClass}`}
+        />
+      </div>
+      <div className={`${fieldClass} card-modal-boolean`}>
         <FBCheckbox
           // @ts-ignore: suppress key error, can't change key assignment
           key="exclusiveMaximum"

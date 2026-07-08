@@ -12,11 +12,12 @@ import {
 } from "./utils"
 import type { Mods, ModLabels, FormInput, CardComponentPropsType } from "./types"
 import Tooltip from "./Tooltip"
+import { fieldClass, fieldControlClass, fieldLabelClass, fieldStackClass } from "./fieldLayout"
 
-const entryRowClass = "card-entry-row flex flex-col gap-4"
-const entryClass = "card-entry flex w-full min-w-0 flex-col gap-2 pb-1"
-const entryLabelClass = "text-[18px] font-bold leading-6"
-const entryControlClass = "w-full"
+const entryRowClass = `card-entry-row ${fieldStackClass}`
+const entryClass = `card-entry ${fieldClass}`
+const entryLabelClass = fieldLabelClass
+const entryControlClass = fieldControlClass
 
 // specify the inputs required for any type of object
 export default function CardGeneralParameterInputs({

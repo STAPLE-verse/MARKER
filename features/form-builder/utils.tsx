@@ -966,8 +966,8 @@ export function generateElementComponentsFromSchemas(parameters: {
   definitionUi?: { [key: string]: any }
   hideKey?: boolean
   path: string
-  cardOpenArray: Array<boolean>
-  setCardOpenArray: (newArr: Array<boolean>) => void
+  cardOpenState: Record<string, boolean>
+  setCardOpenState: (newState: Record<string, boolean>) => void
   allFormInputs: { [key: string]: FormInput }
   mods?: Mods
   categoryHash: { [key: string]: string }
@@ -982,8 +982,8 @@ export function generateElementComponentsFromSchemas(parameters: {
     definitionUi,
     hideKey,
     path,
-    cardOpenArray,
-    setCardOpenArray,
+    cardOpenState,
+    setCardOpenState,
     allFormInputs,
     mods,
     categoryHash,
@@ -1004,8 +1004,7 @@ export function generateElementComponentsFromSchemas(parameters: {
   })
 
   const elementList = elementPropArr.map((elementProp, index) => {
-    const MIN_CARD_OPEN_ARRAY_LENGTH = index + 1
-    const currentLength = cardOpenArray.length
+    const elementKey = `${path}_${elementProp.name}`
     const addProperties = {
       schema,
       uischema,
@@ -1017,11 +1016,7 @@ export function generateElementComponentsFromSchemas(parameters: {
       categoryHash,
     }
 
-    if (currentLength < MIN_CARD_OPEN_ARRAY_LENGTH) {
-      cardOpenArray.push(...new Array(MIN_CARD_OPEN_ARRAY_LENGTH - currentLength).fill(false))
-    }
-    const expanded =
-      (cardOpenArray && index < cardOpenArray.length && cardOpenArray[index]) || false
+    const expanded = cardOpenState[elementKey] || false
     if (elementProp.propType === "card") {
       // choose the appropriate type specific parameters
       const TypeSpecificParameters = getCardParameterInputComponentForType(
@@ -1051,7 +1046,7 @@ export function generateElementComponentsFromSchemas(parameters: {
             ) as CardComponentPropsType
           }
           // @ts-ignore: suppress key error, can't change key assignment
-          key={`${path}_${elementPropArr[index]!.name}`}
+          key={elementKey}
           TypeSpecificParameters={TypeSpecificParameters}
           onChange={(newCardObj: { [key: string]: any }) => {
             const newElementObjArr = generateElementPropsFromSchemas({
@@ -1125,7 +1120,9 @@ export function generateElementComponentsFromSchemas(parameters: {
               categoryHash,
             })
             newElementObjArr.splice(index, 1)
-            setCardOpenArray([...cardOpenArray.slice(0, index), ...cardOpenArray.slice(index + 1)])
+            const nextCardOpenState = { ...cardOpenState }
+            delete nextCardOpenState[elementKey]
+            setCardOpenState(nextCardOpenState)
             updateSchemas(newElementObjArr, {
               schema,
               uischema,
@@ -1193,15 +1190,13 @@ export function generateElementComponentsFromSchemas(parameters: {
             } else if (choice === "section") {
               addSectionObj(addProperties)
             }
-            setCardOpenArray([...cardOpenArray, false])
           }}
           cardOpen={expanded}
           setCardOpen={(newState: boolean) =>
-            setCardOpenArray([
-              ...cardOpenArray.slice(0, index),
-              newState,
-              ...cardOpenArray.slice(index + 1),
-            ])
+            setCardOpenState({
+              ...cardOpenState,
+              [elementKey]: newState,
+            })
           }
           allFormInputs={allFormInputs}
           mods={mods}
@@ -1345,7 +1340,9 @@ export function generateElementComponentsFromSchemas(parameters: {
               categoryHash,
             })
             newElementObjArr.splice(index, 1)
-            setCardOpenArray([...cardOpenArray.slice(0, index), ...cardOpenArray.slice(index + 1)])
+            const nextCardOpenState = { ...cardOpenState }
+            delete nextCardOpenState[elementKey]
+            setCardOpenState(nextCardOpenState)
             updateSchemas(newElementObjArr, {
               schema,
               uischema,
@@ -1409,7 +1406,7 @@ export function generateElementComponentsFromSchemas(parameters: {
           }}
           name={elementProp.name}
           // @ts-ignore: suppress key error, can't change key assignment
-          key={`${path}_${elementPropArr[index]!.name}`}
+          key={elementKey}
           required={elementProp.required}
           path={`${path}_${elementProp.name}`}
           definitionData={definitionData || {}}
@@ -1423,11 +1420,10 @@ export function generateElementComponentsFromSchemas(parameters: {
           parentProperties={addProperties}
           cardOpen={expanded}
           setCardOpen={(newState: boolean) =>
-            setCardOpenArray([
-              ...cardOpenArray.slice(0, index),
-              newState,
-              ...cardOpenArray.slice(index + 1),
-            ])
+            setCardOpenState({
+              ...cardOpenState,
+              [elementKey]: newState,
+            })
           }
           allFormInputs={allFormInputs}
           categoryHash={categoryHash}
@@ -1436,7 +1432,7 @@ export function generateElementComponentsFromSchemas(parameters: {
       )
     } else {
       return (
-        <div key={`${path}_${elementPropArr[index]!.name}`}>
+        <div key={elementKey}>
           <h2> Error parsing element </h2>
         </div>
       )

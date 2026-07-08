@@ -2,12 +2,13 @@ import React, { useState } from "react"
 import type { CardComponentType } from "../types"
 import { getRandomId } from "../utils"
 import Tooltip from "../Tooltip"
+import { fieldClass, fieldControlClass, fieldLabelClass } from "../fieldLayout"
 
 export const PlaceholderInput: CardComponentType = ({ parameters, onChange }) => {
   const [elementId] = useState(getRandomId())
   return (
-    <React.Fragment>
-      <div className="text-[18px] font-bold">
+    <div className={fieldClass}>
+      <div className={fieldLabelClass}>
         Placeholder{" "}
         <a
           href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#attr-placeholder"
@@ -32,8 +33,8 @@ export const PlaceholderInput: CardComponentType = ({ parameters, onChange }) =>
             "ui:placeholder": ev.target.value,
           })
         }}
-        className="input input-bordered input-sm w-full mb-4"
+        className={`input input-primary input-bordered input-sm ${fieldControlClass}`}
       />
-    </React.Fragment>
+    </div>
   )
 }

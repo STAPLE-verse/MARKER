@@ -51,7 +51,7 @@ export default function CardEnumOptions({
               names
             )
           }}
-          className="input input-bordered input-sm w-full"
+          className="input input-primary input-bordered input-sm w-full"
         />
         <input
           value={name || ""}
@@ -66,11 +66,11 @@ export default function CardEnumOptions({
                 ...names.slice(index + 1),
               ])
           }}
-          className="input input-bordered input-sm w-full"
+          className="input input-primary input-bordered input-sm w-full"
           style={{ display: showNames ? "initial" : "none" }}
         />
-        <button
-          className="btn btn-ghost btn-sm btn-circle"
+        <span
+          className="cursor-pointer"
           onClick={() => {
             // remove this value
             onChange(
@@ -79,8 +79,8 @@ export default function CardEnumOptions({
             )
           }}
         >
-          <XMarkIcon className="h-5 w-5 stroke-warning hover:stroke-error" />
-        </button>
+          <XMarkIcon className="h-5 w-5 stroke-warning hover:stroke-error transition-colors" />
+        </span>
       </div>
     )
   })
@@ -88,17 +88,20 @@ export default function CardEnumOptions({
   return (
     <React.Fragment>
       {possibleValues}
-      <span className="tooltip tooltip-right z-50 cursor-pointer" data-tip="Add new possible option">
+      <span
+        className="tooltip tooltip-right tooltip-info z-50 before:max-w-xs mt-2 inline-flex cursor-pointer"
+        data-tip="Add new possible option"
+        onClick={() => {
+          // add a new dropdown option
+          onChange(
+            [...initialValues, type === "string" ? "" : 0],
+            names ? [...names, ""] : undefined
+          )
+        }}
+      >
         <PlusIcon
-          className="h-6 w-6 stroke-secondary mt-2 mb-2 hover:stroke-primary transition-colors"
+          className="h-6 w-6 stroke-secondary transition-colors hover:stroke-primary"
           strokeWidth={4}
-          onClick={() => {
-            // add a new dropdown option
-            onChange(
-              [...initialValues, type === "string" ? "" : 0],
-              names ? [...names, ""] : undefined
-            )
-          }}
         />
       </span>
     </React.Fragment>

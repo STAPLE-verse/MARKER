@@ -14,7 +14,6 @@ import {
   addCardObj,
   addSectionObj,
   onDragEnd,
-  countElementsFromSchema,
   generateCategoryHash,
   excludeKeys,
   DROPPABLE_TYPE,
@@ -59,9 +58,7 @@ export default function FormBuilder({
       !msg.includes("allOf")
   )
 
-  const elementNum = countElementsFromSchema(schemaData)
-  const defaultCollapseStates = [...Array(elementNum)].map(() => false)
-  const [cardOpenArray, setCardOpenArray] = React.useState(defaultCollapseStates)
+  const [cardOpenState, setCardOpenState] = React.useState<Record<string, boolean>>({})
   const categoryHash = generateCategoryHash(allFormInputs)
 
   const isFirstRender = React.useRef(true)
@@ -178,8 +175,8 @@ export default function FormBuilder({
                   definitionData: schemaData.definitions,
                   definitionUi: uiSchemaData.definitions,
                   path: "root",
-                  cardOpenArray,
-                  setCardOpenArray,
+                  cardOpenState,
+                  setCardOpenState,
                   allFormInputs,
                   mods,
                   categoryHash,
@@ -192,11 +189,12 @@ export default function FormBuilder({
                       <div
                         ref={providedDraggable.innerRef}
                         {...providedDraggable.draggableProps}
-                        {...providedDraggable.dragHandleProps}
                         style={providedDraggable.draggableProps.style}
                         className={`pb-4 ${snapshot.isDragging && !snapshot.isDropAnimating ? "opacity-60" : ""}`}
                       >
-                        {element}
+                        {React.cloneElement(element, {
+                          dragHandleProps: providedDraggable.dragHandleProps,
+                        })}
                       </div>
                     )}
                   </Draggable>

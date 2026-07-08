@@ -109,6 +109,7 @@ export interface SectionPropsType {
   dependent?: boolean
   parent?: string
   mods?: Mods
+  dragHandleProps?: any
 }
 
 export type SectionType = FunctionComponent<SectionPropsType>
@@ -130,6 +131,7 @@ export interface CardPropsType {
   allFormInputs: { [key: string]: FormInput }
   showObjectNameInput?: boolean
   addProperties?: { [key: string]: any }
+  dragHandleProps?: any
 }
 
 export type CardType = FunctionComponent<CardPropsType>

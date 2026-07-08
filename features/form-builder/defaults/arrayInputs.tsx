@@ -9,39 +9,44 @@ import numberInputs from "./numberInputs"
 import defaultInputs from "./defaultInputs"
 import { getRandomId } from "../utils"
 import type { FormInput, CardComponentType, CardComponentPropsType } from "../types"
+import { fieldClass, fieldControlClass, fieldLabelClass, fieldStackClass } from "../fieldLayout"
 
 // specify the inputs required for a string type object
 const CardArrayParameterInputs: CardComponentType = ({ parameters, onChange }) => {
   return (
-    <div>
-      <div className="text-[18px] font-bold">Minimum Items</div>
-      <input
-        value={parameters.minItems || ""}
-        placeholder="ex: 2"
-        key="minimum"
-        type="number"
-        onChange={(ev) => {
-          onChange({
-            ...parameters,
-            minItems: parseInt(ev.target.value, 10),
-          })
-        }}
-        className="input input-primary input-bordered input-sm w-full mb-4 mt-2"
-      />
-      <div className="text-[18px] font-bold">Maximum Items</div>
-      <input
-        value={parameters.maxItems || ""}
-        placeholder="ex: 2"
-        key="maximum"
-        type="number"
-        onChange={(ev) => {
-          onChange({
-            ...parameters,
-            maxItems: parseInt(ev.target.value, 10),
-          })
-        }}
-        className="input input-primary input-bordered input-sm w-full mb-4 mt-2"
-      />
+    <div className={fieldStackClass}>
+      <div className={fieldClass}>
+        <div className={fieldLabelClass}>Minimum Items</div>
+        <input
+          value={parameters.minItems || ""}
+          placeholder="ex: 2"
+          key="minimum"
+          type="number"
+          onChange={(ev) => {
+            onChange({
+              ...parameters,
+              minItems: parseInt(ev.target.value, 10),
+            })
+          }}
+          className={`input input-primary input-bordered input-sm ${fieldControlClass}`}
+        />
+      </div>
+      <div className={fieldClass}>
+        <div className={fieldLabelClass}>Maximum Items</div>
+        <input
+          value={parameters.maxItems || ""}
+          placeholder="ex: 2"
+          key="maximum"
+          type="number"
+          onChange={(ev) => {
+            onChange({
+              ...parameters,
+              maxItems: parseInt(ev.target.value, 10),
+            })
+          }}
+          className={`input input-primary input-bordered input-sm ${fieldControlClass}`}
+        />
+      </div>
     </div>
   )
 }
@@ -68,7 +73,7 @@ const InnerCard: CardComponentType = ({ parameters, onChange, mods }) => {
 
   const definitionData = parameters.definitionData ? parameters.definitionData : {}
   const definitionUi = parameters.definitionUi ? parameters.definitionUi : {}
-  const [cardOpen, setCardOpen] = React.useState(false)
+  const [cardOpenState, setCardOpenState] = React.useState<Record<string, boolean>>({})
   if (parameters.type !== "array") {
     return <h4>Not an array </h4>
   }
@@ -112,10 +117,8 @@ const InnerCard: CardComponentType = ({ parameters, onChange, mods }) => {
         definitionData,
         definitionUi,
         hideKey: true,
-        cardOpenArray: [cardOpen],
-        setCardOpenArray: (newArr) => {
-          setCardOpen(newArr[0] ?? false)
-        },
+        cardOpenState,
+        setCardOpenState,
         allFormInputs,
         mods,
         categoryHash: generateCategoryHash(allFormInputs),

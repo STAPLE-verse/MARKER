@@ -21,6 +21,7 @@ export default function Card({
   mods,
   showObjectNameInput = true,
   addProperties,
+  dragHandleProps,
 }: CardPropsType): ReactElement {
   const [modalOpen, setModalOpen] = React.useState(false)
   const [elementId] = React.useState(getRandomId())
@@ -53,7 +54,12 @@ export default function Card({
                 ""
               )}
             </span>
-            <span className="tooltip tooltip-top cursor-grab active:cursor-grabbing p-1" data-tip="Drag to move form item" id={`${elementId}_moveformcard`}>
+            <span
+              {...(dragHandleProps ?? {})}
+              className="tooltip tooltip-left tooltip-info z-50 before:max-w-xs cursor-grab active:cursor-grabbing p-1"
+              data-tip="Drag to move form item"
+              id={`${elementId}_moveformcard`}
+            >
               <ArrowsPointingOutIcon
                 className="w-6 h-6 stroke-2 text-base-content/50 hover:text-base-content transition-colors"
                 onClick={() => {}}
@@ -86,10 +92,10 @@ export default function Card({
             label="Required"
             id={`${elementId}_required`}
           />
-          <span className="tooltip tooltip-top cursor-pointer p-1" data-tip="Additional configurations for this item" id={`${elementId}_editinfo`}>
+          <span className="tooltip tooltip-left tooltip-info z-50 before:max-w-xs cursor-pointer p-1" data-tip="Additional configurations for this item" id={`${elementId}_editinfo`}>
             <PencilIcon className="w-5 h-5 text-secondary hover:text-primary transition-colors" onClick={() => setModalOpen(true)} />
           </span>
-          <span className="tooltip tooltip-top cursor-pointer p-1" data-tip="Delete item" id={`${elementId}_trashinfo`}>
+          <span className="tooltip tooltip-left tooltip-info z-50 before:max-w-xs cursor-pointer p-1" data-tip="Delete item" id={`${elementId}_trashinfo`}>
             <TrashIcon className="w-5 h-5 text-warning hover:text-error transition-colors" onClick={() => onDelete && onDelete()} />
           </span>
         </div>

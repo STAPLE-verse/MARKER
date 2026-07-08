@@ -11,7 +11,6 @@ import Card from "./Card"
 import {
   checkForUnsupportedFeatures,
   generateElementComponentsFromSchemas,
-  countElementsFromSchema,
   addCardObj,
   addSectionObj,
   onDragEnd,
@@ -20,6 +19,12 @@ import {
 import { getRandomId } from "./utils"
 import type { SectionPropsType } from "./types"
 import { ArrowsPointingOutIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline"
+import { fieldClass, fieldControlClass, fieldLabelClass, fieldStackClass } from "./fieldLayout"
+
+const sectionHeadClass = `section-head ${fieldStackClass}`
+const sectionEntryClass = `section-entry ${fieldClass}`
+const sectionLabelClass = fieldLabelClass
+const sectionControlClass = fieldControlClass
 
 export default function Section({
   name,
@@ -46,6 +51,7 @@ export default function Section({
   allFormInputs,
   mods,
   categoryHash,
+  dragHandleProps,
 }: SectionPropsType): ReactElement {
   const unsupportedFeatures = checkForUnsupportedFeatures(
     schema || {},
@@ -53,9 +59,7 @@ export default function Section({
     allFormInputs
   )
   const schemaData = schema || {}
-  const elementNum = countElementsFromSchema(schemaData)
-  const defaultCollapseStates = [...Array(elementNum)].map(() => false)
-  const [cardOpenArray, setCardOpenArray] = React.useState(defaultCollapseStates)
+  const [cardOpenState, setCardOpenState] = React.useState<Record<string, boolean>>({})
   // keep name in state to avoid losing focus
   const [keyName, setKeyName] = React.useState(name)
   const [keyError, setKeyError] = React.useState<null | string>(null)
@@ -92,7 +96,12 @@ export default function Section({
                 ""
               )}
             </span>
-            <span className="tooltip tooltip-top cursor-grab active:cursor-grabbing p-1" data-tip="Drag to move section" id={`${elementId}_moveinfosection`}>
+            <span
+              {...(dragHandleProps ?? {})}
+              className="tooltip tooltip-left tooltip-info z-50 before:max-w-xs cursor-grab active:cursor-grabbing p-1"
+              data-tip="Drag to move section"
+              id={`${elementId}_moveinfosection`}
+            >
               <ArrowsPointingOutIcon
                 className="w-6 h-6 stroke-2 text-base-content/50 hover:text-base-content transition-colors"
                 onClick={() => {}}
@@ -105,12 +114,12 @@ export default function Section({
         }`}
       >
         <div className={`section-entries ${reference ? "section-reference" : ""}`}>
-          <div className="section-head">
+          <div className={sectionHeadClass}>
             {reference ? (
-              <div className="section-entry section-reference">
-                <h5>Reference Section</h5>
+              <div className={`${sectionEntryClass} section-reference`}>
+                <h5 className={sectionLabelClass}>Reference Section</h5>
                 <select
-                  className="select select-bordered w-full mt-2 mb-2 text-primary border-primary border-2 bg-primary-content"
+                  className={`select select-bordered ${sectionControlClass} text-primary border-primary border-2 bg-primary-content`}
                   value={reference}
                   onChange={(e) => {
                     onChange(schema, uischema, e.target.value)
@@ -126,8 +135,8 @@ export default function Section({
             ) : (
               ""
             )}
-            <div className="section-entry" data-test="section-object-name">
-              <h5>
+            <div className={sectionEntryClass} data-test="section-object-name">
+              <h5 className={sectionLabelClass}>
                 Section Variable Name{" "}
                 <Tooltip
                   text={
@@ -142,7 +151,7 @@ export default function Section({
                   type="help"
                 />
               </h5>
-              <div className="form-control w-full mt-2">
+              <div className="form-control w-full">
                 <input
                   value={keyName || ""}
                   placeholder="Key"
@@ -159,18 +168,18 @@ export default function Section({
                       onNameChange(name)
                     }
                   }}
-                  className={`input input-primary input-bordered w-full card-text ${keyError !== null ? 'input-error' : ''}`}
+                  className={`input input-primary input-bordered ${sectionControlClass} card-text ${keyError !== null ? 'input-error' : ''}`}
                   readOnly={hideKey}
                 />
                 {keyError && (
-                  <div className="label">
+                  <div className="label px-0 pb-0 pt-1">
                     <span className="label-text-alt text-error">{keyError}</span>
                   </div>
                 )}
               </div>
             </div>
-            <div className="section-entry" data-test="section-display-name">
-              <h5>
+            <div className={sectionEntryClass} data-test="section-display-name">
+              <h5 className={sectionLabelClass}>
                 Section Display Name{" "}
                 <Tooltip
                   text={
@@ -198,11 +207,11 @@ export default function Section({
                     uischema
                   )
                 }
-                className="input input-primary input-bordered w-full card-text mt-2"
+                className={`input input-primary input-bordered ${sectionControlClass} card-text`}
               />
             </div>
-            <div className="section-entry" data-test="section-description">
-              <h5>
+            <div className={sectionEntryClass} data-test="section-description">
+              <h5 className={sectionLabelClass}>
                 Section Description{" "}
                 <Tooltip
                   text={
@@ -263,8 +272,8 @@ export default function Section({
                       path,
                       definitionData,
                       definitionUi,
-                      cardOpenArray,
-                      setCardOpenArray,
+                      cardOpenState,
+                      setCardOpenState,
                       allFormInputs,
                       mods,
                       categoryHash,
@@ -277,11 +286,12 @@ export default function Section({
                           <div
                             ref={providedDraggable.innerRef}
                             {...providedDraggable.draggableProps}
-                            {...providedDraggable.dragHandleProps}
                             style={providedDraggable.draggableProps.style}
                             className={`pb-4 ${snapshot.isDragging && !snapshot.isDropAnimating ? "opacity-60" : ""}`}
                           >
-                            {element}
+                            {React.cloneElement(element, {
+                              dragHandleProps: providedDraggable.dragHandleProps,
+                            })}
                           </div>
                         )}
                       </Draggable>
@@ -316,13 +326,13 @@ export default function Section({
                 label="Required"
                 id={`${elementId}_required`}
               />
-              <span className="tooltip tooltip-top cursor-pointer p-1" data-tip="Additional configurations for this item" id={`${elementId}_editinfo`}>
+              <span className="tooltip tooltip-left tooltip-info z-50 before:max-w-xs cursor-pointer p-1" data-tip="Additional configurations for this section" id={`${elementId}_editinfo`}>
                 <PencilIcon
                   className="w-5 h-5 text-secondary hover:text-primary transition-colors"
                   onClick={() => setModalOpen(true)}
                 />
               </span>
-              <span className="tooltip tooltip-top cursor-pointer p-1" data-tip="Delete item" id={`${elementId}_trashinfo`}>
+              <span className="tooltip tooltip-left tooltip-info z-50 before:max-w-xs cursor-pointer p-1" data-tip="Delete section" id={`${elementId}_trashinfo`}>
                 <TrashIcon
                   className="w-5 h-5 text-warning hover:text-error transition-colors"
                   onClick={() => (onDelete ? onDelete() : {})}

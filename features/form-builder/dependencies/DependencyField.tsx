@@ -5,6 +5,7 @@ import Tooltip from "../Tooltip"
 import DependencyWarning from "./DependencyWarning"
 import DependencyPossibility from "./DependencyPossibility"
 import { getRandomId } from "../utils"
+import { fieldClass, fieldLabelClass } from "../fieldLayout"
 
 // checks whether an array corresponds to oneOf dependencies
 function checkIfValueBasedDependency(
@@ -50,8 +51,8 @@ export default function DependencyField({
   const [elementId] = useState(getRandomId())
   const valueBased = checkIfValueBasedDependency(parameters.dependents || [])
   return (
-    <div className="form-dependency dependencyField">
-      <div className="text-[18px] font-bold mb-2 flex items-center gap-2">
+    <div className={`form-dependency dependencyField ${fieldClass}`}>
+      <div className={`${fieldLabelClass} flex items-center gap-2`}>
         Dependencies
         <Tooltip
           id={`${elementId}_dependent`}
@@ -111,7 +112,7 @@ export default function DependencyField({
         </React.Fragment>
       )}
       <DependencyWarning parameters={parameters} />
-      <div className="form-dependency-conditions mt-4 space-y-4">
+      <div className="form-dependency-conditions flex flex-col gap-4">
         {parameters.dependents
           ? parameters.dependents.map((possibility, index) => (
               <DependencyPossibility
@@ -145,7 +146,11 @@ export default function DependencyField({
             ))
           : ""}
 
-        <span className="tooltip tooltip-top cursor-pointer" data-tip="Add another dependency relation linking this element and other form elements">
+        <span
+          className="tooltip tooltip-right tooltip-info z-50 before:max-w-xs inline-flex self-start cursor-pointer"
+          data-tip="Add another dependency relation linking this element and other form elements"
+          id={`${elementId}_adddependency`}
+        >
           <PlusCircleIcon
             className="h-8 w-8 stroke-secondary stroke-2 fill-base-100 hover:stroke-primary transition-colors mt-2"
             onClick={() => {
