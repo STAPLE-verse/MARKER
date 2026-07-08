@@ -11,8 +11,8 @@ interface SchemaHeaderTitleProps {
 
 /**
  * Shared page-header title cluster for the form lifecycle pages (detail, edit,
- * publish): an optionally-prefixed, truncating name followed by the version +
- * status badges. Keeps the three headers visually consistent.
+ * publish): an optionally-prefixed, truncating name followed by version/status
+ * labels. Keeps the three headers visually consistent.
  */
 export function SchemaHeaderTitle({ version, prefix, name }: SchemaHeaderTitleProps) {
   const displayName = name || version.name || "Untitled Form";

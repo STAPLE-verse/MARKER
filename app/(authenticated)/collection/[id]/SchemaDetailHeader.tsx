@@ -13,7 +13,7 @@ interface SchemaDetailHeaderProps {
 }
 
 /**
- * Header for the owner's schema detail page: title + status badges + the
+ * Header for the owner's schema detail page: title + version labels + the
  * route-specific action buttons (clone / edit / publish / view public). Lives in
  * the route folder because its actions are tied to this page's routes.
  */

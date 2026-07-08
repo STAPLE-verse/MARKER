@@ -6,9 +6,8 @@ interface SchemaStatusBadgesProps {
 }
 
 /**
- * Renders the version + draft/published status badge pair for a form version.
- * Derives the published semantic version when available, otherwise falls back to
- * the draft version number.
+ * Renders the visible version label plus published status when applicable.
+ * Draft status is already encoded in labels like "Draft 1".
  */
 export function SchemaStatusBadges({ version }: SchemaStatusBadgesProps) {
   const isPublished = version.status === "PUBLISHED";
@@ -21,9 +20,11 @@ export function SchemaStatusBadges({ version }: SchemaStatusBadgesProps) {
       <Badge variant="primary" outline className="shrink-0 mt-0.5">
         {versionLabel}
       </Badge>
-      <Badge variant={isPublished ? "success" : "warning"} className="shrink-0 mt-0.5">
-        {isPublished ? "Published" : "Draft"}
-      </Badge>
+      {isPublished && (
+        <Badge variant="success" className="shrink-0 mt-0.5">
+          Published
+        </Badge>
+      )}
     </>
   );
 }
