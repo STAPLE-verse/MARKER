@@ -1,4 +1,5 @@
 export { getUserForms } from "./getUserForms"
+export { getUserArchivedForms } from "./getUserArchivedForms"
 export { getFormById } from "./getFormById"
 export { getAuthorizedLatestVersion } from "./getAuthorizedLatestVersion"
 export { getAuthorizedArchivedForm } from "./getAuthorizedArchivedForm"

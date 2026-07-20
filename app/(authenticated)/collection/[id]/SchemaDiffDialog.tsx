@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { TabTrigger, Tabs } from "@/components/ui/Tabs";
 
 const SchemaJsonDiffViewer = dynamic(() => import("./SchemaJsonDiffViewer"), {
   ssr: false,
@@ -74,20 +75,14 @@ export function SchemaDiffDialog({
       </div>
 
       <div className="border-b border-base-300 px-6 pt-3">
-        <div className="tabs tabs-bordered">
-          <button
-            className={`tab tab-lg font-semibold ${target === "schema" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
-            onClick={() => setTarget("schema")}
-          >
+        <Tabs>
+          <TabTrigger active={target === "schema"} onClick={() => setTarget("schema")}>
             Data Schema
-          </button>
-          <button
-            className={`tab tab-lg font-semibold ${target === "uiSchema" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
-            onClick={() => setTarget("uiSchema")}
-          >
+          </TabTrigger>
+          <TabTrigger active={target === "uiSchema"} onClick={() => setTarget("uiSchema")}>
             UI Schema
-          </button>
-        </div>
+          </TabTrigger>
+        </Tabs>
       </div>
 
       <div className="min-h-0 min-w-0 flex-1 p-4">

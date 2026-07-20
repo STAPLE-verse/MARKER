@@ -113,7 +113,7 @@ features/
 | `createForm`       | `{ title, description, version?, license? }`                                                                  | Creates `Form` + first `FormVersion` (v1, empty schema). Returns the new form ID.                                                            |
 | `saveFormVersion`  | `{ formId, schema, uiSchema }`                                                                                | Updates the **latest** `FormVersion`'s schema/uiSchema JSON in-place (auto-save while editing).                                              |
 | `createNewVersion` | `{ formId, schema, uiSchema, name? }`                                                                         | Creates a new `FormVersion` row with bumped version number. For explicit "Save as new version" action.                                       |
-| `deleteForm`       | `{ formId }`                                                                                                  | Soft-delete (set `archived: true`) or hard-delete the `Form` and cascade to `FormVersion` rows.                                              |
+| `archiveForm`      | `{ formId }`                                                                                                  | Soft-archive (set `archived: true`) on the `MarkerForm` and cascade to all `MarkerFormVersion` rows.                                              |
 | `publishSchema`    | `{ formVersionId, keywords[], license, domain, language, contributors, releaseNotes, relatedPublicationDoi }` | Freezes a `FormVersion` into a `PublishedSchema`. Extracts nested `ontologyId`s from JSON. Generates PID, familyId, sets `version`.          |
 | `forkSchema`       | `{ publishedSchemaPid }`                                                                                      | Creates a new `Form` + `FormVersion` pre-populated with the published schema's JSON. Sets `derivedFromPid`.                                  |
 | `importFromStaple` | `{ formId, formVersionId }`                                                                                   | Reads STAPLE `Form`/`FormVersion`, creates a **new MARKER copy** (new `Form` row with `app: "marker"`), and calculates `originalImportHash`. |
@@ -146,7 +146,7 @@ features/
 - Call `getUserForms(session.user.id)` to populate the table.
 - Also call `getUserPublishedSchemas(session.user.id)` and merge/tag rows.
 - Add an "Endorsed Schemas" tab/view that calls `getUserEndorsedSchemas(session.user.id)`.
-- Wire the Delete button to `deleteForm` server action.
+- Wire the Archive button to `archiveForm` server action.
 - Add folder sidebar (Phase 3+).
 
 ### 4.2 Create Form — `/collection/new`
@@ -219,7 +219,7 @@ features/
 > **Goal:** A user can create, save, load, and delete draft forms with real DB persistence.
 
 - [x] Create `features/forms/schemas.ts` — Zod schemas for form creation input
-- [x] Create `features/forms/actions.ts` — `createForm`, `saveFormVersion`, `deleteForm`
+- [x] Create `features/forms/actions.ts` — `createForm`, `saveFormVersion`, `archiveForm`
 - [x] Create `features/forms/queries.ts` — `getUserForms`, `getFormById`, `getFormVersion`
 - [x] Create `features/forms/types.ts` — TypeScript types for query returns
 - [x] Refactor `/collection` page → server data fetch with `getUserForms`

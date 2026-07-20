@@ -68,6 +68,9 @@ export interface FormVersionDTO {
 
 export interface FormDetailDTO {
   id: number
+  archived: boolean
+  /** True if any version has a related PublishedSchema (blocks permanent delete). */
+  hasPublishedVersion: boolean
   /** Ordered by version descending; index 0 is the latest version. */
   versions: FormVersionDTO[]
 }

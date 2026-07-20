@@ -1,9 +1,11 @@
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db"
 import { ActionError } from "@/utils/action-result"
+import { getAuthorizedArchivedForm } from "./getAuthorizedArchivedForm"
 import { getAuthorizedLatestVersion } from "./getAuthorizedLatestVersion"
 
 type AuthorizedLatestVersion = Awaited<ReturnType<typeof getAuthorizedLatestVersion>>
+type AuthorizedArchivedForm = Awaited<ReturnType<typeof getAuthorizedArchivedForm>>
 
 /** Parse an ISO timestamp from the client into a Date for DB comparison. */
 export function parseExpectedUpdatedAt(iso: string): Date {
@@ -45,6 +47,35 @@ export async function withLockedAuthorizedLatestVersion<T>(
     `
 
     const context = await getAuthorizedLatestVersion(formId, userId, tx)
+    return callback(tx, context)
+  })
+}
+
+/**
+ * Serializes operations that require the form to remain archived.
+ *
+ * Same lock-and-reauthorize pattern as `withLockedAuthorizedLatestVersion`,
+ * but for archived-form mutations (permanent delete, unarchive).
+ */
+export async function withLockedAuthorizedArchivedForm<T>(
+  formId: number,
+  userId: number,
+  callback: (
+    tx: Prisma.TransactionClient,
+    context: AuthorizedArchivedForm
+  ) => Promise<T>
+): Promise<T> {
+  await getAuthorizedArchivedForm(formId, userId)
+
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`
+      SELECT "id"
+      FROM "MarkerForm"
+      WHERE "id" = ${formId}
+      FOR UPDATE
+    `
+
+    const context = await getAuthorizedArchivedForm(formId, userId, tx)
     return callback(tx, context)
   })
 }

@@ -1,14 +1,28 @@
 import { requirePageAuth } from "@/utils/auth";
-import { getUserForms } from "@/features/forms/queries";
+import { getUserArchivedForms, getUserForms } from "@/features/forms/queries";
 import { getCollectionStatusBadgeLabel } from "@/features/forms/utils/versionLabel";
+import type { FormWithLatestVersion } from "@/features/forms/types";
+import { redirect } from "next/navigation";
 import CollectionClient, { CollectionSchemaRow } from "./CollectionClient";
+import {
+  CollectionTab,
+  isCollectionTab,
+} from "./collectionTabs";
 
-export default async function CollectionPage() {
-  const { userId } = await requirePageAuth();
+interface CollectionPageProps {
+  searchParams: Promise<{ tab?: string | string[] }>;
+}
 
-  const rawForms = await getUserForms(userId);
+function parseCollectionTab(raw: string | string[] | undefined): CollectionTab {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (value && isCollectionTab(value)) {
+    return value;
+  }
+  return "owned";
+}
 
-  const schemas: CollectionSchemaRow[] = rawForms.map((f) => {
+function mapFormsToRows(forms: FormWithLatestVersion[]): CollectionSchemaRow[] {
+  return forms.map((f) => {
     const latestVersion = f.versions[0];
     const status = latestVersion?.status ?? "DRAFT";
     return {
@@ -23,6 +37,20 @@ export default async function CollectionPage() {
       updatedAt: new Date(f.updatedAt).toLocaleDateString(),
     };
   });
+}
 
-  return <CollectionClient schemas={schemas} />;
+export default async function CollectionPage({ searchParams }: CollectionPageProps) {
+  const { userId } = await requirePageAuth();
+  const { tab: tabParam } = await searchParams;
+  const rawTab = Array.isArray(tabParam) ? tabParam[0] : tabParam;
+
+  if (rawTab !== undefined && !isCollectionTab(rawTab)) {
+    redirect("/collection");
+  }
+
+  const tab = parseCollectionTab(tabParam);
+  const rawForms =
+    tab === "archived" ? await getUserArchivedForms(userId) : await getUserForms(userId);
+
+  return <CollectionClient tab={tab} schemas={mapFormsToRows(rawForms)} />;
 }

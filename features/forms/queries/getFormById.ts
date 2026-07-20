@@ -1,31 +1,39 @@
 import { prisma } from "@/lib/db"
 import { FormDetailDTO } from "../types"
-import { nonArchivedVersionsArgs } from "./versionSelectors"
 import { mapContributors, normalizePublicationMetadata, normalizeKeywords } from "../utils/publicationMetadata"
 
+/**
+ * Owner-scoped form detail. Active forms return non-archived versions only;
+ * archived forms return their soft-archived version history so `/collection/[id]`
+ * remains openable from the Archived tab (docs/form-delete-policy.md §4.3).
+ */
 export async function getFormById(formId: number, userId: number): Promise<FormDetailDTO | null> {
   const form = await prisma.markerForm.findFirst({
     where: {
       id: formId,
       ownerId: userId,
-      archived: false
     },
-    include: {
-      versions: {
-        ...nonArchivedVersionsArgs,
-        include: {
-          publicationMetadata: true,
-          publishedSchemas: true,
-        }
-      }
-    }
   })
 
   if (!form) return null
 
+  const versions = await prisma.markerFormVersion.findMany({
+    where: {
+      formId: form.id,
+      ...(form.archived ? {} : { archived: false }),
+    },
+    orderBy: { version: "desc" },
+    include: {
+      publicationMetadata: true,
+      publishedSchemas: true,
+    },
+  })
+
   return {
     id: form.id,
-    versions: form.versions.map((v) => {
+    archived: form.archived,
+    hasPublishedVersion: versions.some((v) => v.publishedSchemas.length > 0),
+    versions: versions.map((v) => {
       const published = v.publishedSchemas[0] ?? null
       const publicationMetadata = v.publicationMetadata
       return {

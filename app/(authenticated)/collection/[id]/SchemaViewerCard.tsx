@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { TabTrigger, Tabs } from "@/components/ui/Tabs";
 import { SchemaSourceViewer } from "@/features/forms/components/SchemaSourceViewer";
 import { SchemaPreviewPanel } from "@/features/forms/components/SchemaPreviewPanel";
 import { SchemaDiffDialog } from "./SchemaDiffDialog";
@@ -19,8 +20,7 @@ interface SchemaViewerCardProps {
 
 /**
  * Page-local card that toggles between the raw JSON source and the live form
- * preview. The tab chrome is kept local (not promoted to @staple-verse/ui) since
- * it has a single app-level consumer for now.
+ * preview.
  */
 export function SchemaViewerCard({
   schema,
@@ -47,20 +47,20 @@ export function SchemaViewerCard({
       <Card bordered className="overflow-hidden">
         <CardBody className="p-0">
           <div className="border-b border-base-200 px-4 pt-4 bg-base-200 flex justify-between items-end">
-            <div className="tabs tabs-bordered">
-              <button
-                className={`tab tab-lg transition-all font-semibold ${activeTab === "schema" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
+            <Tabs>
+              <TabTrigger
+                active={activeTab === "schema"}
                 onClick={() => setActiveTab("schema")}
               >
                 JSON Source
-              </button>
-              <button
-                className={`tab tab-lg transition-all font-semibold ${activeTab === "preview" ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80"}`}
+              </TabTrigger>
+              <TabTrigger
+                active={activeTab === "preview"}
                 onClick={() => setActiveTab("preview")}
               >
                 Form Preview
-              </button>
-            </div>
+              </TabTrigger>
+            </Tabs>
 
             {!isViewingLatest && activeTab === "schema" && (
               <div className="pb-2">

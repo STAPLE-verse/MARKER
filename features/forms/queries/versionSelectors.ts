@@ -16,8 +16,8 @@ export const nonArchivedVersionFilter = {
 } satisfies Prisma.MarkerFormVersionWhereInput
 
 /**
- * All non-archived versions, newest first. Use when a callsite needs the full
- * (active) version history, e.g. the form detail page.
+ * All non-archived versions, newest first. Composed into `latestVersionArgs`;
+ * use directly when a callsite needs the full active history via a relation include.
  */
 export const nonArchivedVersionsArgs = {
   where: nonArchivedVersionFilter,
@@ -30,5 +30,15 @@ export const nonArchivedVersionsArgs = {
  */
 export const latestVersionArgs = {
   ...nonArchivedVersionsArgs,
+  take: 1,
+} satisfies Prisma.MarkerForm$versionsArgs
+
+/**
+ * Highest-numbered version regardless of `archived`. Use for archived-form
+ * list/detail surfaces where soft-delete has marked every version archived
+ * (see docs/form-delete-policy.md §4.3 Step 1).
+ */
+export const latestVersionAnyArgs = {
+  orderBy: { version: "desc" },
   take: 1,
 } satisfies Prisma.MarkerForm$versionsArgs

@@ -3,6 +3,7 @@ import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/Sidebar"
 import { DashedAddButton } from "@/components/ui/DashedAddButton";
 import { ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Badge } from "@/components/ui/Badge";
+import { DeleteFormVersionButton } from "@/features/forms/components/DeleteFormVersionButton";
 import { FormVersionDTO } from "@/features/forms/types";
 
 type FormVersionType = FormVersionDTO;
@@ -15,6 +16,14 @@ interface VersionHistorySidebarProps {
   formId: number;
   onNewVersion: () => void;
   isCreatingVersion: boolean;
+  /** When true, hide version-creation controls (archived forms are read-only). */
+  readOnly?: boolean;
+}
+
+function getVersionLabel(version: FormVersionType): string {
+  return version.status === "PUBLISHED"
+    ? `v${version.publishedSchema?.version || version.version}`
+    : `Draft ${version.version}`;
 }
 
 export function VersionHistorySidebar({
@@ -25,7 +34,10 @@ export function VersionHistorySidebar({
   formId,
   onNewVersion,
   isCreatingVersion,
+  readOnly = false,
 }: VersionHistorySidebarProps) {
+  const canDeleteVersions = !readOnly && versions.length > 1;
+
   return (
     <Sidebar 
       className={`absolute right-0 top-0 bottom-0 z-20 border-l border-base-300 shadow-2xl overflow-hidden transition-all duration-300 ${
@@ -53,6 +65,7 @@ export function VersionHistorySidebar({
             className="btn btn-sm btn-ghost btn-circle" 
             onClick={() => setIsHistoryOpen(!isHistoryOpen)}
             title="Toggle Version History"
+            type="button"
           >
             {isHistoryOpen ? <XMarkIcon className="w-5 h-5" /> : <ClockIcon className="w-5 h-5" />}
           </button>
@@ -61,43 +74,66 @@ export function VersionHistorySidebar({
       
       {isHistoryOpen ? (
         <SidebarContent className="space-y-3 bg-base-200/30">
-          <DashedAddButton
-            onClick={onNewVersion}
-            disabled={isCreatingVersion}
-            title="New draft version (copy of latest)"
-            aria-label="New draft version"
-          />
+          {!readOnly && (
+            <DashedAddButton
+              onClick={onNewVersion}
+              disabled={isCreatingVersion}
+              title="New draft version (copy of latest)"
+              aria-label="New draft version"
+            />
+          )}
           {versions.map((v) => {
             const isLatest = v.id === versions[0].id;
             const isSelected = v.id === selectedVersion.id;
+            const versionLabel = getVersionLabel(v);
+            const showDelete = canDeleteVersions && v.status === "DRAFT";
+
             return (
-              <Link
+              <div
                 key={v.id}
-                href={isLatest ? `/collection/${formId}` : `/collection/${formId}?version=${v.id}`}
-                prefetch={false}
-                scroll={false}
-                aria-current={isSelected ? "page" : undefined}
-                className={`block p-4 rounded-xl border cursor-pointer transition-all ${
+                className={`relative rounded-xl border transition-all ${
                   isSelected
                     ? "border-primary bg-primary/5 ring-1 ring-primary/20"
                     : "border-base-300 hover:border-base-content/30 bg-base-100"
                 }`}
               >
-                <div className="flex justify-between items-start mb-1">
-                  <div className="font-semibold flex items-center gap-2">
-                    {v.status === "PUBLISHED" ? `v${v.publishedSchema?.version || v.version}` : `Draft ${v.version}`}
+                {showDelete && (
+                  <div
+                    className="absolute right-1 top-1 z-10"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <DeleteFormVersionButton
+                      formId={formId}
+                      versionId={v.id}
+                      versionLabel={versionLabel}
+                      versionName={v.name}
+                      redirectTo={isSelected ? `/collection/${formId}` : undefined}
+                    />
+                  </div>
+                )}
+                <Link
+                  href={isLatest ? `/collection/${formId}` : `/collection/${formId}?version=${v.id}`}
+                  prefetch={false}
+                  scroll={false}
+                  aria-current={isSelected ? "page" : undefined}
+                  className={`block cursor-pointer p-4 ${showDelete ? "pr-9" : ""}`}
+                >
+                  <div className={`flex flex-wrap items-center gap-2 font-semibold ${showDelete ? "pr-4" : ""}`}>
+                    {versionLabel}
                     {v.status === "PUBLISHED" && <Badge size="sm" variant="success">Published</Badge>}
                     {isLatest && <Badge size="sm" variant="primary">Latest</Badge>}
                   </div>
-                  <div className="text-xs text-base-content/50 whitespace-nowrap">
-                    {new Date(v.createdAt).toLocaleDateString()}
+                  <div className="mt-1 flex items-end justify-between gap-2">
+                    <div className="min-w-0 truncate text-sm text-base-content/70">
+                      {v.name || "Untitled Draft"}
+                    </div>
+                    <div className="shrink-0 whitespace-nowrap text-xs text-base-content/50">
+                      {new Date(v.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
-                </div>
-                <div className="text-sm text-base-content/70 truncate">
-                  {v.name || "Untitled Draft"}
-                </div>
-              </Link>
-            )
+                </Link>
+              </div>
+            );
           })}
         </SidebarContent>
       ) : (

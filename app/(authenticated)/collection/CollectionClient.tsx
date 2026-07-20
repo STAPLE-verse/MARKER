@@ -1,10 +1,16 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable, ColumnDef } from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
-import Link from "next/link";
+import { TabLink, Tabs } from "@/components/ui/Tabs";
+import {
+  COLLECTION_TABS,
+  CollectionTab,
+  collectionTabHref,
+} from "./collectionTabs";
 
 export interface CollectionSchemaRow {
   id: number;
@@ -15,10 +21,16 @@ export interface CollectionSchemaRow {
 }
 
 interface CollectionClientProps {
+  tab: CollectionTab;
   schemas: CollectionSchemaRow[];
 }
 
-export default function CollectionClient({ schemas }: CollectionClientProps) {
+const TAB_LABELS: Record<CollectionTab, string> = {
+  owned: "Owned",
+  archived: "Archived",
+};
+
+export default function CollectionClient({ tab, schemas }: CollectionClientProps) {
   const columns: ColumnDef<CollectionSchemaRow>[] = [
     {
       accessorKey: "title",
@@ -57,6 +69,14 @@ export default function CollectionClient({ schemas }: CollectionClientProps) {
     },
   ];
 
+  const emptyMessage =
+    tab === "archived"
+      ? "No archived schemas."
+      : "You haven't created any schemas yet.";
+
+  const searchPlaceholder =
+    tab === "archived" ? "Search archived schemas..." : "Search my schemas...";
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300">
       <PageHeader
@@ -70,15 +90,27 @@ export default function CollectionClient({ schemas }: CollectionClientProps) {
         </Link>
       </PageHeader>
 
-      <div className="card bg-base-300 shadow-xl border border-base-200 mt-6">
+      <Tabs className="mt-6">
+        {COLLECTION_TABS.map((value) => (
+          <TabLink
+            key={value}
+            href={collectionTabHref(value)}
+            active={tab === value}
+          >
+            {TAB_LABELS[value]}
+          </TabLink>
+        ))}
+      </Tabs>
+
+      <div className="card bg-base-300 shadow-xl border border-base-200 mt-4">
         <div className="card-body p-6">
           <DataTable
             columns={columns}
             data={schemas}
             enablePagination
             enableGlobalSearch
-            globalSearchPlaceholder="Search my schemas..."
-            emptyMessage="You haven't created any schemas yet."
+            globalSearchPlaceholder={searchPlaceholder}
+            emptyMessage={emptyMessage}
           />
         </div>
       </div>

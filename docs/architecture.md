@@ -200,7 +200,7 @@ Consumers import from the barrel, never from deep file paths:
 
 ```ts
 // Client component
-import { deleteForm, publishSchema } from "@/features/forms/actions"
+import { archiveForm, publishSchema } from "@/features/forms/actions"
 // Server component / page
 import { getUserForms, loadOwnedForm } from "@/features/forms/queries"
 ```
@@ -230,11 +230,15 @@ All forms use **`react-hook-form` with `zodResolver`**, the shared `components/u
 ### 8.5 Identifiers & Immutability Safety
 
 - **PIDs** are generated with `nanoid` (collision-resistant alphabet) via `utils/id.ts`. Publishing **retries on a PID primary-key collision**, while a `familyId + version` uniqueness clash is surfaced as a friendly "this version already exists" error rather than a raw DB exception.
-- The definition of a form's **"latest version" is consistent everywhere**, and that consistency is enforced in **one place**: `features/forms/queries/versionSelectors.ts`. Every read and write path spreads a shared Prisma selector into its `versions` relation arg rather than re-declaring the filter inline:
+- The definition of a form's **"latest version" is consistent everywhere**, and that consistency is enforced in **`features/forms/queries/versionSelectors.ts`**. Most read and write paths spread a shared Prisma selector into their `versions` relation arg rather than re-declaring the filter inline:
+  - `nonArchivedVersionFilter` — `{ archived: false }`. Composed into the selectors below; also used directly when counting active versions (e.g. `deleteFormVersion`).
+  - `nonArchivedVersionsArgs` — the full active history (same filter and `orderBy`, no `take`). Composed into `latestVersionArgs`; not spread directly at call sites today.
   - `latestVersionArgs` — the single head version (`where: { archived: false }`, `orderBy: { version: 'desc' }`, `take: 1`). Used by `getUserForms`, `getAuthorizedLatestVersion`, and the `publishSchema` lookup.
-  - `nonArchivedVersionsArgs` — the full active history (same filter/order, no `take`). Used by `getFormById` for the detail page.
+  - `latestVersionAnyArgs` — highest-numbered version regardless of `archived`. Used by `getUserArchivedForms` for archived collection list rows.
 
-  This means "latest" provably means the same thing across all callsites, and the rule can be extended (e.g. a future soft-delete column) by editing one file. Previously `getAuthorizedLatestVersion` and `getUserForms` omitted the `archived: false` filter, a latent divergence from this invariant.
+  **`getFormById` is the deliberate exception:** it loads versions via a separate `findMany` with a conditional filter — non-archived versions only for active forms, full history (including soft-archived versions) when the parent form is archived — so `/collection/[id]` stays openable from the Archived tab (see `form-delete-policy.md` §4.3).
+
+  This means "latest" provably means the same thing across all cooperating callsites, and the rule can be extended (e.g. a future soft-delete column) by editing one file. Previously `getAuthorizedLatestVersion` and `getUserForms` omitted the `archived: false` filter, a latent divergence from this invariant.
 
 ### 8.6 Transactional Writes
 
@@ -408,7 +412,7 @@ toast.success("Saved");
 ```
 
 Conventions:
-- Every imperative action call goes through a `use*` hook; no action is `await`ed inline in a route component (`createForm`, `deleteForm`, `saveFormVersion`, `createFormCheckpoint`, `publishSchema` each get a hook).
+- Every imperative action call goes through a `use*` hook; no action is `await`ed inline in a route component (`createForm`, `archiveForm`, `saveFormVersion`, `createFormCheckpoint`, `publishSchema` each get a hook).
 - Pending state comes from `useTransition` (§8.7), not hand-rolled `useState(isLoading)`.
 - Success is **always** confirmed (toast or redirect-with-feedback). The publish flow surfaces success on redirect rather than silently relying on the `?published=` param. Form Studio save/checkpoint navigation semantics are specified separately in §8.11.
 - `console.error` is no longer a user-facing strategy; it is only acceptable as server-side logging inside `normalizeActionError`.
@@ -448,7 +452,7 @@ There are two ways to enforce ownership/tenancy on the server, and they are **as
 
 **Which to use:**
 - **Reads / page renders → query-level filtering.** Pages only need "render or `notFound()`", and collapsing every failure avoids leaking resource existence on list/detail surfaces.
-- **Writes / Server Actions → the throw-helper.** Actions return the `ActionResult` envelope and genuinely benefit from coded errors (e.g. `CONFLICT` on an archived/published form). `getAuthorizedLatestVersion` is the **single authorizer for owned-form mutations** — `saveFormVersion`, `createFormCheckpoint`, `deleteForm`, and `publishSchema` all route ownership through it. New write actions should call it rather than re-deriving ownership inline. Its messages are intentionally **action-neutral** ("Cannot modify an archived form", "You do not have permission to modify this form") so every caller can reuse them; action-specific guards (e.g. `publishSchema`'s already-`PUBLISHED` check) stay in the action.
+- **Writes / Server Actions → the throw-helper.** Actions return the `ActionResult` envelope and genuinely benefit from coded errors (e.g. `CONFLICT` on an archived/published form). `getAuthorizedLatestVersion` is the **single authorizer for owned-form mutations** — `saveFormVersion`, `createFormCheckpoint`, `archiveForm`, and `publishSchema` all route ownership through it. New write actions should call it rather than re-deriving ownership inline. Its messages are intentionally **action-neutral** ("Cannot modify an archived form", "You do not have permission to modify this form") so every caller can reuse them; action-specific guards (e.g. `publishSchema`'s already-`PUBLISHED` check) stay in the action.
 
 **Existence-disclosure policy (decided).** When a form exists but is owned by another user, the write-side helper returns **`FORBIDDEN`, not `NOT_FOUND`** — a deliberate, granular choice. Its only callers are authenticated owners operating on their own forms through the UI, so the better error message outweighs the minor trade-off of confirming an id exists to a non-owner. Read-side queries take the opposite stance (collapse to not-found) because list/anonymous surfaces must not disclose existence. This asymmetry is intentional; the decision lives **only** in `getAuthorizedLatestVersion` so it can't drift.
 

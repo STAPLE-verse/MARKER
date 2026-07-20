@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FormDetailDTO, FormVersionDTO } from "@/features/forms/types";
 import { BackButton } from "@/components/ui/BackButton";
+import { Alert } from "@/components/ui/Alert";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { DraftPublicationMetadataCard } from "@/features/forms/components/DraftPublicationMetadataCard";
 import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
@@ -35,16 +36,21 @@ export default function UserSchemaDetailsClient({
   const { createVersion, isCreating } = useCreateFormVersion(form.id);
   const { restoreVersion, isRestoring } = useRestoreFormVersion(form.id);
 
-  // History sidebar is open by default
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
 
   const publishedSchema = selectedVersion.publishedSchema;
-  const isLatestDraft = isViewingLatest && selectedVersion.status === "DRAFT";
-  const isHistoricalDraft = !isViewingLatest && selectedVersion.status === "DRAFT";
+  const isLatestDraft =
+    !form.archived && isViewingLatest && selectedVersion.status === "DRAFT";
+  const isHistoricalDraft =
+    !form.archived && !isViewingLatest && selectedVersion.status === "DRAFT";
 
   return (
     <FormPageLayout
-      backButton={<BackButton href="/collection">Back to Collection</BackButton>}
+      backButton={
+        <BackButton href={form.archived ? "/collection?tab=archived" : "/collection"}>
+          {form.archived ? "Back to Archive" : "Back to Collection"}
+        </BackButton>
+      }
       sidebar={
         <VersionHistorySidebar
           isHistoryOpen={isHistoryOpen}
@@ -54,13 +60,25 @@ export default function UserSchemaDetailsClient({
           formId={form.id}
           onNewVersion={createVersion}
           isCreatingVersion={isCreating}
+          readOnly={form.archived}
         />
       }
     >
+      {form.archived && (
+        <Alert variant="warning" title="Archived schema" className="mb-6">
+          This schema is in your archive. Recover it to edit or publish again
+          {form.hasPublishedVersion
+            ? ". Forms with published versions cannot be permanently deleted."
+            : ", or permanently delete it."}
+        </Alert>
+      )}
+
       <SchemaDetailHeader
         formId={form.id}
         version={selectedVersion}
         isViewingLatest={isViewingLatest}
+        archived={form.archived}
+        hasPublishedVersion={form.hasPublishedVersion}
         onClone={() => clone(selectedVersion.id)}
         isCloning={isCloning}
         onRestore={() => restoreVersion(selectedVersion.id)}

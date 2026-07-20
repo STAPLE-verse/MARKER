@@ -23,18 +23,6 @@ export const saveFormVersionSchema = formVersionConcurrencySchema.extend({
 
 export type SaveFormVersionInput = z.infer<typeof saveFormVersionSchema>
 
-export const deleteFormSchema = z.object({
-  formId: z.number(),
-})
-
-export type DeleteFormInput = z.infer<typeof deleteFormSchema>
-
-export const permanentlyDeleteFormSchema = z.object({
-  formId: z.number(),
-})
-
-export type PermanentlyDeleteFormInput = z.infer<typeof permanentlyDeleteFormSchema>
-
 export const formIdActionSchema = z.object({
   formId: z.number(),
 })
