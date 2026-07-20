@@ -1,7 +1,7 @@
 # MARKER ↔ STAPLE Relationship: Decoupling Decision & Target Data Model
 
 > **Status:** Decided (product direction) — data model design ready for implementation planning
-> **Last updated:** 2026-07-17
+> **Last updated:** 2026-07-20
 > **Supersedes:** The "Pending Decision" in [`forms-feature-plan.md`](./forms-feature-plan.md) §1 (import direction), and extends the `Form.app` scoping model described in [`architecture.md`](./architecture.md) §5
 > **Origin:** Design discussion triggered by a disagreement over delete-behavior coupling between MARKER and STAPLE forms while implementing the `/collection` page (see [`refactor/collection-list-page.md`](./refactor/collection-list-page.md))
 
@@ -73,7 +73,7 @@ User (shared with STAPLE — the one deliberately shared table)
   │     ├── importedFromStapleVersionNumber?
   │     ├── importedAt?
   │     ├── originalImportHash?                (fixity check vs. source content at import time)
-  │     ├── tags Json?, folderId?, archived
+  │     ├── tags Json?, archived
   │     │
   │     ├── MarkerFormVersion[]
   │     │     ├── status: DRAFT | PUBLISHED | ARCHIVED
@@ -82,10 +82,17 @@ User (shared with STAPLE — the one deliberately shared table)
   │     │     ├── PublishedSchema[]            (freeze target)
   │     │     └── NO tasks/projects relation — structurally cannot attach to a STAPLE task
   │     │
-  │     └── MarkerFormCollaborator[]           (NEW — see §7)
-  │           ├── userId → User
-  │           ├── role: OWNER | EDITOR | VIEWER
-  │           └── invitedById, invitedAt, acceptedAt?
+  │     ├── MarkerFormCollaborator[]           (NEW — see §7)
+  │     │     ├── userId → User
+  │     │     ├── role: OWNER | EDITOR | VIEWER
+  │     │     └── invitedById, invitedAt, acceptedAt?
+  │     │
+  │     └── MarkerFormFolderPlacement[]        (NEW — MARKER-exclusive, not STAPLE's Folder; see §8)
+  │           ├── userId → User                (whose personal filing this is)
+  │           └── folderId → MarkerFolder
+  │
+  ├── MarkerFolder                              (NEW — MARKER-exclusive, parallel to STAPLE's own `Folder`)
+  │     └── ownerId → User
   │
   └── PublishedSchema                          (unchanged shape, immutable snapshot + PID)
         ├── externalId? / externalSourceUrl?   (DataCite relatedIdentifier-style — see §5)
@@ -143,20 +150,20 @@ Modeled after how mature metadata standards bodies (DDI Alliance, HL7/FHIR, Dubl
 ## 8. Follow-up items outside this decision
 
 - **STAPLE authorization gap (found during this analysis, not caused by it):** `src/forms/mutations/updateForm.ts`, `updateFormMeta.ts`, and `deleteForm.ts` do not filter by `ctx.session.userId` — only `resolver.authorize()` (authenticated, not owner-scoped). Any authenticated STAPLE user may currently be able to mutate any other user's form. Worth a dedicated fix in STAPLE, independent of the MARKER decoupling work.
-- **Per-collaborator folder placement:** a possible future refinement — since `MarkerFormCollaborator` means a form can have multiple people organizing it, consider moving `folderId` off `MarkerForm` into a per-user placement join table (`MarkerFormFolderPlacement(userId, formId, folderId)`), so each collaborator files a shared item into their own folder structure (the actual Zotero shared-library pattern). Not required for correctness — deferred until collaboration ships and this becomes a real pain point.
 - **Relationship vocabulary for forks/proposals:** if the Tier-3 proposal workflow ships, consider making `derivedFromPid`'s relationship explicit (`isNewVersionOf` / `isVariantFormOf` / `isDerivedFrom`, DataCite-style) rather than one implicit column, once forks-as-proposals become common enough to need disambiguation.
+
+> **Resolved (no longer a follow-up):** Per-collaborator folder placement, and whether MARKER should have its own `Folder` table at all, were originally flagged here as deferred refinements. Both are now decided as part of the initial data model (§4, and `refactor/marker-data-model-decoupling-plan.md` §1.2): MARKER gets its own `MarkerFolder` — not a back-relation onto STAPLE's `Folder` — because the two organize by genuinely different taxonomies (project-workflow vs. domain/topic/publication status, `architecture.md` §5) and would otherwise collide in `Folder`'s `@@unique([name, userId])` namespace. Placement is modeled as a `MarkerFormFolderPlacement(userId, formId, folderId)` join table from day one, rather than a scalar `folderId` on `MarkerForm`, specifically so Collaboration Tier 2 doesn't require a follow-up migration to support per-collaborator filing.
 
 ---
 
 ## 9. Rollout sequencing
 
-1. Design + create the new tables (`MarkerForm`, `MarkerFormVersion`, `MarkerFormCollaborator`, updated `PublishedSchema` fields) via STAPLE's migration pipeline (STAPLE owns all migrations per `deployment.md` — this is a purely additive, low-risk-to-review change).
-2. Backfill existing `app: "marker"` rows (should be minimal — no real MARKER users yet) into the new tables.
-3. Repoint `features/forms/actions`/`queries` at the new tables.
-4. Remove the `app`-based tenancy check in `getAuthorizedLatestVersion` and the `app` filter in `getUserForms`.
-5. Ship Tier 1 (draft-stage endorsement) and Tier 2 (`MarkerFormCollaborator` roles) before attempting Tier 3 (proposal workflow) — get the collaborator authorization model solid with a small set of roles before layering fork-based governance on top.
-6. Add the cross-system usage visibility panel (§6) once `importedFromStapleFormId`/`importedFromStapleVersionNumber` are populated by the new import path — it's a pure read-side addition and can ship independently of the collaboration tiers.
-7. Drop the now-dead `app` / `originalImportHash` columns from the old shared `Form` table in a follow-up cleanup migration once the new tables are confirmed working.
+1. Design + create the new tables (`MarkerForm`, `MarkerFormVersion`, `MarkerFormCollaborator`, `MarkerFolder`, `MarkerFormFolderPlacement`, updated `PublishedSchema` fields) via STAPLE's migration pipeline (STAPLE owns all migrations per `deployment.md` — this is a purely additive, low-risk-to-review change).
+2. Repoint `features/forms/actions`/`queries` at the new tables. **No data backfill:** only dummy/test data exists under `app: "marker"` today (no real MARKER users yet), so MARKER starts with these tables empty rather than migrating existing rows — see `refactor/marker-data-model-decoupling-plan.md` §0.
+3. Remove the `app`-based tenancy check in `getAuthorizedLatestVersion` and the `app` filter in `getUserForms`.
+4. Ship Tier 1 (draft-stage endorsement) and Tier 2 (`MarkerFormCollaborator` roles) before attempting Tier 3 (proposal workflow) — get the collaborator authorization model solid with a small set of roles before layering fork-based governance on top.
+5. Add the cross-system usage visibility panel (§6) once `importedFromStapleFormId`/`importedFromStapleVersionNumber` are populated by the new import path — it's a pure read-side addition and can ship independently of the collaboration tiers.
+6. Drop the now-dead `app` / `originalImportHash` columns from the old shared `Form` table in a follow-up cleanup migration once the new tables are confirmed working.
 
 ---
 

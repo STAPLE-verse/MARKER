@@ -39,6 +39,10 @@ model User {
   // relational information
   projects                      ProjectMember[]
   forms                         Form[]
+  ownedMarkerForms              MarkerForm[]        @relation("MarkerFormOwner")
+  markerFormCollaborations      MarkerFormCollaborator[] @relation("MarkerFormCollaboratorUser")
+  ownedMarkerFolders            MarkerFolder[]      @relation("MarkerFolderOwner")
+  markerFormFolderPlacements    MarkerFormFolderPlacement[] @relation("MarkerFormFolderPlacementUser")
   publishedSchemas              PublishedSchema[]
   schemaEndorsements            SchemaEndorsement[]
   folders                       Folder[]
@@ -317,6 +321,18 @@ enum VersionStatus {
   ARCHIVED
 }
 
+enum MarkerFormOrigin {
+  NATIVE
+  IMPORTED_STAPLE
+  IMPORTED_EXTERNAL
+}
+
+enum MarkerFormCollaboratorRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
 model FormVersion {
   id                  Int                  @id @default(autoincrement())
   name                String
@@ -331,16 +347,111 @@ model FormVersion {
   tasks               Task[]
   projects            Project[]
   status              VersionStatus        @default(DRAFT)
+
+  @@unique([formId, version])
+}
+
+model MarkerForm {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownerId Int
+  owner   User @relation("MarkerFormOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  versions         MarkerFormVersion[]
+  collaborators    MarkerFormCollaborator[]
+  folderPlacements MarkerFormFolderPlacement[]
+
+  archived Boolean @default(false)
+  tags     Json?
+
+  origin                          MarkerFormOrigin @default(NATIVE)
+  externalSourceSystem            String?
+  externalId                      String?
+  externalSourceUrl               String?
+  importedFromStapleFormId        Int?
+  importedFromStapleVersionNumber Int?
+  importedAt                      DateTime?
+  originalImportHash              String?
+
+  @@index([ownerId])
+}
+
+model MarkerFormVersion {
+  id       Int    @id @default(autoincrement())
+  name     String
+  formId   Int
+  form     MarkerForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  version  Int
+  schema   Json
+  uiSchema Json?
+  archived Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  status              VersionStatus        @default(DRAFT)
   publishedSchemas    PublishedSchema[]
   publicationMetadata PublicationMetadata?
 
   @@unique([formId, version])
 }
 
+model MarkerFormCollaborator {
+  id     Int        @id @default(autoincrement())
+  formId Int
+  form   MarkerForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User       @relation("MarkerFormCollaboratorUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  role        MarkerFormCollaboratorRole @default(VIEWER)
+  invitedById Int?
+  invitedAt   DateTime                   @default(now())
+  acceptedAt  DateTime?
+
+  @@unique([formId, userId])
+  @@index([userId])
+}
+
+model MarkerFolder {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownerId Int
+  owner   User @relation("MarkerFolderOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  placements MarkerFormFolderPlacement[]
+
+  @@unique([name, ownerId])
+  @@index([ownerId])
+}
+
+model MarkerFormFolderPlacement {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  formId Int
+  form   MarkerForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  folderId Int
+  folder   MarkerFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  userId Int
+  user   User @relation("MarkerFormFolderPlacementUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([formId, userId])
+  @@index([folderId])
+  @@index([userId])
+}
+
 model PublicationMetadata {
   id            Int         @id @default(autoincrement())
   formVersionId Int         @unique
-  formVersion   FormVersion @relation(fields: [formVersionId], references: [id], onDelete: Cascade)
+  formVersion   MarkerFormVersion @relation(fields: [formVersionId], references: [id], onDelete: Cascade)
 
   domain       String?
   language     String?
@@ -500,7 +611,9 @@ model PublishedSchema {
 
   // Internal tracking
   originFormVersionId Int? // Link back to the STAPLE workspace draft
-  originFormVersion   FormVersion? @relation(fields: [originFormVersionId], references: [id], onDelete: SetNull)
+  originFormVersion   MarkerFormVersion? @relation(fields: [originFormVersionId], references: [id], onDelete: SetNull)
+  externalId          String?
+  externalSourceUrl   String?
   createdAt           DateTime @default(now())
 
   @@unique([familyId, version])
