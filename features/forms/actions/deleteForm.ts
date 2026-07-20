@@ -13,11 +13,11 @@ export const deleteForm = authenticatedAction(deleteFormSchema, async ({ input, 
   // Soft-delete the form and cascade to its versions atomically so we can never
   // end up with an archived form that still has active versions (or vice versa).
   await prisma.$transaction([
-    prisma.form.update({
+    prisma.markerForm.update({
       where: { id: input.formId },
       data: { archived: true }
     }),
-    prisma.formVersion.updateMany({
+    prisma.markerFormVersion.updateMany({
       where: { formId: input.formId },
       data: { archived: true }
     })

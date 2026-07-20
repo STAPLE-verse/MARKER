@@ -21,12 +21,11 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
   })
   const authorName = [user?.firstName, user?.lastName].filter(Boolean).join(" ")
 
-  // A nested create is atomic: the Form and its initial FormVersion are
+  // A nested create is atomic: the MarkerForm and its initial MarkerFormVersion are
   // persisted together or not at all, so no explicit $transaction is needed.
-  const form = await prisma.form.create({
+  const form = await prisma.markerForm.create({
     data: {
-      app: "marker",
-      userId,
+      ownerId: userId,
       versions: {
         create: {
           name: input.title,

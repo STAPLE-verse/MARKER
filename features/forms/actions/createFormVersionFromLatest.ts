@@ -21,7 +21,7 @@ export const createFormVersionFromLatest = authenticatedAction(
           where: { formVersionId: latestVersion.id },
         });
 
-        return tx.formVersion.create({
+        return tx.markerFormVersion.create({
           data: {
             formId: input.formId,
             version: latestVersion.version + 1,

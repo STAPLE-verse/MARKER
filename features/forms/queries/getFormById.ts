@@ -4,11 +4,10 @@ import { nonArchivedVersionsArgs } from "./versionSelectors"
 import { mapContributors, normalizePublicationMetadata, normalizeKeywords } from "../utils/publicationMetadata"
 
 export async function getFormById(formId: number, userId: number): Promise<FormDetailDTO | null> {
-  const form = await prisma.form.findFirst({
+  const form = await prisma.markerForm.findFirst({
     where: {
       id: formId,
-      userId,
-      app: "marker",
+      ownerId: userId,
       archived: false
     },
     include: {

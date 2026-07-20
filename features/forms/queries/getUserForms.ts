@@ -3,10 +3,9 @@ import { FormWithLatestVersion } from "../types"
 import { latestVersionArgs } from "./versionSelectors"
 
 export async function getUserForms(userId: number): Promise<FormWithLatestVersion[]> {
-  return prisma.form.findMany({
+  return prisma.markerForm.findMany({
     where: { 
-      userId, 
-      app: "marker",
+      ownerId: userId,
       archived: false 
     },
     include: {

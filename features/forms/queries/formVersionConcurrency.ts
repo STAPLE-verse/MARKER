@@ -19,9 +19,12 @@ export function parseExpectedUpdatedAt(iso: string): Date {
  *
  * The initial authorization check preserves the granular error policy without
  * holding a row lock for obviously invalid requests. Authorization and latest
- * version selection are repeated after locking the parent Form row, so the
+ * version selection are repeated after locking the parent MarkerForm row, so the
  * callback receives a head that cannot be superseded by another cooperating
  * write until this transaction commits.
+ *
+ * The raw SQL lock hardcodes the physical table name — Prisma model renames do
+ * not update this string automatically.
  */
 export async function withLockedAuthorizedLatestVersion<T>(
   formId: number,
@@ -36,7 +39,7 @@ export async function withLockedAuthorizedLatestVersion<T>(
   return prisma.$transaction(async (tx) => {
     await tx.$queryRaw`
       SELECT "id"
-      FROM "Form"
+      FROM "MarkerForm"
       WHERE "id" = ${formId}
       FOR UPDATE
     `

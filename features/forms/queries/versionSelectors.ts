@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client"
 /**
  * Canonical definition of a form's "latest version" (architecture.md §8.5).
  *
- * The latest version is the highest-numbered `FormVersion` that has **not** been
+ * The latest version is the highest-numbered `MarkerFormVersion` that has **not** been
  * archived. Every read and write path spreads one of these selectors into the
  * Prisma `versions` relation arg instead of re-declaring the filter inline, so
  * "latest" provably means the same thing everywhere and we can extend the rule
@@ -13,7 +13,7 @@ import { Prisma } from "@prisma/client"
 /** Only versions that are part of a form's active history. */
 export const nonArchivedVersionFilter = {
   archived: false,
-} satisfies Prisma.FormVersionWhereInput
+} satisfies Prisma.MarkerFormVersionWhereInput
 
 /**
  * All non-archived versions, newest first. Use when a callsite needs the full
@@ -22,7 +22,7 @@ export const nonArchivedVersionFilter = {
 export const nonArchivedVersionsArgs = {
   where: nonArchivedVersionFilter,
   orderBy: { version: "desc" },
-} satisfies Prisma.Form$versionsArgs
+} satisfies Prisma.MarkerForm$versionsArgs
 
 /**
  * The single latest non-archived version. Use when a callsite only needs the
@@ -31,4 +31,4 @@ export const nonArchivedVersionsArgs = {
 export const latestVersionArgs = {
   ...nonArchivedVersionsArgs,
   take: 1,
-} satisfies Prisma.Form$versionsArgs
+} satisfies Prisma.MarkerForm$versionsArgs

@@ -8,7 +8,7 @@ import { cloneFormVersionSchema } from "../schemas"
 import { copyPublicationMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/publicationMetadata"
 
 export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, async ({ input, userId }) => {
-  const version = await prisma.formVersion.findUnique({
+  const version = await prisma.markerFormVersion.findUnique({
     where: { id: input.versionId },
     include: {
       form: true,
@@ -20,7 +20,7 @@ export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, asyn
     throw new ActionError("NOT_FOUND", "Form version not found");
   }
 
-  if (version.form.userId !== userId) {
+  if (version.form.ownerId !== userId) {
     throw new ActionError("FORBIDDEN", "You do not have permission to clone this form");
   }
 
@@ -32,11 +32,10 @@ export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, asyn
     newSchema = { ...(newSchema as Record<string, unknown>), title: newName };
   }
 
-  // A nested create is atomic: the new Form and its initial FormVersion persist together
-  const newForm = await prisma.form.create({
+  // A nested create is atomic: the new MarkerForm and its initial MarkerFormVersion persist together
+  const newForm = await prisma.markerForm.create({
     data: {
-      app: "marker",
-      userId,
+      ownerId: userId,
       versions: {
         create: {
           name: newName,

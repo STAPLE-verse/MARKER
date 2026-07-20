@@ -21,7 +21,7 @@ export const saveFormVersion = authenticatedAction(saveFormVersionSchema, async 
     input.formVersionId,
     expectedUpdatedAt,
     async (tx) => {
-      const result = await tx.formVersion.updateMany({
+      const result = await tx.markerFormVersion.updateMany({
         where: {
           id: input.formVersionId,
           formId: input.formId,
@@ -40,7 +40,7 @@ export const saveFormVersion = authenticatedAction(saveFormVersionSchema, async 
         throw new ActionError("CONFLICT", CONCURRENT_EDIT_MESSAGE)
       }
 
-      const saved = await tx.formVersion.findUniqueOrThrow({
+      const saved = await tx.markerFormVersion.findUniqueOrThrow({
         where: { id: input.formVersionId },
         select: { updatedAt: true },
       })

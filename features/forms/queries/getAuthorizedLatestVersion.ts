@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db"
 import { ActionError } from "@/utils/action-result"
 import { latestVersionArgs } from "./versionSelectors"
 
-type FormQueryClient = Pick<Prisma.TransactionClient, "form">
+type FormQueryClient = Pick<Prisma.TransactionClient, "markerForm">
 
 /**
  * Write-side authorization helper (architecture.md §8.10).
@@ -19,7 +19,7 @@ export async function getAuthorizedLatestVersion(
   db: FormQueryClient = prisma
 ) {
   // We fetch strictly by ID first so we can give granular, helpful error messages
-  const form = await db.form.findUnique({
+  const form = await db.markerForm.findUnique({
     where: { id: formId },
     include: { versions: latestVersionArgs }
   })
@@ -37,21 +37,16 @@ export async function getAuthorizedLatestVersion(
   //    exists to a signed-in user who isn't the owner. The read-side queries do
   //    the opposite (collapse everything to not-found) because anonymous/list
   //    surfaces must not leak existence. See architecture.md §8.10.
-  if (form.userId !== userId) {
+  if (form.ownerId !== userId) {
     throw new ActionError("FORBIDDEN", "You do not have permission to modify this form")
   }
 
-  // 3. Enforce tenancy boundary silently (If it's a STAPLE form, pretend it doesn't exist here)
-  if (form.app !== "marker") {
-    throw new ActionError("NOT_FOUND", "Form not found")
-  }
-
-  // 4. Check archived state
+  // 3. Check archived state
   if (form.archived) {
     throw new ActionError("CONFLICT", "Cannot modify an archived form")
   }
 
-  // 5. Ensure valid state
+  // 4. Ensure valid state
   if (form.versions.length === 0) {
     throw new ActionError("CONFLICT", "Form data is corrupted (no versions found)")
   }

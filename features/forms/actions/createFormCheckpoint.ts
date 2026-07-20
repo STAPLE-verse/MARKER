@@ -19,7 +19,7 @@ export const createFormCheckpoint = authenticatedAction(saveFormVersionSchema, a
     input.formVersionId,
     expectedUpdatedAt,
     (tx, { latestVersion }) =>
-      tx.formVersion.create({
+      tx.markerFormVersion.create({
         data: {
           formId: input.formId,
           version: latestVersion.version + 1,

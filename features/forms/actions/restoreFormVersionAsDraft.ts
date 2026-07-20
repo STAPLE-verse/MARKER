@@ -22,7 +22,7 @@ export const restoreFormVersionAsDraft = authenticatedAction(
           throw new ActionError("CONFLICT", "This is already the latest version.");
         }
 
-        const sourceVersion = await tx.formVersion.findUnique({
+        const sourceVersion = await tx.markerFormVersion.findUnique({
           where: { id: input.versionId },
           include: {
             publicationMetadata: true,
@@ -38,7 +38,7 @@ export const restoreFormVersionAsDraft = authenticatedAction(
           throw new ActionError("NOT_FOUND", "Form version not found");
         }
 
-        return tx.formVersion.create({
+        return tx.markerFormVersion.create({
           data: {
             formId: input.formId,
             version: latestVersion.version + 1,

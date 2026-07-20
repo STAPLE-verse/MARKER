@@ -34,7 +34,7 @@ export const publishSchema = authenticatedAction(
             const familyId = `family_${form.id}`;
             const publicationMetadata = normalizePublicationMetadata(input);
             const publicationMetadataFields = copyPublicationMetadataFields(publicationMetadata);
-            const locked = await tx.formVersion.updateMany({
+            const locked = await tx.markerFormVersion.updateMany({
               where: {
                 id: input.formVersionId,
                 formId: input.formId,

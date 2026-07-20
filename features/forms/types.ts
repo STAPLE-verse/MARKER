@@ -1,6 +1,6 @@
 import { Prisma, VersionStatus } from "@prisma/client"
 
-export type FormWithLatestVersion = Prisma.FormGetPayload<{
+export type FormWithLatestVersion = Prisma.MarkerFormGetPayload<{
   include: {
     versions: {
       orderBy: { version: 'desc' }
