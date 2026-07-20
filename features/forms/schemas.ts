@@ -29,6 +29,12 @@ export const deleteFormSchema = z.object({
 
 export type DeleteFormInput = z.infer<typeof deleteFormSchema>
 
+export const permanentlyDeleteFormSchema = z.object({
+  formId: z.number(),
+})
+
+export type PermanentlyDeleteFormInput = z.infer<typeof permanentlyDeleteFormSchema>
+
 export const formIdActionSchema = z.object({
   formId: z.number(),
 })
@@ -41,6 +47,13 @@ export const restoreFormVersionAsDraftSchema = z.object({
 })
 
 export type RestoreFormVersionAsDraftInput = z.infer<typeof restoreFormVersionAsDraftSchema>
+
+export const deleteFormVersionSchema = z.object({
+  formId: z.number(),
+  versionId: z.number(),
+})
+
+export type DeleteFormVersionInput = z.infer<typeof deleteFormVersionSchema>
 
 export const cloneFormVersionSchema = z.object({
   versionId: z.number(),
