@@ -29,7 +29,7 @@ export default function CollectionClient({ schemas }: CollectionClientProps) {
     },
     {
       accessorKey: "statusLabel",
-      header: "Status",
+      header: "Latest Version",
       cell: ({ row }) => (
         <span
           className={`badge font-mono ${
