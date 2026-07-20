@@ -5,6 +5,12 @@ export type FormWithLatestVersion = Prisma.MarkerFormGetPayload<{
     versions: {
       orderBy: { version: 'desc' }
       take: 1
+      include: {
+        publishedSchemas: {
+          take: 1
+          select: { version: true }
+        }
+      }
     }
   }
 }>

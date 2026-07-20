@@ -9,7 +9,11 @@ import { toast } from "@/lib/toast";
  * refreshes the current route so the deleted row disappears
  * (see docs/architecture.md §8.9).
  */
-export function useDeleteForm(options?: { onSuccess?: () => void }) {
+export function useDeleteForm(options?: {
+  onSuccess?: () => void;
+  /** Navigate here after delete instead of refreshing the current route. */
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [isDeleting, startDeleting] = useTransition();
 
@@ -20,9 +24,13 @@ export function useDeleteForm(options?: { onSuccess?: () => void }) {
         toast.error(res.error);
         return;
       }
-      options?.onSuccess?.();
       toast.success("Schema deleted");
-      router.refresh();
+      if (options?.redirectTo) {
+        router.push(options.redirectTo);
+      } else {
+        router.refresh();
+      }
+      options?.onSuccess?.();
     });
   };
 

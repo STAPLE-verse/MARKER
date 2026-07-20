@@ -1,18 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DataTable, ColumnDef } from "@/components/ui/Table";
 import { Button } from "@/components/ui/Button";
-import { Modal, ModalActions } from "@/components/ui/Modal";
 import Link from "next/link";
-import { useDeleteForm } from "@/features/forms/hooks/useDeleteForm";
 
 export interface CollectionSchemaRow {
   id: number;
   title: string;
-  type: "Draft" | "Published";
-  version: number;
+  status: "Draft" | "Published";
+  statusLabel: string;
   updatedAt: string;
 }
 
@@ -21,17 +19,6 @@ interface CollectionClientProps {
 }
 
 export default function CollectionClient({ schemas }: CollectionClientProps) {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedSchema, setSelectedSchema] = useState<CollectionSchemaRow | null>(null);
-  const { remove, isDeleting } = useDeleteForm({
-    onSuccess: () => setDeleteModalOpen(false),
-  });
-
-  const handleDelete = () => {
-    if (!selectedSchema) return;
-    remove(selectedSchema.id);
-  };
-
   const columns: ColumnDef<CollectionSchemaRow>[] = [
     {
       accessorKey: "title",
@@ -41,22 +28,17 @@ export default function CollectionClient({ schemas }: CollectionClientProps) {
       ),
     },
     {
-      accessorKey: "type",
+      accessorKey: "statusLabel",
       header: "Status",
       cell: ({ row }) => (
         <span
-          className={`badge ${
-            row.original.type === "Published" ? "badge-success" : "badge-warning"
+          className={`badge font-mono ${
+            row.original.status === "Published" ? "badge-success" : "badge-warning"
           } badge-sm`}
         >
-          {row.original.type}
+          {row.original.statusLabel}
         </span>
       ),
-    },
-    {
-      accessorKey: "version",
-      header: "Version",
-      cell: ({ row }) => <span className="font-mono">v{row.original.version}</span>,
     },
     {
       accessorKey: "updatedAt",
@@ -66,31 +48,11 @@ export default function CollectionClient({ schemas }: CollectionClientProps) {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <div className="flex gap-1">
-          <Link href={`/collection/${row.original.id}`}>
-            <Button variant="ghost" size="sm">
-              View
-            </Button>
-          </Link>
-          {row.original.type === "Draft" && (
-            <Link href={`/collection/${row.original.id}/edit`}>
-              <Button variant="ghost" size="sm">
-                Edit
-              </Button>
-            </Link>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-error hover:bg-error/15"
-            onClick={() => {
-              setSelectedSchema(row.original);
-              setDeleteModalOpen(true);
-            }}
-          >
-            Delete
+        <Link href={`/collection/${row.original.id}`}>
+          <Button variant="ghost" size="sm">
+            View
           </Button>
-        </div>
+        </Link>
       ),
     },
   ];
@@ -120,26 +82,6 @@ export default function CollectionClient({ schemas }: CollectionClientProps) {
           />
         </div>
       </div>
-
-      <Modal
-        open={deleteModalOpen}
-        onClose={() => !isDeleting && setDeleteModalOpen(false)}
-        title="Delete Metadata Schema"
-      >
-        <div className="py-4">
-          <p className="text-base-content/85">
-            Are you sure you want to delete <span className="font-bold text-primary">{selectedSchema?.title}</span>? This action cannot be undone.
-          </p>
-        </div>
-        <ModalActions>
-          <Button variant="ghost" onClick={() => setDeleteModalOpen(false)} disabled={isDeleting}>
-            Cancel
-          </Button>
-          <Button variant="accent" onClick={handleDelete} disabled={isDeleting}>
-            {isDeleting ? "Deleting..." : "Delete Schema"}
-          </Button>
-        </ModalActions>
-      </Modal>
     </div>
   );
 }

@@ -9,7 +9,15 @@ export async function getUserForms(userId: number): Promise<FormWithLatestVersio
       archived: false 
     },
     include: {
-      versions: latestVersionArgs
+      versions: {
+        ...latestVersionArgs,
+        include: {
+          publishedSchemas: {
+            take: 1,
+            select: { version: true },
+          },
+        },
+      },
     },
     orderBy: { updatedAt: 'desc' }
   })
