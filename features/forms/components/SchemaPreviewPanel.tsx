@@ -1,4 +1,4 @@
-import { FormStudioProvider, FormPreview } from "@/features/form-builder";
+import { FormStudioProvider, FormPreview } from "@staple-verse/form-studio";
 
 interface SchemaPreviewPanelProps {
   schema: Record<string, unknown>;
@@ -6,8 +6,8 @@ interface SchemaPreviewPanelProps {
 }
 
 /**
- * Renders a live, read-only preview of a schema using the form-builder package's
- * public API. MARKER consumes form-builder here (one-way dependency); the panel
+ * Renders a live, read-only preview of a schema using Form Studio's public API.
+ * MARKER consumes Form Studio here (one-way dependency); the panel
  * itself stays presentational.
  */
 export function SchemaPreviewPanel({ schema, uiSchema }: SchemaPreviewPanelProps) {

@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Form Studio is installed from GitHub, so Tailwind must scan its bundled component classes. */
+@source "../node_modules/@staple-verse/form-studio/dist";
 @plugin "daisyui";
 
 body {

@@ -19,15 +19,15 @@ To maintain a clean user experience, MARKER separates the structural creation of
 
 | Layer                  | Asset                                                                                                                                               | Status                                                                                                                           |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Form Builder UI**    | `features/form-builder/` — 18 components + 6 subdirs                                                                                                | Working. Visual builder, JSON editor, live preview (FormStudio tabs). Ported from STAPLE's form builder.                         |
-| **FormStudio Context** | `FormStudioContext.tsx` — React context for schema/uiSchema/formData                                                                                | Working. Provider + `useFormStudio` hook.                                                                                        |
-| **Exports**            | `features/form-builder/index.ts`                                                                                                                    | Clean barrel export: `FormBuilder`, `FormStudio`, `JsonEditor`, `FormPreview`, `FormStudioProvider`, `useFormStudio`, all types. |
+| **Form Builder UI**    | `@staple-verse/form-studio` GitHub package                                                                                                          | Working. Shared visual builder, JSON editor, and live preview used by MARKER and STAPLE.                                        |
+| **FormStudio Context** | `FormStudioProvider` and `useFormStudio` package exports                                                                                            | Working. Shared state for schema, uiSchema, and formData.                                                                        |
+| **Exports**            | `@staple-verse/form-studio` public API                                                                                                               | Components, provider, hooks, integration state, and builder types are imported from the package.                               |
 | **App Routes**         | `collection/` list, `collection/new`, `collection/[id]`, `collection/[id]/edit`                                                                     | Scaffolded with **mock data only**. No server actions, no DB reads.                                                              |
 | **Public Routes**      | `(public)/explore/`, `(public)/schemas/`                                                                                                            | Directories exist (content not yet wired to real data).                                                                          |
 | **Prisma Schema**      | `Form`, `FormVersion`, `PublishedSchema` models                                                                                                     | Defined and ready. `Form` → `FormVersion` (1:N), `PublishedSchema` standalone with PID, familyId, version.                       |
 | **UI Components**      | `components/ui/` — Button, Card, Input, Modal, Table, PageHeader, etc.                                                                              | Production-ready, used across existing pages.                                                                                    |
 | **Auth**               | `features/auth/` — actions, schemas, components                                                                                                     | Working. Auth guard in `(authenticated)/layout.tsx`.                                                                             |
-| **Dependencies**       | `@rjsf/core`, `@rjsf/utils`, `@rjsf/validator-ajv8`, `@hello-pangea/dnd`, `@monaco-editor/react`, `react-hook-form`, `zod`, `@tanstack/react-table` | All installed.                                                                                                                   |
+| **Dependencies**       | `@staple-verse/form-studio`, `@monaco-editor/react`, `react-hook-form`, `zod`, `@tanstack/react-table`                                              | Shared builder dependencies are owned by Form Studio; MARKER retains direct dependencies used elsewhere.                       |
 
 ### ❌ What's Missing (The Work)
 
@@ -90,7 +90,9 @@ Create Form (Form row)
 
 ## 3. Feature Module Architecture
 
-Following the vertical slicing pattern in `features/README.md`, we'll create a new `features/forms/` module for the **data layer** (server actions, queries, validation). The **UI builder** stays in `features/form-builder/`.
+Following the vertical slicing pattern in `features/README.md`, `features/forms/` owns the
+MARKER-specific data layer (server actions, queries, validation). The shared UI builder is
+provided by `@staple-verse/form-studio`.
 
 ```
 features/
@@ -313,12 +315,12 @@ features/
 
 ## 7. Technical Notes
 
-### Form Builder Package Extraction
+### Form Studio Package
 
-The `features/form-builder/` directory is destined to become `@staple-verse/form-builder`. For now:
-
-- **No changes needed for Phase 1–2.** Keep it as a local feature module.
-- When extracting, the key boundary is: `features/form-builder/` exports only React components and types. It has **zero** knowledge of Prisma, server actions, or MARKER's app router. This boundary is already clean.
+The shared builder has been extracted to the GitHub-only
+`@staple-verse/form-studio` package. MARKER owns routing, drafts, and persistence while the
+package owns form-building state and UI. The package has no knowledge of Prisma, server
+actions, or MARKER's App Router.
 
 ### Server Action Patterns
 

@@ -9,7 +9,7 @@ import {
   FormStudioUI,
   useFormStudio,
   type FormStudioSaveStatus,
-} from "@/features/form-builder";
+} from "@staple-verse/form-studio";
 import { Alert } from "@/components/ui/Alert";
 import { BackButton } from "@/components/ui/BackButton";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
