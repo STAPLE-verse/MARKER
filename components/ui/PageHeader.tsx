@@ -22,19 +22,19 @@ import { cn } from '@/lib/utils';
  * </PageHeader>
  */
 
-const PageHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & {
-  title: string;
-  description?: string;
+const PageHeader = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> & {
+  title: React.ReactNode;
+  description?: React.ReactNode;
 }>(({ title, description, children, className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6", className)}
+    className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6", className)}
     {...props}
   >
-    <div>
-      <h1 className="text-3xl font-bold">{title}</h1>
+    <div className="flex-1 min-w-0">
+      <h1 className="text-3xl font-bold leading-tight">{title}</h1>
       {description && (
-        <p className="text-base-content/60 mt-1">{description}</p>
+        <p className="text-base-content/60 mt-2">{description}</p>
       )}
     </div>
     {children && (
