@@ -36,7 +36,7 @@ export default async function DashboardPage() {
       >
         <Link href="/collection/new">
           <Button variant="primary" size="sm">
-            Create Schema
+            Add schema
           </Button>
         </Link>
       </PageHeader>
