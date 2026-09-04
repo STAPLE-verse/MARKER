@@ -1,5 +1,13 @@
 # Target Architecture & Tech Stack
 
+> **Status:** Archived planning document. The decoupled MARKER/STAPLE data
+> boundary is defined in `docs/marker-staple-decoupling.md`. The canonical
+> template package, Core V1, and Semantic V1 direction are defined in
+> `docs/refactor/marker-template-profile-v1.md` and the sibling
+> `marker-template-spec` repository. Where this document describes a shared
+> `Form` table, an `app` discriminator, or a unified JSON-LD template wrapper,
+> those designs are superseded.
+
 This document outlines the architectural decisions and technology stack for the **MARKER** platform, specifically detailing how it integrates within the broader **STAPLE** ecosystem.
 
 ## 1. Core Technology Stack
@@ -98,7 +106,8 @@ The `app` field on `Form` is strictly a **product scoping** mechanism. **Provena
 - `PublishedSchema.source` — origin format ("native", "cedar", "redcap")
 - `PublishedSchema.derivedFromPid` — fork lineage
 - `PublishedSchema.originFormVersionId` — link back to the original draft
-- JSON-LD `@context` at export — Dublin Core, PROV-O vocabulary mappings
+- canonical Core V1 identity and provenance metadata, with the exact
+  template-version relationship for collected instances still to be decided
 
 These concerns must not be conflated. Provenance requires multiple fields and careful metadata design; product scoping is a simple binary routing question.
 
@@ -127,11 +136,15 @@ To satisfy the **F** (Findable) and **I** (Interoperable) in FAIR, MARKER implem
 ### Internal Findability (The Explore Page)
 MARKER's internal search relies on highly structured metadata rather than just free-text keyword matching:
 1. **Domain vs. Keywords**: We use a strict `domain` field (e.g., "Neuroscience", "Linguistics") based on controlled vocabularies (like the OECD Fields of Science) for top-level faceted filtering, reserving `keywords` for hyper-specific tags.
-2. **Semantic Ontology Search**: Because `PublishedSchema` supports `ontologyRefs` (e.g., `SNOMED:75367002`), researchers can execute exact semantic searches to find schemas that collect specific data concepts, regardless of what human language the form's title is written in.
+2. **Semantic Search**: Legacy `PublishedSchema.ontologyRefs` values are transitional migration hints. Future semantic discovery must index validated Semantic V1 predicate IRIs, direct IRI values, and exact local value-to-IRI mappings rather than infer conformance from legacy `ontologyId` annotations.
 3. **Advanced Filtering**: Full support for filtering by `language`, `source` (Native vs. CEDAR), and publication date.
 
-### External Findability (Google Dataset Search)
-To ensure schemas are discoverable by the broader internet, the unified export JSON (shown below) is invisibly injected into the `<head>` of the public `schemas/[pid]` detail pages via a `<script type="application/ld+json">` tag. This allows Google Dataset Search and other academic web crawlers to natively index the schemas.
+### External Findability
+A future JSON-LD description of a published template landing page may support
+search engines and registries, but it is separate from Semantic V1 instance
+projection and is deferred beyond V1. A Semantic V1 package must not be
+presented as template-publication JSON-LD merely because it can project
+collected metadata instances.
 
 ### Licensing (Reusability)
 Every `PublishedSchema` must have an explicit license (defaulting to `CC-BY-4.0`) to ensure it is legally reusable by the scientific community.
@@ -139,51 +152,22 @@ Every `PublishedSchema` must have an explicit license (defaulting to `CC-BY-4.0`
 ### Content Negotiation (Accessibility)
 The Persistent Identifier (PID) URL for a schema (e.g., `https://marker.stapleverse.org/schemas/ps_8f9a2b`) acts as a smart endpoint:
 - **Browser (HTML)**: Returns the MARKER web interface for human readability.
-- **API (JSON)**: If requested with `Accept: application/json`, it returns the raw JSON Schema file.
+- **API (JSON)**: If requested with `Accept: application/json`, it returns the
+  canonical self-contained Core V1 template package, not a bare form schema.
 
-### Unified Export Format (JSON-LD + JSON Schema + uiSchema)
-STAPLE currently maps collected form data to standard `schema.org` vocabularies via JSON-LD. MARKER applies this same FAIR philosophy to the form *schemas* themselves, while adhering to the `react-jsonschema-form` (RJSF) standard of separating data validation from UI presentation.
+### Canonical package and Semantic V1 instance projection
 
-When a schema is exported or downloaded from MARKER, it is packaged into a unified `.json` file containing:
-1. **FAIR Metadata**: Provenance and context embedded at the root level using standard Semantic Web vocabularies (Dublin Core, PROV-O).
-2. **Data validation (`schema`)**: The pure JSON Schema object (IETF draft-07).
-3. **Presentation (`uiSchema`)**: The RJSF layout instructions.
+A portable template is one Core V1 JSON package with `conformsTo`, `metadata`,
+and `form`, plus an optional top-level `semantics` component. The nested
+`form.schema` remains draft-07 JSON Schema and `form.uiSchema` remains the RJSF
+presentation object. The package itself is not wrapped in JSON-LD and does not
+contain a root `@context` or `@id`.
 
-**Example Unified Export:**
-```json
-{
-  "@context": {
-    "schema": "https://schema.org/",
-    "prov": "http://www.w3.org/ns/prov#"
-  },
-  "@id": "https://marker.stapleverse.org/schemas/ps_8f9a2b",
-  "title": "Cognitive Assessment Template",
-  "schema:version": "1.0.0",
-  "schema:isVersionOf": "https://marker.stapleverse.org/families/fam_abc",
-  "schema:creator": { "name": "Dr. Jane Doe" },
-  "schema:license": "https://creativecommons.org/licenses/by/4.0/",
-  "prov:wasDerivedFrom": "https://cedar.metadatacenter.org/templates/12345",
-  
-  "schema": {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "properties": {
-      "consent_given": {
-        "type": "boolean",
-        "title": "Patient Consented"
-      }
-    },
-    "required": ["consent_given"]
-  },
-
-  "uiSchema": {
-    "consent_given": {
-      "ui:widget": "switch"
-    }
-  }
-}
-```
-This architecture ensures 100% interoperability: external validators can ignore the `@context` and `uiSchema` keys and run directly against the `schema` object, while MARKER/STAPLE can instantly reconstruct both the data validation rules and the intended visual UX.
+When Semantic V1 is declared, its bindings use absolute predicate IRIs and the
+`literal`, `iri`, and `node` value kinds to project a validated metadata
+response to deterministic, offline expanded JSON-LD. The raw STAPLE response
+remains authoritative. User-authored contexts, remote ontology verification,
+and JSON-LD describing the published template itself are outside Semantic V1.
 
 ## 8. Application Conventions (MARKER)
 

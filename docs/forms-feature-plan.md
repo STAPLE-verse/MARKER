@@ -1,5 +1,11 @@
 # Forms Feature — Vertical Deployment Plan
 
+> **Status:** Historical implementation plan. Current template-contract and
+> Semantic V1 decisions live in `docs/refactor/marker-template-profile-v1.md`
+> and the sibling `marker-template-spec` repository. In particular, embedded
+> `ontologyId` authoring and root-level JSON-LD `@context` export are not the
+> Semantic V1 design.
+
 > **Goal:** Build out the complete Forms lifecycle in MARKER — from creating a draft form through the visual builder, to versioning, publishing to the marketplace, and browsing/forking published schemas. This is the core feature of MARKER.
 
 ### The Core Workflow
@@ -44,7 +50,7 @@ To maintain a clean user experience, MARKER separates the structural creation of
 | **Form Tags**                | `Form.tags` (JSON) exists but no UI for tagging.                                                                   |
 | **Forking/Derivation**       | `PublishedSchema.derivedFromPid` is in the schema. No fork flow exists.                                            |
 | **Content Negotiation**      | Architecture doc describes `Accept: application/json` for PID URLs. Not implemented.                               |
-| **JSON-LD Export**           | Architecture doc describes embedded `@context`. Not implemented.                                                   |
+| **Semantic instance export** | The historical embedded-`@context` design is superseded. Semantic V1 binding design and expanded JSON-LD projection are not implemented. |
 | **Validation**               | No Zod schemas for form creation / version metadata.                                                               |
 
 ### Open Architecture Questions
@@ -112,7 +118,7 @@ features/
 | `saveFormVersion`  | `{ formId, schema, uiSchema }`                                                                                | Updates the **latest** `FormVersion`'s schema/uiSchema JSON in-place (auto-save while editing).                                              |
 | `createNewVersion` | `{ formId, schema, uiSchema, name? }`                                                                         | Creates a new `FormVersion` row with bumped version number. For explicit "Save as new version" action.                                       |
 | `archiveForm`      | `{ formId }`                                                                                                  | Soft-archive (set `archived: true`) on the `MarkerForm` and cascade to all `MarkerFormVersion` rows.                                              |
-| `publishSchema`    | `{ formVersionId, keywords[], license, domain, language, contributors, releaseNotes, relatedPublicationDoi }` | Freezes a `FormVersion` into a `PublishedSchema`. Extracts nested `ontologyId`s from JSON. Generates PID, familyId, sets `version`.          |
+| `publishSchema`    | `{ formVersionId, keywords[], license, domain, language, contributors, releaseNotes, relatedPublicationDoi }` | Freezes a `FormVersion` into a `PublishedSchema`. Transitional behavior still extracts legacy nested `ontologyId` values into `ontologyRefs`; this is not Semantic V1 conformance. Generates PID, familyId, and `version`. |
 | `forkSchema`       | `{ publishedSchemaPid }`                                                                                      | Creates a new `Form` + `FormVersion` pre-populated with the published schema's JSON. Sets `derivedFromPid`.                                  |
 | `importFromStaple` | `{ sourceFormId, sourceVersionId, mode, targetMarkerFormId? }` | Copy one STAPLE version into MARKER (`create` new form or `update` parent). See [`refactor/import.md`](./refactor/import.md). |
 | `endorseSchema`    | `{ publishedSchemaPid }`                                                                                      | Toggles the user's endorsement (like) for a schema. Updates join table and increments/decrements `endorsementCount`.                         |
@@ -127,7 +133,7 @@ features/
 | `getUserPublishedSchemas(userId)`        | All `PublishedSchema` rows authored by the user.                                                                                                                   |
 | `getUserEndorsedSchemas(userId)`         | All `PublishedSchema` rows that the user has endorsed via the `SchemaEndorsement` join table.                                                                      |
 | `getPublishedSchema(pid)`                | Single `PublishedSchema` by PID (for public detail page).                                                                                                          |
-| `searchPublishedSchemas(query, filters)` | Full-text search over `title`, `description`, `keywords`, `contributors`. Filters by `domain`, `language`, `ontologyId`. Sorts by `usageCount`/`endorsementCount`. |
+| `searchPublishedSchemas(query, filters)` | Full-text search over `title`, `description`, `keywords`, `contributors`. Future semantic filters use validated Semantic V1 IRIs; legacy `ontologyRefs` remain transitional migration data. Sorts by `usageCount`/`endorsementCount`. |
 
 ---
 
@@ -239,8 +245,12 @@ features/
 - [x] Implement `createNewVersion` action (version bumping logic)
 - [x] Add version history UI on `/collection/[id]` detail page
 - [x] Build the "Publication Wizard" Modal (collects FAIR metadata: domain, language, contributors, license, release notes)
-- [x] Update FormBuilder UI (`CardGeneralParameterInputs.tsx`, `types.ts`) to add an `ontologyId` input to specific field properties.
-- [x] Implement `publishSchema` action (extracts nested `ontologyId`s to populate `PublishedSchema.ontologyRefs`, generates PID, immutability)
+- [x] Historical: an experimental `ontologyId` field was added and later
+  removed from Form Studio because it could not express Semantic V1 value
+  semantics. Existing values remain migration hints only.
+- [x] Implement `publishSchema`; its legacy `ontologyId` to `ontologyRefs`
+  extraction remains transitional behavior and does not establish Semantic V1
+  conformance
 - [x] Wire the publish modal to trigger from the draft detail page (keeping FormBuilder strictly for structural editing)
 - [x] Refactor detail page to show draft vs. published status from real data
 
@@ -253,7 +263,9 @@ features/
 - [ ] Wire cross-app version import (STAPLE ↔ MARKER): create-new vs update-parent — see [`refactor/import.md`](./refactor/import.md)
 - [ ] Add shared import normalization, hashing, provenance, and persistence infrastructure
 - [ ] Add external catalog adapters as their APIs are selected and designed
-- [ ] Build out `(public)/explore` page with advanced search + filters (Publication Date, Domain/Subject, Ontology Codes)
+- [ ] Build out `(public)/explore` page with advanced search + filters
+  (publication date, domain/subject, and validated Semantic V1 IRIs; preserve
+  legacy ontology codes only as migration data)
 - [ ] Build out `(public)/schemas/[pid]` detail page
 - [ ] Implement `forkSchema` action
 - [ ] Add content negotiation for schema PID URLs (middleware or route handler)
@@ -269,7 +281,9 @@ features/
 - [ ] Form tagging UI (Domain/topic labels, not workflow labels)
 - [ ] Endorsements UI on public schema detail pages (Like/Endorse button)
 - [ ] Dashboard stats wired to real counts (published schemas, drafts, etc.)
-- [ ] JSON-LD `@context` embedding on export
+- [ ] Generate deterministic, offline expanded JSON-LD for metadata instances
+  from validated Semantic V1 bindings; template-publication JSON-LD remains a
+  separate deferred feature
 - [ ] Activity feed on dashboard (from real form events)
 
 **Deliverable:** Feature-complete forms experience with organizational tools and FAIR compliance.
