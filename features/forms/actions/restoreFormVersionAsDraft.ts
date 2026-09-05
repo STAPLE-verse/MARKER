@@ -1,8 +1,10 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { authenticatedAction } from "@/utils/safe-action";
 import { ActionError } from "@/utils/action-result";
+import { generatePID } from "@/utils/id";
 import { restoreFormVersionAsDraftSchema } from "../schemas";
 import { withLockedAuthorizedLatestVersion } from "../queries/formVersionConcurrency";
 import { copyPublicationMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/publicationMetadata";
@@ -45,6 +47,10 @@ export const restoreFormVersionAsDraft = authenticatedAction(
             name: sourceVersion.name,
             schema: sourceVersion.schema ?? {},
             uiSchema: sourceVersion.uiSchema ?? {},
+            semantics: sourceVersion.semantics ?? Prisma.JsonNull,
+            // New MarkerFormVersion row under the same, existing MarkerForm —
+            // mint a fresh versionId; familyId is untouched.
+            versionId: generatePID("mv"),
             publicationMetadata: {
               create: copyPublicationMetadataFields(
                 sourceVersion.publicationMetadata ?? DEFAULT_PUBLICATION_METADATA

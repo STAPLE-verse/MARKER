@@ -16,7 +16,7 @@ describe("saveFormVersionSchema", () => {
   });
 
   it("allows uiSchema to be omitted", () => {
-    const { uiSchema, ...rest } = validInput;
+    const { uiSchema: _uiSchema, ...rest } = validInput;
     const result = saveFormVersionSchema.safeParse(rest);
     expect(result.success).toBe(true);
   });
@@ -30,7 +30,7 @@ describe("saveFormVersionSchema", () => {
   });
 
   it("rejects a missing schema", () => {
-    const { schema, ...rest } = validInput;
+    const { schema: _schema, ...rest } = validInput;
     const result = saveFormVersionSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });

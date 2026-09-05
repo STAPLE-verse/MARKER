@@ -1,8 +1,10 @@
 "use server"
 
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
+import { generatePID } from "@/utils/id"
 import { createFormSchema } from "../schemas"
 import {
   copyPublicationMetadataFields,
@@ -26,6 +28,10 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
   const form = await prisma.markerForm.create({
     data: {
       ownerId: userId,
+      // marker-template-spec Core V1 metadata.familyId: minted once here, never
+      // reassigned. This is the only code path that creates a new MarkerForm row,
+      // so it is the only place a new familyId is ever minted.
+      familyId: generatePID("mf"),
       versions: {
         create: {
           name: input.title,
@@ -37,6 +43,11 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
             properties: {}
           },
           uiSchema: {},
+          // Native creation never takes semantics as input — every native
+          // template starts Core-only.
+          semantics: Prisma.JsonNull,
+          // marker-template-spec Core V1 metadata.versionId (draft phase).
+          versionId: generatePID("mv"),
           publicationMetadata: {
             create: copyPublicationMetadataFields({
               ...DEFAULT_PUBLICATION_METADATA,

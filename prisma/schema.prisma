@@ -340,6 +340,10 @@ model FormVersion {
   version             Int
   schema              Json
   uiSchema            Json?
+  // STAPLE-owned column (STAPLE's migration history is authoritative for this
+  // table). Mirrored here only so MARKER's passive read-side model matches the
+  // live shared-database shape and `prisma migrate dev` doesn't try to drop it.
+  semantics           Json?
   archived            Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @default(now()) @updatedAt
@@ -355,6 +359,11 @@ model MarkerForm {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // marker-template-spec Core V1 metadata.familyId (opaque generatePID("mf") value;
+  // wrapped into a URI at package-assembly time). Minted once at creation, never
+  // reassigned.
+  familyId String @unique
 
   ownerId Int
   owner   User @relation("MarkerFormOwner", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -386,6 +395,15 @@ model MarkerFormVersion {
   version  Int
   schema   Json
   uiSchema Json?
+  // Semantic V1 component (marker-template-spec); absent = Core-only template.
+  // Copied verbatim between MarkerFormVersion rows (already validated at authoring
+  // time via Form Studio's semantic-v1 extension) — a future STAPLE-import path
+  // must validate it, not just copy it, since that content crosses a trust boundary.
+  semantics Json?
+  // marker-template-spec Core V1 metadata.versionId while this version is DRAFT
+  // (opaque generatePID("mv") value). Stable across in-place draft edits; replaced
+  // by a permanent PublishedSchema.pid-derived URI at publish time.
+  versionId String @unique
   archived Boolean @default(false)
 
   createdAt DateTime @default(now())

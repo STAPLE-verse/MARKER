@@ -62,6 +62,7 @@ export interface FormVersionDTO {
   updatedAt: Date
   schema: Record<string, unknown>
   uiSchema: Record<string, unknown>
+  semantics: Record<string, unknown> | null
   publishedSchema: PublishedSchemaSummaryDTO | null
   publicationMetadata: PublicationMetadataDTO | null
 }

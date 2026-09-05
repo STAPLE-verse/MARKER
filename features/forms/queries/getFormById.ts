@@ -45,6 +45,7 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
         updatedAt: v.updatedAt,
         schema: (v.schema ?? {}) as Record<string, unknown>,
         uiSchema: (v.uiSchema ?? {}) as Record<string, unknown>,
+        semantics: (v.semantics ?? null) as Record<string, unknown> | null,
         publicationMetadata: publicationMetadata
           ? {
               ...normalizePublicationMetadata(publicationMetadata),

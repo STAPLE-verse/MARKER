@@ -19,6 +19,9 @@ export const saveFormVersionSchema = formVersionConcurrencySchema.extend({
   formId: z.number(),
   schema: z.record(z.string(), z.any()),
   uiSchema: z.record(z.string(), z.any()).optional(),
+  // Semantic V1 component. Omitted = don't touch the stored value (update paths);
+  // explicit `null` = clear it. See features/forms/actions/saveFormVersion.ts.
+  semantics: z.unknown().nullable().optional(),
 })
 
 export type SaveFormVersionInput = z.infer<typeof saveFormVersionSchema>
