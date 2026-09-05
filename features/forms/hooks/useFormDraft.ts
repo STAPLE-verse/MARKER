@@ -1,15 +1,19 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { computeStateFingerprint } from "@staple-verse/form-studio";
+import { semanticV1Extension } from "@staple-verse/form-studio/semantic-v1";
 
 export interface FormDraftData {
   schema: Record<string, unknown>;
   uiSchema: Record<string, unknown>;
+  semantics: Record<string, unknown> | null;
   baseVersionId: number;
   timestamp?: number;
 }
 
-interface DbBaseline {
+export interface DbBaseline {
   schema: Record<string, unknown>;
   uiSchema: Record<string, unknown>;
+  semantics: Record<string, unknown> | null;
 }
 
 function draftStorageKey(formId: number, versionId: number) {
@@ -20,18 +24,34 @@ function legacyDraftStorageKey(formId: number) {
   return `marker-form-draft-${formId}`;
 }
 
-function serializeBaseline(baseline: DbBaseline) {
-  return JSON.stringify({ schema: baseline.schema, uiSchema: baseline.uiSchema });
+function toExtensionValues(semantics: Record<string, unknown> | null): Record<string, unknown> {
+  return semantics === null ? {} : { [semanticV1Extension.id]: semantics };
 }
 
+/**
+ * Single source of truth for "did the authored state change." Reuses
+ * form-studio's own fingerprint (schema + uiSchema + extensionValues) instead
+ * of hand-rolling a second, narrower one — a semantics-only edit (schema and
+ * uiSchema unchanged) must still count as a change, and this is exactly what
+ * form-studio's own autosave/dirty logic already relies on internally.
+ */
 function differsFromBaseline(
   schema: object,
   uiSchema: object,
+  semantics: Record<string, unknown> | null,
   baseline: DbBaseline
 ): boolean {
   return (
-    serializeBaseline({ schema: schema as Record<string, unknown>, uiSchema: uiSchema as Record<string, unknown> }) !==
-    serializeBaseline(baseline)
+    computeStateFingerprint({
+      schema: schema as Record<string, unknown>,
+      uiSchema: uiSchema as Record<string, unknown>,
+      extensionValues: toExtensionValues(semantics),
+    }) !==
+    computeStateFingerprint({
+      schema: baseline.schema,
+      uiSchema: baseline.uiSchema,
+      extensionValues: toExtensionValues(baseline.semantics),
+    })
   );
 }
 
@@ -50,10 +70,13 @@ export function useFormDraft(
 
   const [currentSchema, setCurrentSchema] = useState(dbBaseline.schema);
   const [currentUiSchema, setCurrentUiSchema] = useState(dbBaseline.uiSchema);
+  const [currentSemantics, setCurrentSemantics] = useState(dbBaseline.semantics);
   const [studioKey, setStudioKey] = useState(0);
 
   const dbBaselineRef = useRef(dbBaseline);
-  dbBaselineRef.current = dbBaseline;
+  useEffect(() => {
+    dbBaselineRef.current = dbBaseline;
+  }, [dbBaseline]);
 
   const draftKey = draftStorageKey(formId, versionId);
 
@@ -61,6 +84,7 @@ export function useFormDraft(
     // Drop legacy unscoped keys from the previous implementation.
     localStorage.removeItem(legacyDraftStorageKey(formId));
 
+    let nextDraftToRestore: FormDraftData | null = null;
     const saved = localStorage.getItem(draftKey);
     if (saved) {
       try {
@@ -69,10 +93,15 @@ export function useFormDraft(
           parsed?.schema &&
           parsed?.uiSchema &&
           parsed.baseVersionId === versionId &&
-          differsFromBaseline(parsed.schema, parsed.uiSchema, dbBaselineRef.current);
+          differsFromBaseline(
+            parsed.schema,
+            parsed.uiSchema,
+            parsed.semantics ?? null,
+            dbBaselineRef.current
+          );
 
         if (isValid) {
-          setDraftToRestore(parsed as FormDraftData);
+          nextDraftToRestore = parsed as FormDraftData;
         } else {
           localStorage.removeItem(draftKey);
         }
@@ -80,6 +109,15 @@ export function useFormDraft(
         localStorage.removeItem(draftKey);
       }
     }
+
+    // A single unconditional update at the end of the effect, mirroring how
+    // draftLoaded was already written — the earlier version of this hook
+    // called setDraftToRestore conditionally from inside the try/if above,
+    // which read as ad hoc derived state to the react-hooks lint rule even
+    // though the effect itself (a one-time localStorage read) is genuinely
+    // unavoidable: localStorage doesn't exist during SSR, so this can't be
+    // computed during render without risking a hydration mismatch.
+    setDraftToRestore(nextDraftToRestore);
     setDraftLoaded(true);
   }, [draftKey, formId, versionId]);
 
@@ -87,6 +125,7 @@ export function useFormDraft(
     if (draftToRestore) {
       setCurrentSchema(draftToRestore.schema);
       setCurrentUiSchema(draftToRestore.uiSchema);
+      setCurrentSemantics(draftToRestore.semantics);
       setStudioKey((k) => k + 1);
       setDraftToRestore(null);
     }
@@ -98,9 +137,9 @@ export function useFormDraft(
   };
 
   const saveDraft = useCallback(
-    (schema: object, uiSchema: object) => {
+    (schema: object, uiSchema: object, semantics: Record<string, unknown> | null) => {
       const baseline = dbBaselineRef.current;
-      if (!differsFromBaseline(schema, uiSchema, baseline)) {
+      if (!differsFromBaseline(schema, uiSchema, semantics, baseline)) {
         localStorage.removeItem(draftKey);
         return;
       }
@@ -108,6 +147,7 @@ export function useFormDraft(
       const payload: FormDraftData = {
         schema: schema as Record<string, unknown>,
         uiSchema: uiSchema as Record<string, unknown>,
+        semantics,
         baseVersionId: versionId,
         timestamp: Date.now(),
       };
@@ -125,6 +165,7 @@ export function useFormDraft(
     draftToRestore,
     currentSchema,
     currentUiSchema,
+    currentSemantics,
     studioKey,
     restoreDraft,
     discardDraft,
@@ -136,7 +177,8 @@ export function useFormDraft(
 export function isDirtyVsDbBaseline(
   schema: object,
   uiSchema: object,
+  semantics: Record<string, unknown> | null,
   baseline: DbBaseline
 ): boolean {
-  return differsFromBaseline(schema, uiSchema, baseline);
+  return differsFromBaseline(schema, uiSchema, semantics, baseline);
 }
