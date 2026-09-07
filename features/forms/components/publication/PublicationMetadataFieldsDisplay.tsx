@@ -1,11 +1,11 @@
 import type { ReactNode } from "react"
 import { Badge } from "@/components/ui/Badge"
 import {
-  contributorRoleLabel,
   domainLabel,
   languageLabel,
   licenseLabel,
 } from "@/features/forms/constants/publicationMetadataOptions"
+import { ContributorSummaryFields } from "@/features/forms/components/publication/ContributorSummaryFields"
 import type { PublicationMetadataFieldsDTO } from "@/features/forms/types"
 
 interface PublicationMetadataFieldsDisplayProps {
@@ -68,27 +68,16 @@ export function PublicationMetadataFieldsDisplay({
             <div className="flex flex-col gap-3">
               {contributors.map((contributor, index) => (
                 <div
-                  key={`${contributor.name}-${contributor.role}-${index}`}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-2 rounded-lg border border-base-200 bg-base-100 p-3"
+                  key={`${contributor.name}-${index}`}
+                  className="flex flex-wrap gap-x-6 gap-y-1.5 rounded-lg border border-base-200 bg-base-100 p-3"
                 >
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
-                      Name
-                    </p>
-                    <p className="font-medium">{contributor.name || "Unnamed"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
-                      Role
-                    </p>
-                    <p className="font-medium">{contributorRoleLabel(contributor.role)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">
-                      ORCID
-                    </p>
-                    <p className="font-medium">{contributor.orcid || "Not specified"}</p>
-                  </div>
+                  <ContributorSummaryFields
+                    name={contributor.name}
+                    nameFallback="Unnamed"
+                    roles={contributor.roles}
+                    orcid={contributor.orcid}
+                    affiliations={contributor.affiliations}
+                  />
                 </div>
               ))}
             </div>

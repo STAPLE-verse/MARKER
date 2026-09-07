@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 
 /**
@@ -9,6 +10,12 @@ import { cn } from '@/lib/utils';
  * Uses the native HTML <dialog> element for accessibility (focus trapping,
  * Escape key, aria roles) instead of STAPLE's `react-overlays` dependency.
  * This keeps the shared package dependency-free.
+ *
+ * Rendered via a portal into `document.body` rather than in place: its
+ * backdrop-close mechanism is a real `<form method="dialog">`, and a modal
+ * is very often opened from inside a page's own `<form>` — without the
+ * portal that nests a form inside a form, which is invalid HTML and breaks
+ * hydration.
  *
  * Controlled via `open` + `onClose` props — no internal state.
  *
@@ -43,8 +50,22 @@ const sizeClasses = {
   full: 'max-w-full mx-4',
 } as const;
 
+// `document.body` doesn't exist during SSR, so the portal target is only
+// available after mount. useSyncExternalStore (rather than setState inside
+// an effect) is React's own hydration-safe way to flip a value like this:
+// it renders `false` for the server/first-hydration pass to match SSR
+// output, then schedules the follow-up client render itself.
+function useIsMounted(): boolean {
+  return React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+}
+
 export function Modal({ open, onClose, title, size = 'md', children, className }: ModalProps) {
   const dialogRef = React.useRef<HTMLDialogElement>(null);
+  const mounted = useIsMounted();
 
   React.useEffect(() => {
     const dialog = dialogRef.current;
@@ -57,7 +78,9 @@ export function Modal({ open, onClose, title, size = 'md', children, className }
     }
   }, [open]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <dialog
       ref={dialogRef}
       className={cn(
@@ -83,7 +106,8 @@ export function Modal({ open, onClose, title, size = 'md', children, className }
       <form method="dialog" className="modal-backdrop">
         <button type="submit" tabIndex={-1}>close</button>
       </form>
-    </dialog>
+    </dialog>,
+    document.body
   );
 }
 

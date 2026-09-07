@@ -33,13 +33,12 @@ interface PublishSchemaClientProps {
 }
 
 export default function PublishSchemaClient({ formId, version, currentUser }: PublishSchemaClientProps) {
-  const formVersion = version.version;
   const [currentStep, setCurrentStep] = useState(1);
   const publicationMetadata = version.publicationMetadata;
   const publicationMetadataDefaults = publicationMetadataToFormValues(publicationMetadata, {
     fallbackContributors: [{
       name: currentUser.name,
-      role: DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
+      roles: [DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE],
       orcid: currentUser.orcid,
     }],
   });
@@ -116,7 +115,7 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
             <CardBody className="p-6 md:p-10">
               {currentStep === 1 && <Step1FairMetadata />}
               {currentStep === 2 && <Step2Contributors isProfileIncomplete={currentUser.isProfileIncomplete} />}
-              {currentStep === 3 && <Step3Review formVersion={formVersion} />}
+              {currentStep === 3 && <Step3Review />}
             </CardBody>
           </Card>
 

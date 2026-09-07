@@ -4,14 +4,9 @@ import { Textarea } from "@/components/ui/Textarea";
 import { WizardStep } from "@/components/ui/WizardStep";
 import { Alert } from "@/components/ui/Alert";
 import { PublishFormInput } from "@/features/forms/schemas";
-import { SemanticVersionInput } from "@/components/ui/SemanticVersionInput";
-import { Control } from "react-hook-form";
+import { VersionInput } from "@/components/ui/VersionInput";
 
-interface Step3ReviewProps {
-  formVersion: number;
-}
-
-export function Step3Review({ formVersion }: Step3ReviewProps) {
+export function Step3Review() {
   const { register, control, formState: { errors } } = useFormContext<PublishFormInput>();
 
   return (
@@ -25,9 +20,9 @@ export function Step3Review({ formVersion }: Step3ReviewProps) {
       </Alert>
 
       <div className="mt-6">
-        <SemanticVersionInput 
+        <VersionInput
           name="version"
-          control={control as Control<any>}
+          control={control}
           label="Semantic Release Version"
           description="Use Major.Minor.Patch format (e.g. 1.0.0)."
           errors={errors}

@@ -24,10 +24,18 @@ export type FormWithLatestVersion = Prisma.MarkerFormGetPayload<{
  * stable, strongly-typed contract instead of `as any` casts on Json columns.
  */
 
+export interface ContributorAffiliationDTO {
+  name: string
+}
+
 export interface ContributorDTO {
   name: string
-  role: string
+  nameType?: "Personal" | "Organizational"
+  givenName?: string
+  familyName?: string
+  roles: string[]
   orcid?: string | null
+  affiliations?: ContributorAffiliationDTO[]
 }
 
 export interface PublishedSchemaSummaryDTO {

@@ -12,7 +12,11 @@ import {
   parseExpectedUpdatedAt,
   withLockedEditableFormVersionHead,
 } from "../queries/formVersionConcurrency";
-import { copyPublicationMetadataFields, normalizePublicationMetadata } from "../utils/publicationMetadata";
+import {
+  contributorsToJson,
+  copyPublicationMetadataFields,
+  normalizePublicationMetadata,
+} from "../utils/publicationMetadata";
 
 const MAX_PID_ATTEMPTS = 5;
 
@@ -76,11 +80,7 @@ export const publishSchema = authenticatedAction(
                 language: publicationMetadata.language ?? input.language,
                 ontologyRefs: extractOntologyIds(latestVersion.schema),
                 authorId: userId,
-                contributors: publicationMetadata.contributors.map((c) => ({
-                  name: c.name,
-                  role: c.role,
-                  orcid: c.orcid || null,
-                })),
+                contributors: contributorsToJson(publicationMetadata.contributors),
                 originFormVersionId: latestVersion.id,
               },
             });

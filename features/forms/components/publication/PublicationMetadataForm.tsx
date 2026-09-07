@@ -21,7 +21,6 @@ export function PublicationMetadataForm<TFieldValues extends FieldValues>({
         errors={errors}
       />
       <PublicationContributorsFields
-        register={register}
         control={control}
         errors={errors}
         isProfileIncomplete={isProfileIncomplete}

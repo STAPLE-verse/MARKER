@@ -7,6 +7,7 @@ import { authenticatedAction } from "@/utils/safe-action"
 import { generatePID } from "@/utils/id"
 import { createFormSchema } from "../schemas"
 import {
+  assembleContributorName,
   copyPublicationMetadataFields,
   DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
   DEFAULT_PUBLICATION_METADATA,
@@ -21,7 +22,11 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
       orcid: true,
     },
   })
-  const authorName = [user?.firstName, user?.lastName].filter(Boolean).join(" ")
+  const authorName = assembleContributorName({
+    nameType: "Personal",
+    givenName: user?.firstName ?? undefined,
+    familyName: user?.lastName ?? undefined,
+  })
 
   // A nested create is atomic: the MarkerForm and its initial MarkerFormVersion are
   // persisted together or not at all, so no explicit $transaction is needed.
@@ -54,7 +59,11 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
               contributors: authorName
                 ? [{
                     name: authorName,
-                    role: DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
+                    nameType: "Personal",
+                    givenName: user?.firstName ?? undefined,
+                    familyName: user?.lastName ?? undefined,
+                    // The form's own author is definitionally its creator.
+                    roles: [DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE, "Creator"],
                     orcid: user?.orcid ?? "",
                   }]
                 : [],

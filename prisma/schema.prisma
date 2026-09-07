@@ -615,7 +615,7 @@ model PublishedSchema {
   derivedFromPid String? // Links to parent if this is a fork
   isSupersededBy String? // Links to a newer schema if this one is deprecated
 
-  // Authorship (Dublin Core mapping)
+  // Authorship — the MARKER user who published this
   authorId              Int
   author                User    @relation(fields: [authorId], references: [id])
   contributors          Json?

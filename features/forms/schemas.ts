@@ -52,15 +52,23 @@ export const cloneFormVersionSchema = z.object({
 
 export type CloneFormVersionInput = z.infer<typeof cloneFormVersionSchema>
 
+const publicationContributorAffiliationSchema = z.object({
+  name: z.string(),
+})
+
 export const draftPublicationContributorSchema = z.object({
   name: z.string().optional(),
-  role: z.string().optional(),
+  nameType: z.enum(["Personal", "Organizational"]).optional(),
+  givenName: z.string().optional(),
+  familyName: z.string().optional(),
+  roles: z.array(z.string()).optional(),
   orcid: z.string().optional().nullable(),
+  affiliations: z.array(publicationContributorAffiliationSchema).optional(),
 })
 
 export const strictPublicationContributorSchema = draftPublicationContributorSchema.extend({
   name: z.string().min(1, "Name is required"),
-  role: z.string().min(1, "Role is required"),
+  roles: z.array(z.string()).min(1, "At least one role is required"),
   orcid: z.string().optional(),
 })
 
