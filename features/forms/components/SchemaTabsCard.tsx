@@ -12,10 +12,11 @@ interface SchemaTabsCardProps {
 }
 
 /**
- * Public counterpart to the authenticated `SchemaViewerCard` — same JSON
- * Source / Form Preview tabs, minus the "Compare to Latest" diff dialog,
- * which only makes sense against a draft's own version history and has no
- * meaning for a single immutable published pid.
+ * Shared JSON Source / Form Preview tabs — used by the public schema detail
+ * page and the STAPLE import modal (features/forms/components/add/StapleImportModal.tsx).
+ * The authenticated `SchemaViewerCard` (app/(authenticated)/collection/[id]/)
+ * is a separate, page-local component with an added "Compare to Latest" diff
+ * dialog that only makes sense against a draft's own MARKER version history.
  */
 export function SchemaTabsCard({ schema, uiSchema }: SchemaTabsCardProps) {
   const [activeTab, setActiveTab] = useState<"schema" | "preview">("schema");

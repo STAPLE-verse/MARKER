@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { BackButton } from "@/components/ui/BackButton";
 import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
 import { getPublishedSchemaByPid } from "@/features/forms/queries";
-import { SchemaTabsCard } from "./SchemaTabsCard";
+import { SchemaTabsCard } from "@/features/forms/components/SchemaTabsCard";
 
 export default async function SchemaDetailsPage({ params }: { params: Promise<{ pid: string }> }) {
   const { pid } = await params;

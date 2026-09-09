@@ -154,3 +154,29 @@ export const publishSchemaActionSchema = publishReviewSchema.extend({
 });
 
 export type PublishSchemaActionInput = z.infer<typeof publishSchemaActionSchema>
+
+export const importFromStapleSchema = z.discriminatedUnion("mode", [
+  z.object({
+    mode: z.literal("create"),
+    sourceFormId: z.number().int().positive(),
+    sourceVersionId: z.number().int().positive(),
+  }),
+  z.object({
+    mode: z.literal("update"),
+    sourceFormId: z.number().int().positive(),
+    sourceVersionId: z.number().int().positive(),
+    targetMarkerFormId: z.number().int().positive(),
+    // True only after the user has explicitly confirmed overwriting local
+    // MARKER edits made since the last import (docs/refactor/staple-import-phase3.md §6a).
+    confirmOverwrite: z.boolean().optional(),
+  }),
+])
+
+export type ImportFromStapleInput = z.infer<typeof importFromStapleSchema>
+
+export const getStapleVersionPreviewSchema = z.object({
+  sourceFormId: z.number().int().positive(),
+  sourceVersionId: z.number().int().positive(),
+})
+
+export type GetStapleVersionPreviewInput = z.infer<typeof getStapleVersionPreviewSchema>

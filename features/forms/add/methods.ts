@@ -14,7 +14,7 @@ export const ADD_SCHEMA_METHODS = [
     title: "From STAPLE",
     description: "Import a selected metadata form version from STAPLE.",
     href: "/collection/new/staple",
-    availability: "coming-soon",
+    availability: "available",
   },
   {
     id: SCHEMA_SOURCE_IDS.CEDAR,

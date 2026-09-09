@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { SecurePassword } from "@/lib/hash"
+import { PasswordVerifyResult, SecurePassword } from "@/lib/hash"
 import { prisma } from "@/lib/db"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -24,18 +24,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // We only authenticate users who have a password (meaning they signed up locally)
         if (!user || !user.hashedPassword) return null;
 
-        const passwordsMatch = await SecurePassword.verify(
+        const result = await SecurePassword.verify(
           credentials.password as string,
           user.hashedPassword
         );
 
-        if (passwordsMatch) {
-          return {
-            ...user,
-            id: user.id.toString()
-          };
+        if (result === PasswordVerifyResult.INVALID) return null;
+
+        if (result === PasswordVerifyResult.VALID_NEEDS_REHASH) {
+          // secure-password's own params (memlimit/opslimit) were upgraded
+          // since this hash was written — same lazy-rehash-on-login pattern
+          // STAPLE's own login.ts uses.
+          const improvedHash = await SecurePassword.hash(credentials.password as string);
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { hashedPassword: improvedHash }
+          });
         }
-        return null;
+
+        return {
+          ...user,
+          id: user.id.toString()
+        };
       }
     })
   ],
