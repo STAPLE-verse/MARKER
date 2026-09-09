@@ -4,8 +4,7 @@ import { Control, Controller, FieldErrors, FieldValues, Path } from "react-hook-
 interface VersionInputProps<TFieldValues extends FieldValues> {
   name: Path<TFieldValues>;
   control: Control<TFieldValues>;
-  label: string;
-  description?: string;
+  label: React.ReactNode;
   errors?: FieldErrors<TFieldValues>;
 }
 
@@ -13,7 +12,6 @@ export function VersionInput<TFieldValues extends FieldValues>({
   name,
   control,
   label,
-  description,
   errors,
 }: VersionInputProps<TFieldValues>) {
   const errorMessage = errors?.[name]?.message as string | undefined;
@@ -25,9 +23,9 @@ export function VersionInput<TFieldValues extends FieldValues>({
       render={({ field: { value, onChange } }) => {
         return (
           <div className="form-control w-full">
-            <div className="label pt-0 pb-1">
-              <span className="label-text font-semibold">{label}</span>
-            </div>
+            <label className="label pb-2">
+              <span className="label-text font-medium">{label}</span>
+            </label>
 
             <div className="flex items-center gap-2">
               <span className="text-xl font-bold text-base-content/50">v</span>
@@ -40,16 +38,10 @@ export function VersionInput<TFieldValues extends FieldValues>({
               />
             </div>
 
-            {description && !errorMessage && (
-              <div className="label pb-0 pt-1">
-                <span className="label-text-alt text-base-content/60">{description}</span>
-              </div>
-            )}
-
             {errorMessage && (
-              <div className="label pb-0 pt-1">
+              <label className="label pt-2">
                 <span className="label-text-alt text-error">{errorMessage}</span>
-              </div>
+              </label>
             )}
           </div>
         );

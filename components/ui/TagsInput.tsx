@@ -10,7 +10,7 @@ function getTagText(tag: ReactTag): string {
 export interface TagsInputProps {
   value: string[];
   onChange: (value: string[]) => void;
-  label?: string;
+  label?: React.ReactNode;
   placeholder?: string;
   description?: string;
   error?: string;
@@ -59,9 +59,9 @@ export function TagsInput({
   return (
     <div className="form-control w-full">
       {label && (
-        <div className="label pt-0 pb-1">
-          <span className="label-text font-semibold">{label}</span>
-        </div>
+        <label className="label pb-2">
+          <span className="label-text font-medium">{label}</span>
+        </label>
       )}
 
       <div className="react-tags-wrapper">
@@ -89,15 +89,15 @@ export function TagsInput({
       </div>
 
       {description && !error && (
-        <div className="label pb-0 pt-1">
-          <span className="label-text-alt text-base-content/60">{description}</span>
-        </div>
+        <label className="label pt-2">
+          <span className="label-text-alt text-base-content/70">{description}</span>
+        </label>
       )}
 
       {error && (
-        <div className="label pb-0 pt-1">
+        <label className="label pt-2">
           <span className="label-text-alt text-error">{error}</span>
-        </div>
+        </label>
       )}
     </div>
   );

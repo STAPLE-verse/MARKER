@@ -332,8 +332,8 @@ function ContributorEditorModal({
         />
 
         <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-semibold">Roles</span>
+          <label className="label pb-2">
+            <span className="label-text font-medium">Roles</span>
           </label>
           <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
             {roleChecklist.map((role) => (

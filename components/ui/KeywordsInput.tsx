@@ -1,10 +1,11 @@
+import type { ReactNode } from "react";
 import { Control, Controller, FieldErrors, FieldValues, Path } from "react-hook-form";
 import { TagsInput } from "./TagsInput";
 
 interface KeywordsInputProps<TFieldValues extends FieldValues> {
   name: Path<TFieldValues>;
   control: Control<TFieldValues>;
-  label: string;
+  label: ReactNode;
   placeholder?: string;
   description?: string;
   errors?: FieldErrors<TFieldValues>;

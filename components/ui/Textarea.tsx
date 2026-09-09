@@ -17,8 +17,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
   return (
     <div className="form-control w-full mt-6">
       {label && (
-        <label className="label">
-          <span className="label-text font-semibold">{label}</span>
+        <label className="label pb-2">
+          <span className="label-text font-medium">{label}</span>
         </label>
       )}
       <textarea
@@ -31,7 +31,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
         {...props}
       />
       {(error || helperText) && (
-        <label className="label">
+        <label className="label pt-2">
           <span className={cn(
             "label-text-alt",
             error ? "text-error" : "text-base-content/70"

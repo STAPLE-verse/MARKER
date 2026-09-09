@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  label?: string;
+  label?: React.ReactNode;
   error?: string;
   helperText?: string;
 };
@@ -17,7 +17,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   return (
     <div className="form-control w-full">
       {label && (
-        <label className="label">
+        <label className="label pb-2">
           <span className="label-text font-medium">{label}</span>
         </label>
       )}
@@ -31,7 +31,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
         {...props}
       />
       {(error || helperText) && (
-        <label className="label">
+        <label className="label pt-2">
           <span className={cn(
             "label-text-alt",
             error ? "text-error" : "text-base-content/70"

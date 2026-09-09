@@ -46,8 +46,8 @@ export function TextListInput({
   return (
     <div className="form-control w-full">
       {label && (
-        <label className="label">
-          <span className="label-text font-semibold">{label}</span>
+        <label className="label pb-2">
+          <span className="label-text font-medium">{label}</span>
         </label>
       )}
       <div className="space-y-2">

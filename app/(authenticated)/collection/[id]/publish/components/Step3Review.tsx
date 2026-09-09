@@ -24,8 +24,12 @@ export function Step3Review() {
         <VersionInput
           name="version"
           control={control}
-          label="Semantic Release Version"
-          description="Use Major.Minor.Patch format (e.g. 1.0.0)."
+          label={
+            <span className="inline-flex items-center gap-1.5">
+              Semantic Release Version
+              <InfoTooltip text="Use Major.Minor.Patch format (e.g. 1.0.0)." />
+            </span>
+          }
           errors={errors}
         />
       </div>
@@ -38,7 +42,7 @@ export function Step3Review() {
           </span>
         }
         placeholder="Describe what this template is for, who it's designed for, and how researchers might reuse it..."
-        className="h-32 mt-6"
+        className="h-32"
         error={errors.description?.message}
         {...register("description")}
       />
@@ -46,16 +50,20 @@ export function Step3Review() {
       <Textarea
         label="Release Notes (Optional)"
         placeholder="Describe what is new or changed in this schema version to help researchers understand the update..."
-        className="h-32 mt-6"
+        className="h-32"
         error={errors.releaseNotes?.message}
         {...register("releaseNotes")}
       />
 
       <div className="mt-6">
         <Input
-          label="Related Publication DOI (Optional)"
+          label={
+            <span className="inline-flex items-center gap-1.5">
+              Related Publication DOI (Optional)
+              <InfoTooltip text="Link this schema to a published paper or dataset to strengthen its provenance." />
+            </span>
+          }
           placeholder="e.g. 10.1000/xyz123"
-          helperText="Link this schema to a published paper or dataset to strengthen its provenance."
           error={errors.relatedPublicationDoi?.message}
           {...register("relatedPublicationDoi")}
         />
