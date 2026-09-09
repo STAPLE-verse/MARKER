@@ -18,7 +18,7 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@staple-verse/form-studio": "github:STAPLE-verse/form-studio#v0.2.0-rc.4",
-    "@staple-verse/marker-template-runtime": "https://github.com/STAPLE-verse/marker-template-spec/releases/download/v1.0.0-rc.3/staple-verse-marker-template-runtime-1.0.0-rc.3.tgz",
+    "@staple-verse/marker-template-runtime": "https://github.com/STAPLE-verse/marker-template-spec/releases/download/v1.0.0-rc.4/staple-verse-marker-template-runtime-1.0.0-rc.4.tgz",
     "@tanstack/react-table": "^8.21.3",
     "argon2": "^0.44.0",
     "clsx": "^2.1.1",

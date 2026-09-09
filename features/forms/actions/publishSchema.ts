@@ -17,6 +17,7 @@ import {
   copyPublicationMetadataFields,
   normalizePublicationMetadata,
 } from "../utils/publicationMetadata";
+import { assemblePublishedPackage, formatDiagnosticsForUser, validateTemplatePackage } from "../utils/templatePackage";
 
 const MAX_PID_ATTEMPTS = 5;
 
@@ -35,9 +36,40 @@ export const publishSchema = authenticatedAction(
           input.formVersionId,
           expectedUpdatedAt,
           async (tx, { form, latestVersion }) => {
-            const familyId = `family_${form.id}`;
+            // marker-template-spec Core V1 metadata.familyId — the real, stored
+            // identity minted once at MarkerForm creation (see templateIdentity.ts).
+            const familyId = form.familyId;
             const publicationMetadata = normalizePublicationMetadata(input);
             const publicationMetadataFields = copyPublicationMetadataFields(publicationMetadata);
+            const resolvedLicense = publicationMetadata.license ?? input.license;
+            const resolvedLanguage = publicationMetadata.language ?? input.language;
+            const resolvedDescription = extractSchemaDescription(latestVersion.schema);
+
+            const draftPackage = assemblePublishedPackage({
+              pid,
+              familyId,
+              version: input.version,
+              title: latestVersion.name || "Untitled Schema",
+              schema: (latestVersion.schema ?? {}) as Record<string, unknown>,
+              uiSchema: latestVersion.uiSchema as Record<string, unknown> | null,
+              semantics: latestVersion.semantics,
+              createdAt: latestVersion.createdAt,
+              updatedAt: latestVersion.updatedAt,
+              publishedAt: new Date(),
+              description: resolvedDescription,
+              language: resolvedLanguage,
+              domain: publicationMetadata.domain,
+              keywords: publicationMetadata.keywords,
+              contributors: publicationMetadata.contributors,
+              license: resolvedLicense,
+              releaseNotes: input.releaseNotes,
+            });
+
+            const diagnostics = validateTemplatePackage(draftPackage);
+            if (diagnostics.length > 0) {
+              throw new ActionError("VALIDATION", formatDiagnosticsForUser(diagnostics));
+            }
+
             const locked = await tx.markerFormVersion.updateMany({
               where: {
                 id: input.formVersionId,
@@ -62,28 +94,41 @@ export const publishSchema = authenticatedAction(
               update: publicationMetadataFields,
             });
 
-            return tx.publishedSchema.create({
+            const created = await tx.publishedSchema.create({
               data: {
                 pid,
                 title: latestVersion.name || "Untitled Schema",
-                description: extractSchemaDescription(latestVersion.schema),
+                description: resolvedDescription,
                 schemaJson: latestVersion.schema ?? {},
                 uiSchema: latestVersion.uiSchema ?? {},
                 source: "native",
                 version: input.version,
                 familyId,
-                license: publicationMetadata.license ?? input.license,
+                license: resolvedLicense,
                 releaseNotes: input.releaseNotes,
                 relatedPublicationDoi: input.relatedPublicationDoi,
                 keywords: publicationMetadata.keywords,
                 domain: publicationMetadata.domain,
-                language: publicationMetadata.language ?? input.language,
+                language: resolvedLanguage,
                 ontologyRefs: extractOntologyIds(latestVersion.schema),
                 authorId: userId,
                 contributors: contributorsToJson(publicationMetadata.contributors),
                 originFormVersionId: latestVersion.id,
               },
             });
+
+            // Freeze the already-assembled, already-validated package as a
+            // permanent snapshot — see PublishedSchemaPackage's own comment
+            // in schema.prisma for why this isn't re-derived from `created`
+            // on read.
+            await tx.publishedSchemaPackage.create({
+              data: {
+                pid,
+                packageJson: draftPackage as unknown as Prisma.InputJsonValue,
+              },
+            });
+
+            return created;
           }
         );
 

@@ -634,8 +634,31 @@ model PublishedSchema {
   externalSourceUrl   String?
   createdAt           DateTime @default(now())
 
+  packageSnapshot PublishedSchemaPackage?
+
   @@unique([familyId, version])
   @@index([keywords]) // Make searching fast
+}
+
+// The full marker-template-spec MarkerTemplatePackage assembled and validated
+// at publish time, frozen forever after. Kept separate from PublishedSchema
+// so the (query-heavy) normalized columns above never have to carry this
+// payload along, and so this table's "never updated after insert" invariant
+// stays structurally obvious rather than mixed in with columns that do
+// legitimately change post-publish (viewCount, usageCount, endorsementCount).
+model PublishedSchemaPackage {
+  // Shared-PK 1:1 with PublishedSchema — exactly one frozen snapshot per
+  // published schema, ever. Reuses the same pid rather than a redundant
+  // autoincrement id, since the relationship is genuinely 1:1 (unlike
+  // SchemaEndorsement's many-per-schema shape, which uses a separate id).
+  pid             String          @id
+  publishedSchema PublishedSchema @relation(fields: [pid], references: [pid], onDelete: Cascade)
+
+  // The full assembled package (conformsTo/metadata/form/semantics), exactly
+  // as validated by validateTemplatePackage at publish time.
+  packageJson Json
+
+  createdAt DateTime @default(now())
 }
 
 model SchemaEndorsement {
