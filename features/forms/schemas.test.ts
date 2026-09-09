@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishFormSchema, saveFormVersionSchema } from "./schemas";
+import { publishFormSchema, saveFormVersionSchema, strictPublicationContributorSchema } from "./schemas";
 
 describe("saveFormVersionSchema", () => {
   const validInput = {
@@ -64,5 +64,80 @@ describe("publishFormSchema description", () => {
     const { description: _description, ...rest } = validInput;
     const result = publishFormSchema.safeParse(rest);
     expect(result.success).toBe(false);
+  });
+});
+
+describe("publishFormSchema version", () => {
+  const validInput = {
+    domain: "Psychology",
+    language: "en",
+    license: "CC-BY-4.0",
+    keywords: ["memory"],
+    contributors: [{ name: "Jane Doe", roles: ["Author"] }],
+    description: "A catalog-facing description for other researchers.",
+  };
+
+  it("accepts versions with no leading zeros", () => {
+    for (const version of ["0.1.0", "1.0.0", "10.20.30"]) {
+      expect(publishFormSchema.safeParse({ ...validInput, version }).success).toBe(true);
+    }
+  });
+
+  it("rejects versions with a leading zero in any part — matches Core V1's exact pattern", () => {
+    for (const version of ["01.2.3", "1.02.0", "1.2.030"]) {
+      expect(publishFormSchema.safeParse({ ...validInput, version }).success).toBe(false);
+    }
+  });
+});
+
+describe("strictPublicationContributorSchema orcid", () => {
+  const validInput = { name: "Jane Doe", roles: ["Author"] };
+
+  it("accepts a well-formed ORCID", () => {
+    expect(
+      strictPublicationContributorSchema.safeParse({ ...validInput, orcid: "0000-0002-1825-0097" }).success
+    ).toBe(true);
+  });
+
+  it("accepts an ORCID ending in the X checksum character", () => {
+    expect(
+      strictPublicationContributorSchema.safeParse({ ...validInput, orcid: "0000-0002-1825-009X" }).success
+    ).toBe(true);
+  });
+
+  it("accepts an empty or omitted ORCID — the field is optional", () => {
+    expect(strictPublicationContributorSchema.safeParse({ ...validInput, orcid: "" }).success).toBe(true);
+    expect(strictPublicationContributorSchema.safeParse(validInput).success).toBe(true);
+  });
+
+  it("rejects a malformed ORCID with a friendly message", () => {
+    const result = strictPublicationContributorSchema.safeParse({ ...validInput, orcid: "not-an-orcid" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.orcid).toContain("Must be a valid ORCID (e.g. 0000-0002-1825-0097)");
+    }
+  });
+});
+
+describe("publishFormSchema keywords", () => {
+  const validInput = {
+    domain: "Psychology",
+    language: "en",
+    license: "CC-BY-4.0",
+    contributors: [{ name: "Jane Doe", roles: ["Author"] }],
+    version: "1.0.0",
+    description: "A catalog-facing description for other researchers.",
+  };
+
+  it("accepts unique keywords", () => {
+    expect(publishFormSchema.safeParse({ ...validInput, keywords: ["memory", "cognition"] }).success).toBe(true);
+  });
+
+  it("rejects a duplicate keyword with a friendly message", () => {
+    const result = publishFormSchema.safeParse({ ...validInput, keywords: ["memory", "memory"] });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.keywords).toContain("Keywords must be unique");
+    }
   });
 });

@@ -73,4 +73,23 @@ describe("ContributorEditorModal save-time validation", () => {
     expect(screen.getByText(NO_CONTRIBUTORS_TEXT)).toBeInTheDocument();
     expect(within(dialog).getByText("At least one role is required")).toBeInTheDocument();
   });
+
+  it("blocks Save when the ORCID is malformed, even with a valid name and role", async () => {
+    render(<Harness />);
+
+    fireEvent.click(screen.getByRole("button", { name: /add contributor/i }));
+    const dialog = await screen.findByRole("dialog");
+
+    fireEvent.change(within(dialog).getByPlaceholderText("Jane"), { target: { value: "Jane" } });
+    fireEvent.change(within(dialog).getByPlaceholderText("Doe"), { target: { value: "Doe" } });
+    fireEvent.change(within(dialog).getByPlaceholderText("0000-0000-0000-0000"), {
+      target: { value: "not-an-orcid" },
+    });
+    fireEvent.click(within(dialog).getByRole("checkbox", { name: "Author" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText(NO_CONTRIBUTORS_TEXT)).toBeInTheDocument();
+    expect(within(dialog).getByText("Must be a valid ORCID (e.g. 0000-0002-1825-0097)")).toBeInTheDocument();
+  });
 });

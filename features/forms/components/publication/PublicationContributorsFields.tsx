@@ -201,7 +201,7 @@ function ContributorEditorModal({
   // wizard-level submit/step-trigger result for an already-committed
   // contributor. This is the primary gate: it runs on every Save attempt,
   // before anything is committed to the field array.
-  const [saveErrors, setSaveErrors] = useState<{ name?: string; roles?: string }>({})
+  const [saveErrors, setSaveErrors] = useState<{ name?: string; roles?: string; orcid?: string }>({})
 
   const updateField = <K extends keyof ContributorFormValues>(key: K, value: ContributorFormValues[K]) =>
     setValues((prev) => ({ ...prev, [key]: value }))
@@ -254,7 +254,7 @@ function ContributorEditorModal({
     const result = strictPublicationContributorSchema.safeParse(assembled)
     if (!result.success) {
       const fieldErrors = result.error.flatten().fieldErrors
-      setSaveErrors({ name: fieldErrors.name?.[0], roles: fieldErrors.roles?.[0] })
+      setSaveErrors({ name: fieldErrors.name?.[0], roles: fieldErrors.roles?.[0], orcid: fieldErrors.orcid?.[0] })
       return
     }
 
@@ -264,6 +264,7 @@ function ContributorEditorModal({
 
   const nameError = saveErrors.name ?? externalNameError
   const rolesError = saveErrors.roles ?? externalRolesError
+  const orcidError = saveErrors.orcid
 
   return (
     <Modal open onClose={onClose} title="Edit Contributor" size="lg">
@@ -319,6 +320,7 @@ function ContributorEditorModal({
           placeholder="0000-0000-0000-0000"
           value={values.orcid}
           onChange={(e) => updateField("orcid", e.target.value)}
+          error={orcidError}
         />
 
         <TextListInput
