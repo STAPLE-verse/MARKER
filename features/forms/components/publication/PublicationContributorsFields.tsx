@@ -20,6 +20,7 @@ import {
   availableContributorRoles,
   sortRoles,
 } from "@/features/forms/utils/publicationMetadata"
+import { strictPublicationContributorSchema } from "@/features/forms/schemas"
 import type { ContributorAffiliationDTO } from "@/features/forms/types"
 
 interface ContributorFormValues {
@@ -188,13 +189,19 @@ interface ContributorEditorModalProps {
 function ContributorEditorModal({
   initial,
   contributors,
-  nameError,
-  rolesError,
+  nameError: externalNameError,
+  rolesError: externalRolesError,
   onSave,
   onClose,
 }: ContributorEditorModalProps) {
   const [values, setValues] = useState<ContributorFormValues>(initial)
   const [customRole, setCustomRole] = useState("")
+  // Populated only by this modal's own save-time check below — distinct from
+  // the externally-passed nameError/rolesError, which reflect the *previous*
+  // wizard-level submit/step-trigger result for an already-committed
+  // contributor. This is the primary gate: it runs on every Save attempt,
+  // before anything is committed to the field array.
+  const [saveErrors, setSaveErrors] = useState<{ name?: string; roles?: string }>({})
 
   const updateField = <K extends keyof ContributorFormValues>(key: K, value: ContributorFormValues[K]) =>
     setValues((prev) => ({ ...prev, [key]: value }))
@@ -224,7 +231,7 @@ function ContributorEditorModal({
     const trimmedGivenName = values.nameType === "Personal" ? values.givenName.trim() : ""
     const trimmedFamilyName = values.nameType === "Personal" ? values.familyName.trim() : ""
 
-    onSave({
+    const assembled = {
       ...values,
       name: assembleContributorName({
         nameType: values.nameType,
@@ -239,8 +246,24 @@ function ContributorEditorModal({
         .map((affiliation) => affiliation.name.trim())
         .filter((name) => name.length > 0)
         .map((name) => ({ name })),
-    })
+    }
+
+    // Same schema the server enforces (strictPublicationContributorSchema) —
+    // reused here rather than hand-rolled, so this can never drift from what
+    // actually gets checked at publish time.
+    const result = strictPublicationContributorSchema.safeParse(assembled)
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      setSaveErrors({ name: fieldErrors.name?.[0], roles: fieldErrors.roles?.[0] })
+      return
+    }
+
+    setSaveErrors({})
+    onSave(assembled)
   }
+
+  const nameError = saveErrors.name ?? externalNameError
+  const rolesError = saveErrors.roles ?? externalRolesError
 
   return (
     <Modal open onClose={onClose} title="Edit Contributor" size="lg">

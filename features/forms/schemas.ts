@@ -100,6 +100,10 @@ export type SavePublicationMetadataInput = z.infer<typeof savePublicationMetadat
 
 export const publishFormSchema = strictPublicationMetadataSchema.extend({
   version: z.string().regex(/^\d+\.\d+\.\d+$/, "Must be a valid semantic version (e.g., 1.0.0)"),
+  // Package-level description (marker-template-spec metadata.description) —
+  // distinct from the form schema's own description, which is shown to
+  // people filling out the rendered form. See Step3Review.tsx.
+  description: z.string().min(1, "A description is required"),
   releaseNotes: z.string().optional(),
   relatedPublicationDoi: z.string().optional(),
 })

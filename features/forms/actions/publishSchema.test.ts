@@ -45,6 +45,7 @@ function basePublishInput(overrides: Record<string, unknown> = {}) {
     keywords: ["memory"],
     contributors: [{ name: "Jane Doe", roles: ["Author"] }],
     version: "1.0.0",
+    description: "A catalog-facing description for other researchers.",
     ...overrides,
   };
 }
@@ -88,7 +89,7 @@ describe("publishSchema identity + template-package validation gate", () => {
   });
 
   it("publishes using the real stored MarkerForm.familyId, not an ad-hoc value", async () => {
-    mockFormWithSchema({ type: "object", description: "A schema with a description.", properties: {} });
+    mockFormWithSchema({ type: "object", properties: {} });
 
     const result = await publishSchema(basePublishInput());
 
@@ -97,22 +98,35 @@ describe("publishSchema identity + template-package validation gate", () => {
     expect(data.familyId).toBe(FAMILY_ID);
   });
 
-  it("blocks publish when the schema has no description — a Core V1 rule zod alone can't check", async () => {
+  it("blocks publish when the wizard's Description field is empty — now caught by zod, not the runtime gate", async () => {
     mockFormWithSchema({ type: "object", properties: {} });
 
-    const result = await publishSchema(basePublishInput());
+    const result = await publishSchema(basePublishInput({ description: "" }));
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.code).toBe("VALIDATION");
+      expect(result.fieldErrors?.description).toContain("A description is required");
     }
     expect(updateMany).not.toHaveBeenCalled();
     expect(createPublishedSchema).not.toHaveBeenCalled();
     expect(createPublishedSchemaPackage).not.toHaveBeenCalled();
   });
 
+  it("uses the wizard's Description field, not the schema's own description — the two are independent", async () => {
+    mockFormWithSchema({ type: "object", description: "Form-facing instructions for people filling this out.", properties: {} });
+
+    await publishSchema(basePublishInput({ description: "Catalog-facing summary for other researchers." }));
+
+    const publishedData = createPublishedSchema.mock.calls[0][0].data;
+    const packageData = createPublishedSchemaPackage.mock.calls[0][0].data;
+
+    expect(publishedData.description).toBe("Catalog-facing summary for other researchers.");
+    expect(packageData.packageJson.metadata.description).toBe("Catalog-facing summary for other researchers.");
+  });
+
   it("succeeds and stores no Creator-role requirement — reflects the rc.4 spec change", async () => {
-    mockFormWithSchema({ type: "object", description: "Fine without a Creator role.", properties: {} });
+    mockFormWithSchema({ type: "object", properties: {} });
 
     const result = await publishSchema(
       basePublishInput({ contributors: [{ name: "Jane Doe", roles: ["Editor"] }] })
@@ -122,7 +136,7 @@ describe("publishSchema identity + template-package validation gate", () => {
   });
 
   it("freezes the exact validated package into PublishedSchemaPackage, keyed by pid", async () => {
-    mockFormWithSchema({ type: "object", description: "A schema with a description.", properties: {} });
+    mockFormWithSchema({ type: "object", properties: {} });
 
     await publishSchema(basePublishInput());
 

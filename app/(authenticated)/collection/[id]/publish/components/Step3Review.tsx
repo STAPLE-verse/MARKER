@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { WizardStep } from "@/components/ui/WizardStep";
 import { Alert } from "@/components/ui/Alert";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { PublishFormInput } from "@/features/forms/schemas";
 import { VersionInput } from "@/components/ui/VersionInput";
 
@@ -29,7 +30,20 @@ export function Step3Review() {
         />
       </div>
 
-      <Textarea 
+      <Textarea
+        label={
+          <span className="inline-flex items-center gap-1.5">
+            Description
+            <InfoTooltip text="A longer description for other researchers deciding whether to reuse this template — different from the form's own description, which is shown to people filling it out." />
+          </span>
+        }
+        placeholder="Describe what this template is for, who it's designed for, and how researchers might reuse it..."
+        className="h-32 mt-6"
+        error={errors.description?.message}
+        {...register("description")}
+      />
+
+      <Textarea
         label="Release Notes (Optional)"
         placeholder="Describe what is new or changed in this schema version to help researchers understand the update..."
         className="h-32 mt-6"

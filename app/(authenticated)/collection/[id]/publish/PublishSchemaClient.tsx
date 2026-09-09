@@ -18,6 +18,7 @@ import {
   DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
   publicationMetadataToFormValues,
 } from "@/features/forms/utils/publicationMetadata";
+import { extractSchemaDescription } from "@/utils/schema";
 import { Step1FairMetadata } from "./components/Step1FairMetadata";
 import { Step2Contributors } from "./components/Step2Contributors";
 import { Step3Review } from "./components/Step3Review";
@@ -48,6 +49,10 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
     defaultValues: {
       ...publicationMetadataDefaults,
       version: "1.0.0",
+      // Starting point only — most templates' catalog description will
+      // begin close to the form's own description and get expanded from
+      // there, but the two are independently editable from here on.
+      description: extractSchemaDescription(version.schema),
       releaseNotes: "",
       relatedPublicationDoi: ""
     }

@@ -6,7 +6,7 @@ import { ActionError } from "@/utils/action-result";
 import { publishSchemaActionSchema } from "../schemas";
 import { revalidatePath } from "next/cache";
 import { generatePID } from "@/utils/id";
-import { extractOntologyIds, extractSchemaDescription } from "@/utils/schema";
+import { extractOntologyIds } from "@/utils/schema";
 import {
   CONCURRENT_EDIT_MESSAGE,
   parseExpectedUpdatedAt,
@@ -43,7 +43,10 @@ export const publishSchema = authenticatedAction(
             const publicationMetadataFields = copyPublicationMetadataFields(publicationMetadata);
             const resolvedLicense = publicationMetadata.license ?? input.license;
             const resolvedLanguage = publicationMetadata.language ?? input.language;
-            const resolvedDescription = extractSchemaDescription(latestVersion.schema);
+            // Package-level description — a real wizard field now (see
+            // Step3Review.tsx), independent of the form schema's own
+            // description shown to people filling out the rendered form.
+            const resolvedDescription = input.description;
 
             const draftPackage = assemblePublishedPackage({
               pid,

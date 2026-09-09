@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-  label?: string;
+  label?: React.ReactNode;
   error?: string;
   helperText?: string;
 };
