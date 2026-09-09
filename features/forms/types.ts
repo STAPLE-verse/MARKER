@@ -49,6 +49,30 @@ export interface PublishedSchemaSummaryDTO {
   contributors: ContributorDTO[]
 }
 
+/**
+ * Full public-facing shape for `/schemas/[pid]` — the catalog detail page.
+ * Sourced from `PublishedSchema`'s normalized columns (fast, already
+ * display-shaped), not `PublishedSchemaPackage.packageJson` (the frozen
+ * marker-template-spec snapshot, reserved for export/interop — see its own
+ * schema.prisma comment on why it's kept separate).
+ */
+export interface PublicPublishedSchemaDTO {
+  pid: string
+  title: string
+  description: string | null
+  version: string
+  license: string
+  domain: string | null
+  language: string
+  keywords: string[]
+  contributors: ContributorDTO[]
+  releaseNotes: string | null
+  relatedPublicationDoi: string | null
+  schema: Record<string, unknown>
+  uiSchema: Record<string, unknown>
+  createdAt: Date
+}
+
 export interface PublicationMetadataFieldsDTO {
   domain: string | null
   language: string | null
