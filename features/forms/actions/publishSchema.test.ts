@@ -7,8 +7,8 @@ const UPDATED_AT = new Date("2026-09-01T00:00:00.000Z");
 const FAMILY_ID = "mf_realstoredid01";
 
 const findUniqueMarkerForm = vi.fn();
+const findUniquePublicationMetadata = vi.fn();
 const updateMany = vi.fn();
-const upsertPublicationMetadata = vi.fn();
 const createPublishedSchema = vi.fn();
 const createPublishedSchemaPackage = vi.fn();
 const queryRaw = vi.fn();
@@ -17,7 +17,7 @@ vi.mock("@/lib/db", () => {
   const client = {
     markerForm: { findUnique: (...args: unknown[]) => findUniqueMarkerForm(...args) },
     markerFormVersion: { updateMany: (...args: unknown[]) => updateMany(...args) },
-    publicationMetadata: { upsert: (...args: unknown[]) => upsertPublicationMetadata(...args) },
+    publicationMetadata: { findUnique: (...args: unknown[]) => findUniquePublicationMetadata(...args) },
     publishedSchema: { create: (...args: unknown[]) => createPublishedSchema(...args) },
     publishedSchemaPackage: { create: (...args: unknown[]) => createPublishedSchemaPackage(...args) },
     $queryRaw: (...args: unknown[]) => queryRaw(...args),
@@ -34,23 +34,34 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
 import { publishSchema } from "./publishSchema";
 
+// publishSchema now reads PublicationMetadata from the DB (written earlier by
+// the wizard's Steps 1-2 / the draft card, via savePublicationMetadata)
+// instead of accepting it as part of the publish payload — see
+// docs/refactor/publish-wizard-refactor.md, Phase 2.
 function basePublishInput(overrides: Record<string, unknown> = {}) {
   return {
     formId: FORM_ID,
     formVersionId: VERSION_ID,
     expectedUpdatedAt: UPDATED_AT.toISOString(),
-    domain: "Psychology",
-    language: "en",
-    license: "CC-BY-4.0",
-    keywords: ["memory"],
-    contributors: [{ name: "Jane Doe", roles: ["Author"] }],
     version: "1.0.0",
     description: "A catalog-facing description for other researchers.",
     ...overrides,
   };
 }
 
-function mockFormWithSchema(schema: Record<string, unknown>) {
+function mockPublicationMetadata(overrides: Record<string, unknown> = {}) {
+  findUniquePublicationMetadata.mockResolvedValue({
+    updatedAt: UPDATED_AT,
+    domain: "Psychology",
+    language: "en",
+    license: "CC-BY-4.0",
+    keywords: ["memory"],
+    contributors: [{ name: "Jane Doe", roles: ["Author"] }],
+    ...overrides,
+  });
+}
+
+function mockFormWithSchema(schema: Record<string, unknown>, semantics: unknown = null) {
   findUniqueMarkerForm.mockResolvedValue({
     id: FORM_ID,
     ownerId: OWNER_ID,
@@ -66,7 +77,7 @@ function mockFormWithSchema(schema: Record<string, unknown>) {
         name: "Test schema",
         schema,
         uiSchema: {},
-        semantics: null,
+        semantics,
       },
     ],
   });
@@ -75,14 +86,14 @@ function mockFormWithSchema(schema: Record<string, unknown>) {
 describe("publishSchema identity + template-package validation gate", () => {
   beforeEach(() => {
     findUniqueMarkerForm.mockReset();
+    findUniquePublicationMetadata.mockReset();
     updateMany.mockReset();
-    upsertPublicationMetadata.mockReset();
     createPublishedSchema.mockReset();
     createPublishedSchemaPackage.mockReset();
     queryRaw.mockReset();
 
     updateMany.mockResolvedValue({ count: 1 });
-    upsertPublicationMetadata.mockResolvedValue({});
+    mockPublicationMetadata();
     createPublishedSchema.mockImplementation(async ({ data }) => data);
     createPublishedSchemaPackage.mockImplementation(async ({ data }) => data);
     queryRaw.mockResolvedValue([]);
@@ -127,12 +138,53 @@ describe("publishSchema identity + template-package validation gate", () => {
 
   it("succeeds and stores no Creator-role requirement — reflects the rc.4 spec change", async () => {
     mockFormWithSchema({ type: "object", properties: {} });
+    mockPublicationMetadata({ contributors: [{ name: "Jane Doe", roles: ["Editor"] }] });
 
-    const result = await publishSchema(
-      basePublishInput({ contributors: [{ name: "Jane Doe", roles: ["Editor"] }] })
-    );
+    const result = await publishSchema(basePublishInput());
 
     expect(result.ok).toBe(true);
+  });
+
+  it("blocks publish when PublicationMetadata is missing required fields — reads the DB row, not the payload", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+    findUniquePublicationMetadata.mockResolvedValue(null);
+
+    const result = await publishSchema(basePublishInput());
+
+    expect(result.ok).toBe(false);
+    expect(updateMany).not.toHaveBeenCalled();
+    expect(createPublishedSchema).not.toHaveBeenCalled();
+  });
+
+  it("logs diagnostics and gives actionable guidance when the assembled package fails spec validation despite passing all upstream checks — Phase 3b", async () => {
+    // Structurally broken semantics: everything upstream (zod on metadata,
+    // zod on the review fields) is valid, so this can only be caught here,
+    // by the runtime spec validator itself.
+    mockFormWithSchema({ type: "object", properties: {} }, { bindings: "not-an-array" });
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await publishSchema(basePublishInput());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe("VALIDATION");
+      expect(result.error).toContain("even though it passed the earlier checks");
+      expect(result.error).toContain("contact support");
+    }
+    expect(updateMany).not.toHaveBeenCalled();
+    expect(createPublishedSchema).not.toHaveBeenCalled();
+    expect(createPublishedSchemaPackage).not.toHaveBeenCalled();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("failed marker-template-spec validation"),
+      expect.objectContaining({
+        formId: FORM_ID,
+        formVersionId: VERSION_ID,
+        diagnostics: expect.any(Array),
+      })
+    );
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("freezes the exact validated package into PublishedSchemaPackage, keyed by pid", async () => {

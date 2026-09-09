@@ -79,7 +79,11 @@ export const draftPublicationContributorSchema = z.object({
 export const strictPublicationContributorSchema = draftPublicationContributorSchema.extend({
   name: z.string().min(1, "Name is required"),
   roles: z.array(z.string()).min(1, "At least one role is required"),
-  orcid: orcidField,
+  // `orcid` stays nullable here too (inherited from the draft schema below) —
+  // ORCID itself is optional even for a strict/published contributor;
+  // `ContributorDTO.orcid` (and therefore anything re-validating a value
+  // already normalized through `mapContributors`) is `string | null`, never
+  // `undefined`.
 })
 
 // Matches Core V1's keywords rule (items minLength 1, uniqueItems) — was
@@ -115,7 +119,11 @@ export const savePublicationMetadataSchema = draftPublicationMetadataSchema.exte
 
 export type SavePublicationMetadataInput = z.infer<typeof savePublicationMetadataSchema>
 
-export const publishFormSchema = strictPublicationMetadataSchema.extend({
+// Step 3's own fields — the only ones actually submitted to `publishSchema`.
+// Steps 1-2's FAIR metadata/contributors are persisted separately, through
+// `savePublicationMetadata` (see PublishSchemaClient.tsx); `publishSchema`
+// reads that row rather than accepting it as input.
+export const publishReviewSchema = z.object({
   // Matches Core V1's exact published-version pattern (rejects leading
   // zeros, e.g. "01.2.3") — an interim patch, not the long-term answer to
   // keeping zod and the spec's own validator in sync; see the "Phase 1"
@@ -130,9 +138,16 @@ export const publishFormSchema = strictPublicationMetadataSchema.extend({
   relatedPublicationDoi: z.string().optional(),
 })
 
+export type PublishReviewInput = z.infer<typeof publishReviewSchema>
+
+// The wizard's full client-side form: Steps 1-2's FAIR metadata/contributors
+// (rendered through the same fields/validation the draft card uses) plus
+// Step 3's review fields.
+export const publishFormSchema = strictPublicationMetadataSchema.merge(publishReviewSchema)
+
 export type PublishFormInput = z.infer<typeof publishFormSchema>
 
-export const publishSchemaActionSchema = publishFormSchema.extend({
+export const publishSchemaActionSchema = publishReviewSchema.extend({
   formId: z.number(),
   formVersionId: z.number(),
   expectedUpdatedAt: z.string().datetime(),

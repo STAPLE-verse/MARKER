@@ -3,7 +3,7 @@
 import { Prisma, VersionStatus } from "@prisma/client";
 import { authenticatedAction } from "@/utils/safe-action";
 import { ActionError } from "@/utils/action-result";
-import { publishSchemaActionSchema } from "../schemas";
+import { publishSchemaActionSchema, strictPublicationMetadataSchema } from "../schemas";
 import { revalidatePath } from "next/cache";
 import { generatePID } from "@/utils/id";
 import { extractOntologyIds } from "@/utils/schema";
@@ -14,7 +14,6 @@ import {
 } from "../queries/formVersionConcurrency";
 import {
   contributorsToJson,
-  copyPublicationMetadataFields,
   normalizePublicationMetadata,
 } from "../utils/publicationMetadata";
 import { assemblePublishedPackage, formatDiagnosticsForUser, validateTemplatePackage } from "../utils/templatePackage";
@@ -39,14 +38,31 @@ export const publishSchema = authenticatedAction(
             // marker-template-spec Core V1 metadata.familyId — the real, stored
             // identity minted once at MarkerForm creation (see templateIdentity.ts).
             const familyId = form.familyId;
-            const publicationMetadata = normalizePublicationMetadata(input);
-            const publicationMetadataFields = copyPublicationMetadataFields(publicationMetadata);
-            const resolvedLicense = publicationMetadata.license ?? input.license;
-            const resolvedLanguage = publicationMetadata.language ?? input.language;
+
+            // PublicationMetadata now has exactly one writer —
+            // `savePublicationMetadata`, which both the draft card and the
+            // wizard's Steps 1-2 "Continue" go through (see
+            // PublishSchemaClient.tsx). Publish only reads the row here;
+            // re-validated against the strict schema since the DB row itself
+            // (unlike the old wizard-submitted input) was never guaranteed
+            // to satisfy publish-time requiredness.
+            const publicationMetadataRow = await tx.publicationMetadata.findUnique({
+              where: { formVersionId: latestVersion.id },
+            });
+            const parsedMetadata = strictPublicationMetadataSchema.safeParse(
+              normalizePublicationMetadata(publicationMetadataRow)
+            );
+            if (!parsedMetadata.success) {
+              throw new ActionError(
+                "VALIDATION",
+                "Publication metadata is incomplete. Go back to the FAIR Metadata and Contributors steps and fill in the required fields before publishing."
+              );
+            }
+            const publicationMetadata = parsedMetadata.data;
             // Package-level description — a real wizard field now (see
             // Step3Review.tsx), independent of the form schema's own
             // description shown to people filling out the rendered form.
-            const resolvedDescription = input.description;
+            const packageDescription = input.description;
 
             const draftPackage = assemblePublishedPackage({
               pid,
@@ -59,18 +75,35 @@ export const publishSchema = authenticatedAction(
               createdAt: latestVersion.createdAt,
               updatedAt: latestVersion.updatedAt,
               publishedAt: new Date(),
-              description: resolvedDescription,
-              language: resolvedLanguage,
+              description: packageDescription,
+              language: publicationMetadata.language,
               domain: publicationMetadata.domain,
               keywords: publicationMetadata.keywords,
               contributors: publicationMetadata.contributors,
-              license: resolvedLicense,
+              license: publicationMetadata.license,
               releaseNotes: input.releaseNotes,
             });
 
             const diagnostics = validateTemplatePackage(draftPackage);
             if (diagnostics.length > 0) {
-              throw new ActionError("VALIDATION", formatDiagnosticsForUser(diagnostics));
+              // Should be unreachable in normal use: Phase 3a already gates
+              // schema/uiSchema conformance before the wizard opens, and every
+              // metadata field here is zod-validated at save time (Steps 1-2
+              // "Continue", Step 3 submit — see Phase 2). Reaching this means
+              // something upstream has a gap (a spec rule zod doesn't mirror, a
+              // race with a concurrent edit, a stale pre-Phase-1 row) rather
+              // than a mistake the user can fix by re-typing a field, so it's
+              // logged here for maintainer follow-up rather than mapped to a
+              // specific input (docs/refactor/publish-wizard-refactor.md,
+              // Phase 3b — field mapping was considered and deliberately cut).
+              console.error(
+                "publishSchema: assembled package failed marker-template-spec validation despite passing all upstream checks",
+                { formId: input.formId, formVersionId: input.formVersionId, diagnostics }
+              );
+              throw new ActionError(
+                "VALIDATION",
+                `This didn't meet publishing requirements even though it passed the earlier checks (${formatDiagnosticsForUser(diagnostics)}). Re-check your schema in the editor and your publication details, then try publishing again. If this keeps happening, contact support.`
+              );
             }
 
             const locked = await tx.markerFormVersion.updateMany({
@@ -88,31 +121,22 @@ export const publishSchema = authenticatedAction(
               throw new ActionError("CONFLICT", CONCURRENT_EDIT_MESSAGE);
             }
 
-            await tx.publicationMetadata.upsert({
-              where: { formVersionId: latestVersion.id },
-              create: {
-                formVersion: { connect: { id: latestVersion.id } },
-                ...publicationMetadataFields,
-              },
-              update: publicationMetadataFields,
-            });
-
             const created = await tx.publishedSchema.create({
               data: {
                 pid,
                 title: latestVersion.name || "Untitled Schema",
-                description: resolvedDescription,
+                description: packageDescription,
                 schemaJson: latestVersion.schema ?? {},
                 uiSchema: latestVersion.uiSchema ?? {},
                 source: "native",
                 version: input.version,
                 familyId,
-                license: resolvedLicense,
+                license: publicationMetadata.license,
                 releaseNotes: input.releaseNotes,
                 relatedPublicationDoi: input.relatedPublicationDoi,
                 keywords: publicationMetadata.keywords,
                 domain: publicationMetadata.domain,
-                language: resolvedLanguage,
+                language: publicationMetadata.language,
                 ontologyRefs: extractOntologyIds(latestVersion.schema),
                 authorId: userId,
                 contributors: contributorsToJson(publicationMetadata.contributors),
