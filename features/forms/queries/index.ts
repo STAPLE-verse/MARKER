@@ -1,5 +1,6 @@
 export { getUserForms } from "./getUserForms"
 export { getUserArchivedForms } from "./getUserArchivedForms"
+export { getUserPublishedSchemas } from "./getUserPublishedSchemas"
 export { getFormById } from "./getFormById"
 export { getAuthorizedLatestVersion } from "./getAuthorizedLatestVersion"
 export { getLatestVersionForConformanceCheck } from "./getLatestVersionForConformanceCheck"

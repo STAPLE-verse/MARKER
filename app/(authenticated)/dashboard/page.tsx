@@ -1,32 +1,20 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+import Link from "next/link";
+import { requirePageAuth } from "@/utils/auth";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
-import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { getDashboardStats, getRecentActivity } from "@/features/dashboard/queries";
+import { formatRelativeTime } from "@/features/dashboard/utils/formatRelativeTime";
+import { getActivityActionLabel, getActivityTargetLabel } from "@/features/dashboard/utils/activityLabel";
+import { collectionTabHref } from "../collection/collectionTabs";
 
 export default async function DashboardPage() {
-  const session = await auth();
+  const { session, userId } = await requirePageAuth();
 
-  if (!session?.user) {
-    redirect("/login");
-  }
-
-  const dbUser = await prisma.user.findUnique({
-    where: { id: parseInt(session.user.id) },
-  });
-
-  if (!dbUser) {
-    redirect("/login");
-  }
-
-  // Sample recent activity for demonstration
-  const recentActivities = [
-    { id: 1, action: "Published schema", target: "Cognitive Assessment Template v1.0.0", time: "2 hours ago" },
-    { id: 2, action: "Imported form from STAPLE", target: "Patient Demographics Form", time: "1 day ago" },
-    { id: 3, action: "Created draft schema", target: "EEG Recording Log", time: "3 days ago" },
-  ];
+  const [stats, activity] = await Promise.all([
+    getDashboardStats(userId),
+    getRecentActivity(userId),
+  ]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300">
@@ -42,72 +30,65 @@ export default async function DashboardPage() {
       </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Quick Actions & Status */}
         <div className="lg:col-span-2 space-y-6">
           <Card bordered>
             <CardBody>
               <CardTitle className="text-xl font-bold">Recent Activities</CardTitle>
-              <div className="divide-y divide-base-300">
-                {recentActivities.map((act) => (
-                  <div key={act.id} className="py-4 flex justify-between items-center first:pt-0 last:pb-0">
-                    <div>
-                      <span className="font-semibold text-primary">{act.action}</span>
-                      <span className="text-base-content/80"> - {act.target}</span>
-                    </div>
-                    <span className="text-xs text-base-content/50">{act.time}</span>
-                  </div>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card bordered>
-            <CardBody>
-              <CardTitle className="text-xl font-bold">Session & Ecosystem Status</CardTitle>
-              <p className="text-sm text-base-content/80 mb-4">
-                You are securely logged in. Below is your decrypted JWT user information, shared directly with the STAPLE database.
-              </p>
-              <div className="bg-base-300 p-4 rounded-lg overflow-x-auto border border-base-200">
-                <pre className="text-xs font-mono text-secondary-content">
-                  {JSON.stringify(session.user, null, 2)}
-                </pre>
-              </div>
+              {activity.length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-base-content/70 mb-4">
+                    Nothing here yet — create your first schema to get started.
+                  </p>
+                  <Link href="/collection/new">
+                    <Button variant="primary" size="sm">
+                      Add schema
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="divide-y divide-base-300">
+                  {activity.map((item, index) => (
+                    <Link
+                      key={index}
+                      href={item.href}
+                      className="py-4 flex justify-between items-center first:pt-0 last:pb-0 hover:bg-base-200/50 -mx-2 px-2 rounded transition-colors"
+                    >
+                      <div>
+                        <span className="font-semibold text-primary">{getActivityActionLabel(item)}</span>
+                        <span className="text-base-content/80"> - {getActivityTargetLabel(item)}</span>
+                      </div>
+                      <span className="text-xs text-base-content/50 shrink-0 ml-4">
+                        {formatRelativeTime(item.timestamp)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </CardBody>
           </Card>
         </div>
 
-        {/* Right Column: Statistics & Highlights */}
         <div className="space-y-6">
           <Card bordered className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
             <CardBody>
               <CardTitle className="text-lg font-bold">My Stats</CardTitle>
               <div className="stats stats-vertical bg-transparent w-full">
-                <div className="stat px-0">
+                <Link href="/collection" className="stat px-0 hover:opacity-80 transition-opacity">
                   <div className="stat-title text-base-content/70">Published Schemas</div>
-                  <div className="stat-value text-primary text-3xl font-extrabold">2</div>
-                </div>
-                <div className="stat px-0">
+                  <div className="stat-value text-primary text-3xl font-extrabold">{stats.publishedCount}</div>
+                </Link>
+                <Link href="/collection" className="stat px-0 hover:opacity-80 transition-opacity">
                   <div className="stat-title text-base-content/70">Draft Templates</div>
-                  <div className="stat-value text-secondary text-3xl font-extrabold">4</div>
-                </div>
-                <div className="stat px-0">
-                  <div className="stat-title text-base-content/70">Total Downloads/Reuse</div>
-                  <div className="stat-value text-accent text-3xl font-extrabold">128</div>
-                </div>
+                  <div className="stat-value text-secondary text-3xl font-extrabold">{stats.draftCount}</div>
+                </Link>
+                <Link
+                  href={collectionTabHref("archived")}
+                  className="stat px-0 hover:opacity-80 transition-opacity"
+                >
+                  <div className="stat-title text-base-content/70">Archived</div>
+                  <div className="stat-value text-accent text-3xl font-extrabold">{stats.archivedCount}</div>
+                </Link>
               </div>
-            </CardBody>
-          </Card>
-
-          <Card bordered>
-            <CardBody>
-              <CardTitle className="text-lg font-bold">SSO & DB Status</CardTitle>
-              <p className="text-xs text-base-content/70 leading-relaxed">
-                Database: <span className="text-success font-semibold">Connected (Shared)</span>
-                <br />
-                User Scope: <span className="font-semibold">{dbUser.role}</span>
-                <br /><br />
-                Your credentials correspond to your registered STAPLE account, allowing seamless resource discovery across both platforms.
-              </p>
             </CardBody>
           </Card>
         </div>

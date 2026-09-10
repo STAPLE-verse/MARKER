@@ -1,4 +1,4 @@
-export const COLLECTION_TABS = ["owned", "archived"] as const;
+export const COLLECTION_TABS = ["owned", "archived", "published"] as const;
 
 export type CollectionTab = (typeof COLLECTION_TABS)[number];
 
