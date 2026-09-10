@@ -24,11 +24,19 @@ interface SchemaDetailHeaderProps {
 interface StapleImportBadgesProps {
   /** This *version's own* frozen source version number, if known — see FormVersionDTO.stapleProvenance. */
   sourceVersionNumber: number | null;
+  /**
+   * When this row's own import/last-update-import happened. STAPLE only bumps
+   * a form's version number when it's task-attached — otherwise edits mutate
+   * the same version number in place, so "v1" alone can silently mean
+   * different content at different times. Pairing it with this timestamp is
+   * what actually disambiguates two same-numbered imports in MARKER's history.
+   */
+  importedAt: Date | null;
   /** This version's own frozen modification status — meaningful on any version, historical or head. */
   modificationStatus?: StapleImportInfoDTO["modificationStatus"];
 }
 
-function StapleImportBadges({ sourceVersionNumber, modificationStatus }: StapleImportBadgesProps) {
+function StapleImportBadges({ sourceVersionNumber, importedAt, modificationStatus }: StapleImportBadgesProps) {
   // "Imported from STAPLE" is a present-tense identity claim — only true
   // while this version's content still matches that import verbatim. Once
   // native edits diverge it, however many edits removed, "Based on STAPLE
@@ -41,6 +49,7 @@ function StapleImportBadges({ sourceVersionNumber, modificationStatus }: StapleI
       <span className="badge badge-ghost badge-sm font-mono">
         {label}
         {sourceVersionNumber != null && ` · v${sourceVersionNumber}`}
+        {importedAt != null && ` · ${importedAt.toLocaleDateString()}`}
       </span>
       {modificationStatus && modificationStatus !== "UNKNOWN" && (
         <span
@@ -90,12 +99,18 @@ export function SchemaDetailHeader({
     : isViewingLatest
       ? stapleImport?.modificationStatus
       : undefined;
+  const importedAt =
+    version.stapleProvenance?.importedAt ?? (isViewingLatest ? stapleImport?.importedAt ?? null : null);
   const description =
     pid || showStapleImportBadges ? (
       <span className="inline-flex items-center gap-2 flex-wrap">
         {pid && <span className="font-mono text-primary text-xs">PID: {pid}</span>}
         {showStapleImportBadges && (
-          <StapleImportBadges sourceVersionNumber={sourceVersionNumber} modificationStatus={modificationStatus} />
+          <StapleImportBadges
+            sourceVersionNumber={sourceVersionNumber}
+            importedAt={importedAt}
+            modificationStatus={modificationStatus}
+          />
         )}
       </span>
     ) : null;
