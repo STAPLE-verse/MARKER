@@ -141,6 +141,15 @@ export const publishSchema = authenticatedAction(
                 authorId: userId,
                 contributors: contributorsToJson(publicationMetadata.contributors),
                 originFormVersionId: latestVersion.id,
+                // Academic-credit lineage (architecture.md "Tracking Lineage
+                // (Forking)") — carried forward automatically, no user input:
+                // `form` already has every MarkerForm scalar column in scope
+                // (getAuthorizedLatestVersion's findUnique has no `select`),
+                // so this costs no extra query. Applies on every republish
+                // from a forked-origin form, not just the first — there's no
+                // "did they actually modify it" gate here (that's the
+                // separate, unbuilt modification-status system).
+                derivedFromPid: form.origin === "FORKED" ? form.forkedFromPid : null,
               },
             });
 

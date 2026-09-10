@@ -202,3 +202,9 @@ export const getStapleVersionPreviewSchema = z.object({
 })
 
 export type GetStapleVersionPreviewInput = z.infer<typeof getStapleVersionPreviewSchema>
+
+export const forkSchemaSchema = z.object({
+  publishedSchemaPid: z.string(),
+})
+
+export type ForkSchemaInput = z.infer<typeof forkSchemaSchema>

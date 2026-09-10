@@ -267,7 +267,12 @@ features/
   (publication date, domain/subject, and validated Semantic V1 IRIs; preserve
   legacy ontology codes only as migration data)
 - [ ] Build out `(public)/schemas/[pid]` detail page
-- [ ] Implement `forkSchema` action
+- [x] Implement `forkSchema` action — also wires `derivedFromPid` at publish
+  time from a forked-origin form (originally scoped separately, folded in
+  since it's the actual credit-tracking mechanism `derivedFromPid` exists
+  for) and adds a minimal "Forked from [title]" link on `/schemas/[pid]`.
+  Does not include the "Unmodified Translation" vs "Modified Derivative"
+  badge system below — that's still separate, larger work.
 - [ ] Add content negotiation for schema PID URLs (middleware or route handler)
 - [ ] Add UI badges for imported/forked schemas indicating if they are an "Unmodified Translation" vs a "Modified Derivative"
 

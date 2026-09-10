@@ -32,10 +32,21 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
 
   const latestVersion = versions[0]
 
+  // Bare string, no Prisma relation (same shape as PublishedSchema.derivedFromPid
+  // itself) — a second lookup, not an `include`.
+  const forkedFrom =
+    form.origin === "FORKED" && form.forkedFromPid
+      ? await prisma.publishedSchema.findUnique({
+          where: { pid: form.forkedFromPid },
+          select: { pid: true, title: true },
+        })
+      : null
+
   return {
     id: form.id,
     archived: form.archived,
     hasPublishedVersion: versions.some((v) => v.publishedSchemas.length > 0),
+    forkedFrom: forkedFrom ? { pid: forkedFrom.pid, title: forkedFrom.title } : null,
     stapleImport:
       form.origin === "IMPORTED_STAPLE" && form.importedFromStapleFormId
         ? {

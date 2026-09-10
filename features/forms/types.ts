@@ -119,6 +119,25 @@ export interface PublicPublishedSchemaDTO {
   uiSchema: Record<string, unknown>
   createdAt: Date
   versions: PublishedSchemaVersionDTO[]
+  /** Set when this schema's `derivedFromPid` resolves to another published schema — the fork lineage `architecture.md` describes. `null` for a schema with no fork ancestry (or a dangling pointer, which shouldn't happen). */
+  forkedFrom: { pid: string; title: string } | null
+}
+
+/**
+ * `getPublishedSchemaByPid`'s actual return shape — the public
+ * `PublicPublishedSchemaDTO` plus two fields that must NEVER reach the
+ * client directly: `authorId` (another user's numeric id) and
+ * `originFormId` (a MarkerForm id, only meaningful to its owner). Both exist
+ * solely for `app/(public)/schemas/[pid]/page.tsx` to resolve viewer-specific
+ * state server-side (via `auth()`) — is the viewer the author, what's their
+ * draft's formId — before stripping them and passing the rest down to
+ * `SchemaDetailsClient`.
+ */
+export interface PublishedSchemaDetailDTO extends PublicPublishedSchemaDTO {
+  authorId: number
+  originFormId: number | null
+  /** The exact `MarkerFormVersion.id` frozen into this pid — not just "a" version of `originFormId`'s form. See `getPublishedSchemaByPid`'s doc comment. */
+  originVersionId: number | null
 }
 
 export interface PublicationMetadataFieldsDTO {
@@ -194,4 +213,13 @@ export interface FormDetailDTO {
   /** Ordered by version descending; index 0 is the latest version. */
   versions: FormVersionDTO[]
   stapleImport: StapleImportInfoDTO | null
+  /**
+   * Present only when `MarkerForm.origin === "FORKED"`. Unlike `stapleImport`,
+   * this is form-level in the literal sense too — a fork happens once, at
+   * `MarkerForm` creation, so it applies unchanged to every version of the
+   * form (no per-version provenance/recurrence the way a STAPLE update-import
+   * has). `null` if the origin `PublishedSchema` row is somehow gone (should
+   * be unreachable — those rows are never deleted — but not fabricated).
+   */
+  forkedFrom: { pid: string; title: string } | null
 }

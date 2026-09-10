@@ -31,6 +31,9 @@ function baseRow(overrides: Record<string, unknown> = {}) {
     uiSchema: null,
     createdAt: new Date("2026-09-01T00:00:00.000Z"),
     familyId: "fam_abc123",
+    authorId: 1,
+    derivedFromPid: null,
+    originFormVersion: null,
     ...overrides,
   };
 }
@@ -99,6 +102,51 @@ describe("getPublishedSchemaByPid", () => {
     expect(findManyPublishedSchema).toHaveBeenCalledWith(
       expect.objectContaining({ where: { familyId: { in: ["fam_abc123"] } } })
     );
+  });
+
+  it("resolves originFormId AND originVersionId from the originFormVersion relation when present", async () => {
+    findUniquePublishedSchema.mockResolvedValue(baseRow({ originFormVersion: { id: 55, formId: 7 } }));
+
+    const result = await getPublishedSchemaByPid("ps_abc123");
+
+    expect(result?.authorId).toBe(1);
+    expect(result?.originFormId).toBe(7);
+    // The exact MarkerFormVersion this pid was frozen from, not just "a"
+    // version of formId 7 — a family can have several published versions,
+    // each pointing at a different draft version.
+    expect(result?.originVersionId).toBe(55);
+  });
+
+  it("returns null originFormId/originVersionId when the origin draft's FK was nulled (onDelete: SetNull) or never existed", async () => {
+    findUniquePublishedSchema.mockResolvedValue(baseRow({ originFormVersion: null }));
+
+    const result = await getPublishedSchemaByPid("ps_abc123");
+
+    expect(result?.originFormId).toBeNull();
+    expect(result?.originVersionId).toBeNull();
+  });
+
+  it("resolves forkedFrom by a second lookup when derivedFromPid is set", async () => {
+    findUniquePublishedSchema
+      .mockResolvedValueOnce(baseRow({ derivedFromPid: "ps_original" }))
+      .mockResolvedValueOnce({ pid: "ps_original", title: "Original Template" });
+
+    const result = await getPublishedSchemaByPid("ps_abc123");
+
+    expect(result?.forkedFrom).toEqual({ pid: "ps_original", title: "Original Template" });
+    expect(findUniquePublishedSchema).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ where: { pid: "ps_original" } })
+    );
+  });
+
+  it("leaves forkedFrom null when derivedFromPid is not set, without a second lookup", async () => {
+    findUniquePublishedSchema.mockResolvedValue(baseRow());
+
+    const result = await getPublishedSchemaByPid("ps_abc123");
+
+    expect(result?.forkedFrom).toBeNull();
+    expect(findUniquePublishedSchema).toHaveBeenCalledTimes(1);
   });
 
   it("falls back to an empty object for null schemaJson/uiSchema", async () => {

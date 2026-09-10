@@ -1,0 +1,130 @@
+"use server"
+
+import { Prisma } from "@prisma/client"
+import type { MarkerTemplatePackage } from "@staple-verse/marker-template-runtime"
+import { prisma } from "@/lib/db"
+import { revalidatePath } from "next/cache"
+import { authenticatedAction } from "@/utils/safe-action"
+import { ActionError } from "@/utils/action-result"
+import { generatePID } from "@/utils/id"
+import { forkSchemaSchema } from "../schemas"
+import {
+  assembleContributorName,
+  copyPublicationMetadataFields,
+  DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
+  DEFAULT_PUBLICATION_METADATA,
+} from "../utils/publicationMetadata"
+
+/**
+ * Reads from the frozen `PublishedSchemaPackage.packageJson` snapshot, not
+ * `PublishedSchema.schemaJson`/`.uiSchema` — those columns encode the same
+ * content but the package is the only place `semantics` exists at all (see
+ * docs/refactor/explore.md's fork-planning discussion). Falls back to the
+ * bare columns only for a legacy row with no snapshot, in which case
+ * semantics simply isn't available to fork.
+ */
+function resolveForkedContent(published: {
+  schemaJson: unknown
+  uiSchema: unknown
+  packageSnapshot: { packageJson: unknown } | null
+}): { schema: Record<string, unknown>; uiSchema: Record<string, unknown>; semantics: unknown } {
+  if (published.packageSnapshot) {
+    const pkg = published.packageSnapshot.packageJson as unknown as MarkerTemplatePackage
+    return {
+      schema: pkg.form.schema as Record<string, unknown>,
+      uiSchema: (pkg.form.uiSchema ?? {}) as Record<string, unknown>,
+      semantics: pkg.semantics ?? null,
+    }
+  }
+  return {
+    schema: (published.schemaJson ?? {}) as Record<string, unknown>,
+    uiSchema: (published.uiSchema ?? {}) as Record<string, unknown>,
+    semantics: null,
+  }
+}
+
+export const forkSchema = authenticatedAction(forkSchemaSchema, async ({ input, userId }) => {
+  const published = await prisma.publishedSchema.findUnique({
+    where: { pid: input.publishedSchemaPid },
+    select: {
+      pid: true,
+      title: true,
+      authorId: true,
+      schemaJson: true,
+      uiSchema: true,
+      packageSnapshot: { select: { packageJson: true } },
+    },
+  })
+
+  if (!published) {
+    throw new ActionError("NOT_FOUND", "This published schema could not be found.")
+  }
+
+  // The UI hides the Fork button for the schema's own author (ForkSchemaButton.tsx
+  // links to their existing draft instead), but the action itself must not
+  // rely on that — enforce it server-side too, not just via the client not
+  // rendering a button.
+  if (published.authorId === userId) {
+    throw new ActionError("FORBIDDEN", "You already own this schema — open your draft instead of forking it.")
+  }
+
+  const { schema, uiSchema, semantics } = resolveForkedContent(published)
+
+  const newName = `Copy of ${published.title || "Untitled Schema"}`
+  const newSchema = { ...schema, title: newName }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { firstName: true, lastName: true, orcid: true },
+  })
+  const authorName = assembleContributorName({
+    nameType: "Personal",
+    givenName: user?.firstName ?? undefined,
+    familyName: user?.lastName ?? undefined,
+  })
+
+  const form = await prisma.markerForm.create({
+    data: {
+      ownerId: userId,
+      familyId: generatePID("mf"),
+      origin: "FORKED",
+      forkedFromPid: published.pid,
+      forkedAt: new Date(),
+      versions: {
+        create: {
+          name: newName,
+          version: 1,
+          schema: newSchema as Prisma.InputJsonValue,
+          uiSchema: uiSchema as Prisma.InputJsonValue,
+          // Copied verbatim from the frozen package snapshot — already
+          // validated at publish time (publishSchema.ts), same trust
+          // domain as cloneFormVersion.ts, unlike a STAPLE import.
+          semantics: (semantics ?? Prisma.JsonNull) as Prisma.InputJsonValue,
+          versionId: generatePID("mv"),
+          // A fresh fork always starts fresh publication metadata (not
+          // copied from the source) — same rule as createForm.ts. The
+          // publish wizard already re-requires every FAIR field before a
+          // re-publish, so nothing is lost.
+          publicationMetadata: {
+            create: copyPublicationMetadataFields({
+              ...DEFAULT_PUBLICATION_METADATA,
+              contributors: authorName
+                ? [{
+                    name: authorName,
+                    nameType: "Personal",
+                    givenName: user?.firstName ?? undefined,
+                    familyName: user?.lastName ?? undefined,
+                    roles: [DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE, "Creator"],
+                    orcid: user?.orcid ?? "",
+                  }]
+                : [],
+            }),
+          },
+        },
+      },
+    },
+  })
+
+  revalidatePath("/collection")
+  return form.id
+})

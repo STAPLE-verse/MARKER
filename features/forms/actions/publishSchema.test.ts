@@ -62,12 +62,19 @@ function mockPublicationMetadata(overrides: Record<string, unknown> = {}) {
   });
 }
 
-function mockFormWithSchema(schema: Record<string, unknown>, semantics: unknown = null) {
+function mockFormWithSchema(
+  schema: Record<string, unknown>,
+  semantics: unknown = null,
+  originOverrides: Record<string, unknown> = {}
+) {
   findUniqueMarkerForm.mockResolvedValue({
     id: FORM_ID,
     ownerId: OWNER_ID,
     archived: false,
     familyId: FAMILY_ID,
+    origin: "NATIVE",
+    forkedFromPid: null,
+    ...originOverrides,
     versions: [
       {
         id: VERSION_ID,
@@ -245,6 +252,28 @@ describe("publishSchema identity + template-package validation gate", () => {
     // Fails fast on the real conflict — must not burn through the PID retry
     // loop (which is for pid collisions, a different P2002 case entirely).
     expect(createPublishedSchema).toHaveBeenCalledTimes(1);
+  });
+
+  it("carries derivedFromPid forward from a forked-origin form", async () => {
+    mockFormWithSchema(
+      { type: "object", properties: {} },
+      null,
+      { origin: "FORKED", forkedFromPid: "ps_original123" }
+    );
+
+    await publishSchema(basePublishInput());
+
+    const data = createPublishedSchema.mock.calls[0][0].data;
+    expect(data.derivedFromPid).toBe("ps_original123");
+  });
+
+  it("leaves derivedFromPid null for a native (non-forked) form", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+
+    await publishSchema(basePublishInput());
+
+    const data = createPublishedSchema.mock.calls[0][0].data;
+    expect(data.derivedFromPid).toBeNull();
   });
 
   it("still retries on a genuine pid collision, not just any P2002", async () => {

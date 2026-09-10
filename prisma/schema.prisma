@@ -325,6 +325,7 @@ enum MarkerFormOrigin {
   NATIVE
   IMPORTED_STAPLE
   IMPORTED_EXTERNAL
+  FORKED
 }
 
 enum MarkerFormCollaboratorRole {
@@ -383,6 +384,14 @@ model MarkerForm {
   importedFromStapleVersionNumber Int?
   importedAt                      DateTime?
   originalImportHash              String?
+
+  // Fork provenance — set once at creation, never touched again. Distinct
+  // from PublishedSchema.derivedFromPid (a republished schema's lineage back
+  // to another PublishedSchema) — this instead answers "did this MARKER
+  // draft originate as a fork," independent of whether it's ever published
+  // again. Bare string, no relation — same shape as derivedFromPid itself.
+  forkedFromPid String?
+  forkedAt      DateTime?
 
   @@index([ownerId])
 }
