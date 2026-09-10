@@ -79,7 +79,13 @@ function StapleImportBadge({ sourceVersionNumber, importedAt, modificationStatus
       variant={variant}
       outline
       className={
-        tooltip ? "shrink-0 mt-0.5 tooltip tooltip-bottom z-50 before:max-w-xs cursor-help" : "shrink-0 mt-0.5"
+        // z-10, not z-50: AppNavbar is `sticky ... z-50` — a badge at the
+        // same z-index sits in a different stacking context (page content
+        // vs. the sticky nav) and, at a tie, paints on top of it instead of
+        // scrolling behind it as the page scrolls. z-10 is still well above
+        // this badge's own unstacked siblings (enough for the tooltip
+        // popover to clear them) without ever competing with the navbar.
+        tooltip ? "shrink-0 mt-0.5 tooltip tooltip-bottom z-10 before:max-w-xs cursor-help" : "shrink-0 mt-0.5"
       }
       data-tip={tooltip}
     >

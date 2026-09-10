@@ -127,7 +127,12 @@ export function VersionHistorySidebar({
                         size="sm"
                         variant={v.stapleProvenance.modificationStatus === "MODIFIED" ? "warning" : "success"}
                         outline
-                        className="tooltip tooltip-bottom z-50 before:max-w-[14rem] cursor-help"
+                        // z-10, not z-50 — see the matching comment on
+                        // SchemaDetailHeader.tsx's StapleImportBadge:
+                        // AppNavbar is sticky at z-50, and tying that
+                        // z-index elsewhere risks painting over it instead
+                        // of scrolling behind it.
+                        className="tooltip tooltip-bottom z-10 before:max-w-[14rem] cursor-help"
                         data-tip={`Imported from STAPLE · v${v.stapleProvenance.sourceVersionNumber} · ${v.stapleProvenance.importedAt.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`}
                       >
                         Import
