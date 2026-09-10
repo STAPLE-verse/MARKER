@@ -211,31 +211,31 @@ export function SchemaDetailHeader({
             {isRestoring ? "Restoring..." : "Restore as New Draft"}
           </Button>
         )}
-        {isViewingLatest && (
+        {isViewingLatest && !isPublished && (
           <>
-            {!isPublished ? (
-              <>
-                <Link href={`/collection/${formId}/edit`}>
-                  <Button variant="primary" outline size="sm">
-                    Edit Structure
-                  </Button>
-                </Link>
-                <Link href={`/collection/${formId}/publish`}>
-                  <Button variant="primary" size="sm">
-                    Publish Schema
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              pid && (
-                <Link href={`/schemas/${pid}`}>
-                  <Button variant="secondary" size="sm">
-                    View Public URL
-                  </Button>
-                </Link>
-              )
-            )}
+            <Link href={`/collection/${formId}/edit`}>
+              <Button variant="primary" outline size="sm">
+                Edit Structure
+              </Button>
+            </Link>
+            <Link href={`/collection/${formId}/publish`}>
+              <Button variant="primary" size="sm">
+                Publish Schema
+              </Button>
+            </Link>
           </>
+        )}
+        {/* Independent of isViewingLatest — a family can have several
+            published versions (see docs/refactor/explore.md §7's version
+            history), and an older, non-latest version can be published too.
+            Previously nested under isViewingLatest, which hid this for any
+            published version that wasn't also the latest. */}
+        {isPublished && pid && (
+          <Link href={`/schemas/${pid}`}>
+            <Button variant="secondary" size="sm">
+              View Public URL
+            </Button>
+          </Link>
         )}
         {/* Secondary/occasional actions — kept out of the primary row so it
             doesn't grow with every action a form can support. */}
