@@ -1,24 +1,19 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import type { FormStudioState } from "@staple-verse/form-studio";
 import { saveFormVersion } from "@/features/forms/actions";
 import { SaveFormVersionInput } from "@/features/forms/schemas";
 import { runAction } from "@/lib/action";
 import { toast } from "@/lib/toast";
-
-interface SaveState {
-  schema: object;
-  uiSchema: object;
-  formData: object;
-}
 
 interface SaveSuccessResult {
   updatedAt: string;
 }
 
 interface UseSaveFormOptions {
-  buildSaveInput: (state: SaveState) => SaveFormVersionInput;
+  buildSaveInput: (state: FormStudioState) => SaveFormVersionInput;
   /** Called after a successful in-place save. Does not navigate. */
-  onSaveSuccess?: (state: SaveState, result: SaveSuccessResult) => void;
+  onSaveSuccess?: (state: FormStudioState, result: SaveSuccessResult) => void;
 }
 
 /**
@@ -28,7 +23,7 @@ export function useSaveForm(options: UseSaveFormOptions) {
   const router = useRouter();
   const [isSaving, startSaving] = useTransition();
 
-  const persist = async (state: SaveState): Promise<boolean> => {
+  const persist = async (state: FormStudioState): Promise<boolean> => {
     const res = await runAction(saveFormVersion(options.buildSaveInput(state)));
     if (!res.ok) {
       toast.error(res.error);
@@ -41,12 +36,12 @@ export function useSaveForm(options: UseSaveFormOptions) {
     return true;
   };
 
-  const save = (state: SaveState) =>
+  const save = (state: FormStudioState) =>
     startSaving(async () => {
       await persist(state);
     });
 
-  const done = (state: SaveState, isDirty: boolean, formId: number) => {
+  const done = (state: FormStudioState, isDirty: boolean, formId: number) => {
     if (!isDirty) {
       router.push(`/collection/${formId}`);
       return;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Modal, ModalActions } from "@/components/ui/Modal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 type ButtonVariant = "primary" | "secondary" | "accent" | "ghost" | "link";
 type ButtonSize = "lg" | "md" | "sm" | "xs";
@@ -29,9 +29,9 @@ export interface ConfirmActionButtonProps {
 }
 
 /**
- * Trigger button + confirmation modal + cancel/confirm actions.
- * Parent supplies `isPending` and `onConfirm`; optionally controls `open`/`onOpenChange`
- * so the modal can close after an async action succeeds.
+ * Trigger button + ConfirmDialog. Parent supplies `isPending` and
+ * `onConfirm`; optionally controls `open`/`onOpenChange` so the modal can
+ * close after an async action succeeds.
  */
 export function ConfirmActionButton({
   triggerLabel,
@@ -78,26 +78,18 @@ export function ConfirmActionButton({
         {triggerLabel}
       </Button>
 
-      <Modal
+      <ConfirmDialog
         open={open}
-        onClose={() => !isPending && setOpen(false)}
+        onClose={() => setOpen(false)}
         title={modalTitle}
-      >
-        <div className="py-4">{modalBody}</div>
-        <ModalActions>
-          <Button variant="ghost" onClick={() => setOpen(false)} disabled={isPending}>
-            Cancel
-          </Button>
-          <Button
-            variant={confirmVariant}
-            className={confirmClassName}
-            onClick={onConfirm}
-            disabled={isPending}
-          >
-            {isPending ? pendingLabel : confirmLabel}
-          </Button>
-        </ModalActions>
-      </Modal>
+        body={modalBody}
+        confirmLabel={confirmLabel}
+        pendingLabel={pendingLabel}
+        confirmVariant={confirmVariant}
+        confirmClassName={confirmClassName}
+        isPending={isPending}
+        onConfirm={onConfirm}
+      />
     </>
   );
 }

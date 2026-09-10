@@ -79,6 +79,7 @@ export default function UserSchemaDetailsClient({
         isViewingLatest={isViewingLatest}
         archived={form.archived}
         hasPublishedVersion={form.hasPublishedVersion}
+        stapleImport={form.stapleImport}
         onClone={() => clone(selectedVersion.id)}
         isCloning={isCloning}
         onRestore={() => restoreVersion(selectedVersion.id)}

@@ -122,6 +122,17 @@ export function VersionHistorySidebar({
                     {versionLabel}
                     {v.status === "PUBLISHED" && <Badge size="sm" variant="success">Published</Badge>}
                     {isLatest && <Badge size="sm" variant="primary">Latest</Badge>}
+                    {v.stapleProvenance?.isDirectImport && (
+                      <Badge
+                        size="sm"
+                        variant={v.stapleProvenance.modificationStatus === "MODIFIED" ? "warning" : "success"}
+                        outline
+                        className="tooltip tooltip-bottom z-50 before:max-w-[14rem] cursor-help"
+                        data-tip={`Imported from STAPLE · v${v.stapleProvenance.sourceVersionNumber} · ${v.stapleProvenance.importedAt.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`}
+                      >
+                        Import
+                      </Badge>
+                    )}
                   </div>
                   <div className="mt-1 flex items-end justify-between gap-2">
                     <div className="min-w-0 truncate text-sm text-base-content/70">

@@ -1,6 +1,6 @@
 "use server"
 
-import { VersionStatus } from "@prisma/client"
+import { Prisma, VersionStatus } from "@prisma/client"
 import { authenticatedAction } from "@/utils/safe-action"
 import { ActionError } from "@/utils/action-result"
 import { saveFormVersionSchema } from "../schemas"
@@ -33,6 +33,11 @@ export const saveFormVersion = authenticatedAction(saveFormVersionSchema, async 
           name: schemaTitle,
           schema: input.schema,
           uiSchema: input.uiSchema || {},
+          // undefined (omitted) = caller doesn't know about semantics, leave the
+          // stored value untouched; explicit null = clear it. familyId/versionId
+          // are never written here — this is an in-place draft edit, identity is
+          // set once at creation and stays stable across it.
+          ...(input.semantics !== undefined ? { semantics: input.semantics ?? Prisma.JsonNull } : {}),
         },
       })
 

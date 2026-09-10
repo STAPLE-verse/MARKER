@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client"
-import type { PublicationMetadataFieldsDTO, ContributorDTO } from "../types"
+import type { ContributorAffiliationDTO, PublicationMetadataFieldsDTO, ContributorDTO } from "../types"
+import { PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS } from "../constants/publicationMetadataOptions"
 
 export type PublicationMetadataLike = {
   domain?: unknown
@@ -10,7 +11,7 @@ export type PublicationMetadataLike = {
 }
 
 export const DEFAULT_PUBLICATION_LANGUAGE = "en"
-export const DEFAULT_PUBLICATION_LICENSE = "CC-BY 4.0"
+export const DEFAULT_PUBLICATION_LICENSE = "CC-BY-4.0"
 export const DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE = "Author"
 
 export const DEFAULT_PUBLICATION_METADATA: PublicationMetadataLike = {
@@ -22,8 +23,12 @@ export const DEFAULT_PUBLICATION_METADATA: PublicationMetadataLike = {
 
 export interface PublicationMetadataFormContributor {
   name: string
-  role: string
+  nameType: "Personal" | "Organizational"
+  givenName: string
+  familyName: string
+  roles: string[]
   orcid: string
+  affiliations: ContributorAffiliationDTO[]
 }
 
 export interface PublicationMetadataFormValues {
@@ -40,26 +45,93 @@ function normalizeNullableString(value: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null
 }
 
-export function normalizeKeywords(raw: unknown): string[] {
+function normalizeNameType(value: unknown): "Personal" | "Organizational" | undefined {
+  return value === "Personal" || value === "Organizational" ? value : undefined
+}
+
+/**
+ * Shared core for "list of raw values -> trimmed, deduped string[]": drops
+ * non-strings and blanks, keeps first-seen casing. `caseInsensitive` folds
+ * the dedupe key only (used by keywords); roles stay case-sensitive since
+ * they're matched verbatim against PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS and
+ * marker-template-spec's reserved "Creator" string.
+ */
+function dedupeTrimmedStrings(raw: unknown, { caseInsensitive = false } = {}): string[] {
   if (!Array.isArray(raw)) return []
 
   const seen = new Set<string>()
-  const keywords: string[] = []
+  const values: string[] = []
 
   for (const value of raw) {
     if (typeof value !== "string") continue
 
-    const keyword = value.trim()
-    if (!keyword) continue
+    const trimmed = value.trim()
+    if (!trimmed) continue
 
-    const key = keyword.toLocaleLowerCase()
+    const key = caseInsensitive ? trimmed.toLocaleLowerCase() : trimmed
     if (seen.has(key)) continue
 
     seen.add(key)
-    keywords.push(keyword)
+    values.push(trimmed)
   }
 
-  return keywords
+  return values
+}
+
+export function normalizeKeywords(raw: unknown): string[] {
+  return dedupeTrimmedStrings(raw, { caseInsensitive: true })
+}
+
+export function normalizeRoles(raw: unknown): string[] {
+  return dedupeTrimmedStrings(raw)
+}
+
+export function sortRoles(roles: string[]): string[] {
+  return [...roles].sort((a, b) => a.localeCompare(b))
+}
+
+/**
+ * The single source of truth for a contributor's display/citation `name`.
+ * Organizational contributors have no given/family split, so their typed
+ * name is authoritative. Personal contributors are assembled from
+ * given+family name rather than typed separately, so there's exactly one
+ * place a name and its parts can go out of sync with each other — never.
+ */
+export function assembleContributorName(input: {
+  nameType?: "Personal" | "Organizational"
+  name?: string
+  givenName?: string
+  familyName?: string
+}): string {
+  if (input.nameType === "Organizational") {
+    return input.name?.trim() ?? ""
+  }
+
+  return [input.givenName, input.familyName]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part))
+    .join(" ")
+}
+
+export function normalizeAffiliations(raw: unknown): ContributorAffiliationDTO[] {
+  if (!Array.isArray(raw)) return []
+
+  const seen = new Set<string>()
+  const affiliations: ContributorAffiliationDTO[] = []
+
+  for (const value of raw) {
+    if (!value || typeof value !== "object") continue
+
+    const name = typeof (value as Record<string, unknown>).name === "string"
+      ? ((value as Record<string, unknown>).name as string).trim()
+      : ""
+    if (!name || seen.has(name)) continue
+
+    seen.add(name)
+    affiliations.push({ name })
+  }
+
+  return affiliations
 }
 
 export function mapContributors(raw: unknown): ContributorDTO[] {
@@ -71,15 +143,38 @@ export function mapContributors(raw: unknown): ContributorDTO[] {
     })
     .map((contributor) => ({
       name: typeof contributor.name === "string" ? contributor.name.trim() : "",
-      role: typeof contributor.role === "string" ? contributor.role.trim() : "",
+      nameType: normalizeNameType(contributor.nameType),
+      givenName: normalizeNullableString(contributor.givenName) ?? undefined,
+      familyName: normalizeNullableString(contributor.familyName) ?? undefined,
+      roles: normalizeRoles(contributor.roles),
       orcid:
         typeof contributor.orcid === "string" && contributor.orcid.trim()
           ? contributor.orcid.trim()
           : null,
+      affiliations: normalizeAffiliations(contributor.affiliations),
     }))
     .filter((contributor) => {
-      return Boolean(contributor.name || contributor.role || contributor.orcid)
+      return Boolean(contributor.name || contributor.roles.length > 0 || contributor.orcid)
     })
+}
+
+/**
+ * The role checklist offered when editing a contributor: MARKER's fixed
+ * suggestions, plus any role already used by another contributor on the same
+ * form, plus (via `extraRoles`) whatever's selected in the contributor
+ * currently being edited but not yet committed to the field array — so a
+ * custom role typed for this contributor appears in its own checklist
+ * immediately, not just in everyone else's. Derived live from the form's own
+ * data rather than stored anywhere, so nothing needs a new persistence
+ * concept for "known custom roles."
+ */
+export function availableContributorRoles(
+  contributors: { roles?: unknown }[],
+  extraRoles: string[] = []
+): string[] {
+  const fixed = PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS.map((option) => option.value)
+  const used = contributors.flatMap((contributor) => normalizeRoles(contributor.roles))
+  return Array.from(new Set([...fixed, ...used, ...extraRoles]))
 }
 
 export function normalizePublicationMetadata(input: PublicationMetadataLike | null | undefined): PublicationMetadataFieldsDTO {
@@ -95,8 +190,12 @@ export function normalizePublicationMetadata(input: PublicationMetadataLike | nu
 function contributorsToFormValues(contributors: ContributorDTO[]): PublicationMetadataFormContributor[] {
   return contributors.map((contributor) => ({
     name: contributor.name,
-    role: contributor.role,
+    nameType: contributor.nameType ?? "Personal",
+    givenName: contributor.givenName ?? "",
+    familyName: contributor.familyName ?? "",
+    roles: contributor.roles,
     orcid: contributor.orcid ?? "",
+    affiliations: contributor.affiliations ?? [],
   }))
 }
 

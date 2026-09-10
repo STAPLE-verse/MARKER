@@ -340,6 +340,10 @@ model FormVersion {
   version             Int
   schema              Json
   uiSchema            Json?
+  // STAPLE-owned column (STAPLE's migration history is authoritative for this
+  // table). Mirrored here only so MARKER's passive read-side model matches the
+  // live shared-database shape and `prisma migrate dev` doesn't try to drop it.
+  semantics           Json?
   archived            Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @default(now()) @updatedAt
@@ -355,6 +359,11 @@ model MarkerForm {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // marker-template-spec Core V1 metadata.familyId (opaque generatePID("mf") value;
+  // wrapped into a URI at package-assembly time). Minted once at creation, never
+  // reassigned.
+  familyId String @unique
 
   ownerId Int
   owner   User @relation("MarkerFormOwner", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -386,7 +395,55 @@ model MarkerFormVersion {
   version  Int
   schema   Json
   uiSchema Json?
+  // Semantic V1 component (marker-template-spec); absent = Core-only template.
+  // Copied verbatim between MarkerFormVersion rows (already validated at authoring
+  // time via Form Studio's semantic-v1 extension) — a future STAPLE-import path
+  // must validate it, not just copy it, since that content crosses a trust boundary.
+  semantics Json?
+  // marker-template-spec Core V1 metadata.versionId while this version is DRAFT
+  // (opaque generatePID("mv") value). Stable across in-place draft edits; replaced
+  // by a permanent PublishedSchema.pid-derived URI at publish time.
+  versionId String @unique
   archived Boolean @default(false)
+
+  // Per-version STAPLE import provenance — distinct from the same-named
+  // fields on MarkerForm, which only ever hold the *most recent* import
+  // (mutable, overwritten on every update-import). These are set once, at
+  // the moment this specific version row is created, and never touched
+  // again:
+  //  - a version created BY an import (create or update mode) gets a fresh
+  //    value matching that import;
+  //  - a version created by a native edit (createFormVersionFromLatest,
+  //    createFormCheckpoint) copies the value forward from the version it
+  //    was copied from, unchanged;
+  //  - a version restored from history (restoreFormVersionAsDraft) copies
+  //    it from the version being restored, not from the current head.
+  // This lets any historical version answer "what STAPLE version was I
+  // last tied to" without consulting MarkerForm's mutable field (which may
+  // have since moved on) or walking version history.
+  //
+  // originalImportHash carries the same copy-forward/fresh-on-import rules
+  // as the two fields above, and answers a *different* question: "was THIS
+  // version's own content already changed from that STAPLE baseline, at the
+  // moment this row was created?" (hashImportedSnapshot's `{schema,
+  // uiSchema}` baseline — see utils/importHash.ts). Unlike
+  // MarkerForm.originalImportHash (mutable, always the latest import's
+  // baseline), this is frozen per row, so the modification badge can be
+  // shown correctly on historical versions too, not just the current head.
+  importedFromStapleVersionNumber Int?
+  importedAt                      DateTime?
+  originalImportHash              String?
+  // Unlike the three fields above, this one is NEVER copied forward — it
+  // answers a third, different question: "was this exact row created BY an
+  // importFromStaple transaction," as opposed to a native edit or restore
+  // that merely carries an earlier import's lineage. A fresh native-edit
+  // copy starts byte-identical to its parent, so `originalImportHash`
+  // alone can't tell "this IS the import" apart from "this is an untouched
+  // copy of one" — only this flag can. Set true only in importFromStaple's
+  // two version-create paths; explicitly false everywhere else, including
+  // restoreFormVersionAsDraft (restoring is a different transaction, even
+  // when it reproduces a direct-import row's exact content).
+  isDirectStapleImport Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -597,7 +654,7 @@ model PublishedSchema {
   derivedFromPid String? // Links to parent if this is a fork
   isSupersededBy String? // Links to a newer schema if this one is deprecated
 
-  // Authorship (Dublin Core mapping)
+  // Authorship — the MARKER user who published this
   authorId              Int
   author                User    @relation(fields: [authorId], references: [id])
   contributors          Json?
@@ -616,8 +673,31 @@ model PublishedSchema {
   externalSourceUrl   String?
   createdAt           DateTime @default(now())
 
+  packageSnapshot PublishedSchemaPackage?
+
   @@unique([familyId, version])
   @@index([keywords]) // Make searching fast
+}
+
+// The full marker-template-spec MarkerTemplatePackage assembled and validated
+// at publish time, frozen forever after. Kept separate from PublishedSchema
+// so the (query-heavy) normalized columns above never have to carry this
+// payload along, and so this table's "never updated after insert" invariant
+// stays structurally obvious rather than mixed in with columns that do
+// legitimately change post-publish (viewCount, usageCount, endorsementCount).
+model PublishedSchemaPackage {
+  // Shared-PK 1:1 with PublishedSchema — exactly one frozen snapshot per
+  // published schema, ever. Reuses the same pid rather than a redundant
+  // autoincrement id, since the relationship is genuinely 1:1 (unlike
+  // SchemaEndorsement's many-per-schema shape, which uses a separate id).
+  pid             String          @id
+  publishedSchema PublishedSchema @relation(fields: [pid], references: [pid], onDelete: Cascade)
+
+  // The full assembled package (conformsTo/metadata/form/semantics), exactly
+  // as validated by validateTemplatePackage at publish time.
+  packageJson Json
+
+  createdAt DateTime @default(now())
 }
 
 model SchemaEndorsement {

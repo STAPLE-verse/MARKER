@@ -1,12 +1,18 @@
 # Forms Feature — Vertical Deployment Plan
 
+> **Status:** Historical implementation plan. Current template-contract and
+> Semantic V1 decisions live in `docs/refactor/marker-template-profile-v1.md`
+> and the sibling `marker-template-spec` repository. In particular, embedded
+> `ontologyId` authoring and root-level JSON-LD `@context` export are not the
+> Semantic V1 design.
+
 > **Goal:** Build out the complete Forms lifecycle in MARKER — from creating a draft form through the visual builder, to versioning, publishing to the marketplace, and browsing/forking published schemas. This is the core feature of MARKER.
 
 ### The Core Workflow
 
 To maintain a clean user experience, MARKER separates the structural creation of a form from the academic publication of that form:
 
-1. **The Draft Phase (Ingestion):** A user creates a draft by building it from scratch in the `FormBuilder`, importing it from CEDAR/STAPLE, or uploading JSON. At this stage, it is a private, mutable `Form`. The `FormBuilder` is used strictly for editing the structure (`schema` and `uiSchema`).
+1. **The Draft Phase (Ingestion):** A user creates a draft by building it from scratch in the `FormBuilder` or importing it from STAPLE or an external catalog such as CEDAR. At this stage, it is a private, mutable `Form`. The `FormBuilder` is used strictly for editing the structure (`schema` and `uiSchema`).
 2. **The Publish Phase (The Freeze):** When ready, the user clicks "Publish". This triggers a **Publication Wizard** that collects all FAIR academic metadata (Domain, Language, Contributors, License, Release Notes). Upon submission, an immutable `PublishedSchema` with a PID is minted.
 
 > **Product Identity Note (The Metadata Librarian):** MARKER acts as a **Zotero for metadata schemas** (a curated private collection) and a **Zenodo for metadata** (a public archive). It is not a mirror of STAPLE. Users deliberately bring schemas into MARKER. To support this, `Form` records will be scoped by an `app` field (`"staple"` vs `"marker"`), and imports from STAPLE will create independent copies, not links.
@@ -38,22 +44,18 @@ To maintain a clean user experience, MARKER separates the structural creation of
 | **Form ↔ DB Wiring**         | Edit page (`collection/[id]/edit`) uses local `useState("{}")` — doesn't load or save to the database.             |
 | **Versioning Logic**         | FormVersion table is defined but no code creates/bumps versions.                                                   |
 | **Publish Flow**             | Publish modal exists as UI only. No server action to freeze a FormVersion into a `PublishedSchema` row with a PID. |
-| **Import from STAPLE**       | "Import from STAPLE" tab on the new-form page is mock. Need to query `Form`+`FormVersion` from the shared DB.      |
-| **Upload JSON**              | File upload + parse logic is not implemented.                                                                      |
+| **Import from STAPLE**       | The source-specific add route is not implemented. Need to query `Form` + `FormVersion` from the shared DB.         |
 | **Explore/Browse**           | Public explore page likely mock or empty. Needs search, filtering, schema detail pages.                            |
 | **Folders**                  | `Folder` model exists in Prisma. No UI for organizing forms into folders.                                          |
 | **Form Tags**                | `Form.tags` (JSON) exists but no UI for tagging.                                                                   |
 | **Forking/Derivation**       | `PublishedSchema.derivedFromPid` is in the schema. No fork flow exists.                                            |
 | **Content Negotiation**      | Architecture doc describes `Accept: application/json` for PID URLs. Not implemented.                               |
-| **JSON-LD Export**           | Architecture doc describes embedded `@context`. Not implemented.                                                   |
+| **Semantic instance export** | The historical embedded-`@context` design is superseded. Semantic V1 binding design and expanded JSON-LD projection are not implemented. |
 | **Validation**               | No Zod schemas for form creation / version metadata.                                                               |
 
 ### Open Architecture Questions
 
-> **Pending Decision:** Should we allow users to import MARKER Draft schemas into STAPLE, or only Published schemas?
->
-> - **Approach A (Strict FAIR - Recommended):** STAPLE can _only_ import `PublishedSchema` records. Drafts are unstable workbenches. If a user wants to test or use their schema in STAPLE, they must publish it to guarantee immutability and get a PID.
-> - **Approach B (Flexible Hard-Copy):** STAPLE can import Drafts, but the import must perform a hard-copy clone of the JSON into a new `app: "staple"` Form record. This severs the link, ensuring that any subsequent in-place edits to the Draft in MARKER do not break active STAPLE data collection tasks.
+> **Resolved (2026-07-28):** Cross-app import is bidirectional and allows **draft** versions as well as published tips. Each import copies one specific version; the user chooses **create new form** or **update parent form** (when provenance exists). Updates append a new version with the imported snapshot — no diff/merge/gate. Draft MARKER→STAPLE export must be clearly labeled as not a `PublishedSchema`. Full spec: [`refactor/import.md`](./refactor/import.md).
 
 ---
 
@@ -116,10 +118,9 @@ features/
 | `saveFormVersion`  | `{ formId, schema, uiSchema }`                                                                                | Updates the **latest** `FormVersion`'s schema/uiSchema JSON in-place (auto-save while editing).                                              |
 | `createNewVersion` | `{ formId, schema, uiSchema, name? }`                                                                         | Creates a new `FormVersion` row with bumped version number. For explicit "Save as new version" action.                                       |
 | `archiveForm`      | `{ formId }`                                                                                                  | Soft-archive (set `archived: true`) on the `MarkerForm` and cascade to all `MarkerFormVersion` rows.                                              |
-| `publishSchema`    | `{ formVersionId, keywords[], license, domain, language, contributors, releaseNotes, relatedPublicationDoi }` | Freezes a `FormVersion` into a `PublishedSchema`. Extracts nested `ontologyId`s from JSON. Generates PID, familyId, sets `version`.          |
+| `publishSchema`    | `{ formVersionId, keywords[], license, domain, language, contributors, releaseNotes, relatedPublicationDoi }` | Freezes a `FormVersion` into a `PublishedSchema`. Transitional behavior still extracts legacy nested `ontologyId` values into `ontologyRefs`; this is not Semantic V1 conformance. Generates PID, familyId, and `version`. |
 | `forkSchema`       | `{ publishedSchemaPid }`                                                                                      | Creates a new `Form` + `FormVersion` pre-populated with the published schema's JSON. Sets `derivedFromPid`.                                  |
-| `importFromStaple` | `{ formId, formVersionId }`                                                                                   | Reads STAPLE `Form`/`FormVersion`, creates a **new MARKER copy** (new `Form` row with `app: "marker"`), and calculates `originalImportHash`. |
-| `uploadJsonSchema` | `{ title, jsonString }`                                                                                       | Parses + validates JSON Schema draft-07, creates `Form` + `FormVersion`. Calculates `originalImportHash`.                                    |
+| `importFromStaple` | `{ sourceFormId, sourceVersionId, mode, targetMarkerFormId? }` | Copy one STAPLE version into MARKER (`create` new form or `update` parent). See [`refactor/import.md`](./refactor/import.md). |
 | `endorseSchema`    | `{ publishedSchemaPid }`                                                                                      | Toggles the user's endorsement (like) for a schema. Updates join table and increments/decrements `endorsementCount`.                         |
 
 ### Queries Needed
@@ -132,7 +133,7 @@ features/
 | `getUserPublishedSchemas(userId)`        | All `PublishedSchema` rows authored by the user.                                                                                                                   |
 | `getUserEndorsedSchemas(userId)`         | All `PublishedSchema` rows that the user has endorsed via the `SchemaEndorsement` join table.                                                                      |
 | `getPublishedSchema(pid)`                | Single `PublishedSchema` by PID (for public detail page).                                                                                                          |
-| `searchPublishedSchemas(query, filters)` | Full-text search over `title`, `description`, `keywords`, `contributors`. Filters by `domain`, `language`, `ontologyId`. Sorts by `usageCount`/`endorsementCount`. |
+| `searchPublishedSchemas(query, filters)` | Full-text search over `title`, `description`, `keywords`, `contributors`. Future semantic filters use validated Semantic V1 IRIs; legacy `ontologyRefs` remain transitional migration data. Sorts by `usageCount`/`endorsementCount`. |
 
 ---
 
@@ -153,22 +154,27 @@ features/
 
 ### 4.2 Create Form — `/collection/new`
 
-**Current:** Three tabs (scratch / STAPLE import / upload), all mock.
+**Current:** Native creation is implemented at this route.
 
-**Target — "From Scratch" tab:**
+**Target — add-method chooser:**
 
-- Wire the form to call `createForm` server action on submit.
+- Render equal cards for native creation, STAPLE import, and planned external API integrations.
+- Navigate each card to a dedicated subroute; do not use tabs or treat native creation as an import.
+
+**Target — `/collection/new/blank`:**
+
+- Relocate the existing native form without changing its `createForm` action.
 - On success, redirect to `/collection/{newFormId}/edit`.
 
-**Target — "Import from STAPLE" tab:**
+**Target — `/collection/new/staple`:**
 
-- Call a query to list the user's STAPLE `Form` + latest `FormVersion`.
-- On "Import", call `importFromStaple` action, redirect to edit page.
+- List the user’s STAPLE forms + selectable versions; on import, choose **create new** or **update parent** (when provenance exists). See [`refactor/import.md`](./refactor/import.md).
+- Redirect to the MARKER form detail/edit page.
 
-**Target — "Upload JSON" tab:**
+**Target — external API routes:**
 
-- Implement client-side file parsing + validation.
-- Call `uploadJsonSchema` action, redirect to edit page.
+- Add one route and server adapter per supported external catalog.
+- Reuse the normalized snapshot and persistence infrastructure in [`refactor/import.md`](./refactor/import.md).
 
 ### 4.3 Form Detail — `/collection/[id]`
 
@@ -225,7 +231,7 @@ features/
 - [x] Create `features/forms/queries.ts` — `getUserForms`, `getFormById`, `getFormVersion`
 - [x] Create `features/forms/types.ts` — TypeScript types for query returns
 - [x] Refactor `/collection` page → server data fetch with `getUserForms`
-- [x] Wire `/collection/new` "From Scratch" tab → `createForm` + redirect
+- [x] Wire native schema creation → `createForm` + redirect
 - [x] Wire `/collection/[id]` → `getFormById` with ownership check
 - [x] Wire `/collection/[id]/edit` → load `FormVersion` schema, save via `saveFormVersion`
 - [x] Wire Delete action on collection page
@@ -239,26 +245,33 @@ features/
 - [x] Implement `createNewVersion` action (version bumping logic)
 - [x] Add version history UI on `/collection/[id]` detail page
 - [x] Build the "Publication Wizard" Modal (collects FAIR metadata: domain, language, contributors, license, release notes)
-- [x] Update FormBuilder UI (`CardGeneralParameterInputs.tsx`, `types.ts`) to add an `ontologyId` input to specific field properties.
-- [x] Implement `publishSchema` action (extracts nested `ontologyId`s to populate `PublishedSchema.ontologyRefs`, generates PID, immutability)
+- [x] Historical: an experimental `ontologyId` field was added and later
+  removed from Form Studio because it could not express Semantic V1 value
+  semantics. Existing values remain migration hints only.
+- [x] Implement `publishSchema`; its legacy `ontologyId` to `ontologyRefs`
+  extraction remains transitional behavior and does not establish Semantic V1
+  conformance
 - [x] Wire the publish modal to trigger from the draft detail page (keeping FormBuilder strictly for structural editing)
 - [x] Refactor detail page to show draft vs. published status from real data
 
 **Deliverable:** User can save named versions, compare them, and publish a frozen schema with a PID.
 
-### Phase 3: Import, Upload, and Explore
+### Phase 3: Import and Explore
 
-> **Goal:** All three creation paths work. Public explore page is functional.
+> **Goal:** Native creation and the first import paths work. Public explore page is functional.
 
-- [ ] Wire "Import from STAPLE" tab → `importFromStaple` action
-- [ ] Wire "Upload JSON" tab → client-side parsing + `uploadJsonSchema` action
-- [ ] Build out `(public)/explore` page with advanced search + filters (Publication Date, Domain/Subject, Ontology Codes)
+- [ ] Wire cross-app version import (STAPLE ↔ MARKER): create-new vs update-parent — see [`refactor/import.md`](./refactor/import.md)
+- [ ] Add shared import normalization, hashing, provenance, and persistence infrastructure
+- [ ] Add external catalog adapters as their APIs are selected and designed
+- [ ] Build out `(public)/explore` page with advanced search + filters
+  (publication date, domain/subject, and validated Semantic V1 IRIs; preserve
+  legacy ontology codes only as migration data)
 - [ ] Build out `(public)/schemas/[pid]` detail page
 - [ ] Implement `forkSchema` action
 - [ ] Add content negotiation for schema PID URLs (middleware or route handler)
 - [ ] Add UI badges for imported/forked schemas indicating if they are an "Unmodified Translation" vs a "Modified Derivative"
 
-**Deliverable:** Users can import from STAPLE, upload JSON files, browse the public archive, and fork schemas.
+**Deliverable:** Users can import from STAPLE and selected external catalogs, browse the public archive, and fork schemas.
 
 ### Phase 4: Polish + Organization
 
@@ -268,7 +281,9 @@ features/
 - [ ] Form tagging UI (Domain/topic labels, not workflow labels)
 - [ ] Endorsements UI on public schema detail pages (Like/Endorse button)
 - [ ] Dashboard stats wired to real counts (published schemas, drafts, etc.)
-- [ ] JSON-LD `@context` embedding on export
+- [ ] Generate deterministic, offline expanded JSON-LD for metadata instances
+  from validated Semantic V1 bindings; template-publication JSON-LD remains a
+  separate deferred feature
 - [ ] Activity feed on dashboard (from real form events)
 
 **Deliverable:** Feature-complete forms experience with organizational tools and FAIR compliance.

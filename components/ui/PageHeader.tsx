@@ -28,7 +28,7 @@ const PageHeader = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttributes<HT
 }>(({ title, description, children, className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6", className)}
+    className={cn("flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6", className)}
     {...props}
   >
     <div className="flex-1 min-w-0">

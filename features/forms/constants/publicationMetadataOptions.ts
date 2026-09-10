@@ -16,13 +16,14 @@ export const PUBLICATION_LANGUAGE_OPTIONS = [
 ] satisfies SelectOption[]
 
 export const PUBLICATION_LICENSE_OPTIONS = [
-  { value: "CC-BY 4.0", label: "Creative Commons Attribution 4.0 (CC-BY 4.0)" },
-  { value: "CC0 1.0", label: "CC0 1.0 Universal (Public Domain Dedication)" },
+  { value: "CC-BY-4.0", label: "Creative Commons Attribution 4.0 (CC-BY-4.0)" },
+  { value: "CC0-1.0", label: "CC0 1.0 Universal (Public Domain Dedication)" },
   { value: "MIT", label: "MIT License" },
 ] satisfies SelectOption[]
 
 export const PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS = [
   { value: "Author", label: "Author" },
+  { value: "Creator", label: "Creator" },
   { value: "Maintainer", label: "Maintainer" },
   { value: "Translator", label: "Translator" },
   { value: "Data Curator", label: "Data Curator" },

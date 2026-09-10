@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
@@ -15,9 +17,9 @@
     "@monaco-editor/react": "^4.7.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
-    "@staple-verse/form-studio": "github:STAPLE-verse/form-studio",
+    "@staple-verse/form-studio": "github:STAPLE-verse/form-studio#v0.2.0-rc.4",
+    "@staple-verse/marker-template-runtime": "https://github.com/STAPLE-verse/marker-template-spec/releases/download/v1.0.0-rc.4/staple-verse-marker-template-runtime-1.0.0-rc.4.tgz",
     "@tanstack/react-table": "^8.21.3",
-    "argon2": "^0.44.0",
     "clsx": "^2.1.1",
     "escape-string-regexp": "^5.0.0",
     "nanoid": "^5.1.15",
@@ -29,6 +31,7 @@
     "react-hook-form": "^7.77.0",
     "react-hot-toast": "^2.6.0",
     "react-tag-input": "^6.10.6",
+    "secure-password": "^4.0.0",
     "spark-md5": "^3.0.2",
     "tailwind-merge": "^3.6.0",
     "unist-util-is": "^6.0.1",
@@ -37,16 +40,23 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/secure-password": "^4.0.2",
     "@types/spark-md5": "^3.0.5",
+    "@vitejs/plugin-react": "^6.1.1",
     "daisyui": "^5.5.20",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "jsdom": "^30.0.1",
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^5.0.0"
   }
 }

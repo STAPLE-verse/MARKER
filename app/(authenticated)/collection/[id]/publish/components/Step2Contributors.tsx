@@ -8,15 +8,14 @@ export interface Step2ContributorsProps {
 }
 
 export function Step2Contributors({ isProfileIncomplete }: Step2ContributorsProps) {
-  const { register, control, formState: { errors } } = useFormContext<PublishFormInput>();
+  const { control, formState: { errors } } = useFormContext<PublishFormInput>();
 
   return (
-    <WizardStep 
-      title="Contributors" 
+    <WizardStep
+      title="Contributors"
       description="List the authors and maintainers of this schema. ORCIDs are highly recommended."
     >
       <PublicationContributorsFields
-        register={register}
         control={control}
         errors={errors}
         isProfileIncomplete={isProfileIncomplete}
