@@ -151,6 +151,25 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
     setVisibleCount(PAGE_SIZE);
   }
 
+  const hasActiveFilters =
+    domainFilters.length > 0 ||
+    licenseFilters.length > 0 ||
+    languageFilters.length > 0 ||
+    sourceFilters.length > 0 ||
+    publishedAfter !== "" ||
+    publishedBefore !== "";
+
+  // Clears only the sidebar's own filters — the search box above the card
+  // feed is a separate control (main content, not the sidebar), left as-is.
+  const clearAllFilters = () => {
+    setDomainFilters([]);
+    setLicenseFilters([]);
+    setLanguageFilters([]);
+    setSourceFilters([]);
+    setPublishedAfter("");
+    setPublishedBefore("");
+  };
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
 
@@ -187,9 +206,16 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
           the sidebar its own independent scroll region — see
           FormPageLayout.tsx), mirrored to the left per user request. */}
       <Sidebar className="absolute left-0 top-0 bottom-0 z-20 w-80 lg:w-96 border-r border-base-300 shadow-2xl overflow-y-auto">
-        <SidebarHeader className="bg-base-200/50 gap-2">
-          <FunnelIcon className="w-5 h-5" />
-          <span className="text-lg font-bold">Filters</span>
+        <SidebarHeader className="bg-base-200/50 gap-2 justify-between">
+          <div className="flex items-center gap-2">
+            <FunnelIcon className="w-5 h-5" />
+            <span className="text-lg font-bold">Filters</span>
+          </div>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+              Clear all
+            </Button>
+          )}
         </SidebarHeader>
         <SidebarContent className="bg-base-200/30 space-y-5 pb-10">
           <FilterCheckboxGroup
