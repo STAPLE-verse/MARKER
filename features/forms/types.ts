@@ -40,6 +40,17 @@ export interface ContributorDTO {
 }
 
 /**
+ * One sibling version within a `PublishedSchema` family, newest first —
+ * lets both the `/explore` card's version picker and `/schemas/[pid]`'s
+ * version-history sidebar link across a family without re-fetching.
+ */
+export interface PublishedSchemaVersionDTO {
+  pid: string
+  version: string
+  createdAt: Date
+}
+
+/**
  * One row in the public `/explore` catalog — one per `familyId` (latest
  * version only; see `docs/refactor/explore.md` §2.2). Deliberately reuses
  * `ContributorDTO` rather than a narrower shape: the card needs the same
@@ -50,6 +61,9 @@ export interface ContributorDTO {
  * (`firstName`/`lastName`), included only as a fallback for the rare row
  * whose `contributors` comes back empty (see `docs/refactor/explore.md`
  * §2.1) — MARKER's own model has no elevated "author" concept otherwise.
+ *
+ * `versions` always includes this row's own version and is sorted newest
+ * first; length 1 means this family has never had another version published.
  */
 export interface PublishedSchemaCardDTO {
   pid: string
@@ -64,6 +78,7 @@ export interface PublishedSchemaCardDTO {
   contributors: ContributorDTO[]
   authorName: string | null
   createdAt: Date
+  versions: PublishedSchemaVersionDTO[]
 }
 
 export interface PublishedSchemaSummaryDTO {
@@ -83,6 +98,10 @@ export interface PublishedSchemaSummaryDTO {
  * display-shaped), not `PublishedSchemaPackage.packageJson` (the frozen
  * marker-template-spec snapshot, reserved for export/interop — see its own
  * schema.prisma comment on why it's kept separate).
+ *
+ * `versions` (see `PublishedSchemaVersionDTO`) is every published version in
+ * this schema's family, newest first, always including this row's own
+ * version — feeds the version-history sidebar.
  */
 export interface PublicPublishedSchemaDTO {
   pid: string
@@ -99,6 +118,7 @@ export interface PublicPublishedSchemaDTO {
   schema: Record<string, unknown>
   uiSchema: Record<string, unknown>
   createdAt: Date
+  versions: PublishedSchemaVersionDTO[]
 }
 
 export interface PublicationMetadataFieldsDTO {

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db"
 import { PublicPublishedSchemaDTO } from "../types"
 import { mapContributorsChecked, normalizeKeywordsChecked } from "../utils/publicationMetadata"
+import { getVersionsByFamilyIds } from "./publishedSchemaFamilyVersions"
 
 /**
  * Public, unauthenticated lookup for `/schemas/[pid]` — the catalog detail
@@ -25,10 +26,13 @@ export async function getPublishedSchemaByPid(pid: string): Promise<PublicPublis
       schemaJson: true,
       uiSchema: true,
       createdAt: true,
+      familyId: true,
     },
   })
 
   if (!schema) return null
+
+  const versionsByFamily = await getVersionsByFamilyIds([schema.familyId])
 
   return {
     pid: schema.pid,
@@ -45,5 +49,8 @@ export async function getPublishedSchemaByPid(pid: string): Promise<PublicPublis
     schema: (schema.schemaJson ?? {}) as Record<string, unknown>,
     uiSchema: (schema.uiSchema ?? {}) as Record<string, unknown>,
     createdAt: schema.createdAt,
+    versions: versionsByFamily.get(schema.familyId) ?? [
+      { pid: schema.pid, version: schema.version, createdAt: schema.createdAt },
+    ],
   }
 }

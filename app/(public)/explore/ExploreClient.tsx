@@ -2,12 +2,13 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { FunnelIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { Dropdown, DropdownContent, DropdownItem, DropdownTrigger } from "@/components/ui/Dropdown";
 import { Input } from "@/components/ui/Input";
 import type { SelectOption } from "@/components/ui/Select";
 import { Sidebar, SidebarHeader, SidebarContent } from "@/components/ui/Sidebar";
@@ -105,6 +106,46 @@ function publishedOnLabel(createdAt: Date): string {
     month: "long",
     day: "numeric",
   });
+}
+
+/**
+ * The version badge on an Explore card. A family with only one published
+ * version renders as a plain badge (nothing to pick between). A family with
+ * more renders as a dropdown listing every sibling version — newest first,
+ * same order as `PublishedSchemaCardDTO.versions` — each linking straight to
+ * that version's own `/schemas/[pid]`.
+ */
+function VersionBadge({ schema }: { schema: PublishedSchemaCardDTO }) {
+  if (schema.versions.length <= 1) {
+    return (
+      <Badge variant="secondary" outline size="sm" className="font-mono">
+        v{schema.version}
+      </Badge>
+    );
+  }
+
+  return (
+    <Dropdown>
+      <DropdownTrigger>
+        <Badge variant="secondary" outline size="sm" className="font-mono cursor-pointer gap-0.5">
+          v{schema.version}
+          <ChevronDownIcon className="w-3 h-3" />
+        </Badge>
+      </DropdownTrigger>
+      <DropdownContent className="w-64">
+        {schema.versions.map((version) => (
+          <DropdownItem key={version.pid}>
+            <Link href={`/schemas/${version.pid}`} className="flex items-center justify-between gap-2">
+              <span className={version.pid === schema.pid ? "font-semibold" : ""}>v{version.version}</span>
+              <span className="text-xs text-base-content/50 whitespace-nowrap">
+                {publishedOnLabel(version.createdAt)}
+              </span>
+            </Link>
+          </DropdownItem>
+        ))}
+      </DropdownContent>
+    </Dropdown>
+  );
 }
 
 export default function ExploreClient({ schemas }: ExploreClientProps) {
@@ -295,9 +336,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
                       <Link href={`/schemas/${schema.pid}`} className="hover:underline">
                         <h2 className="text-xl font-bold">{schema.title}</h2>
                       </Link>
-                      <Badge variant="secondary" outline size="sm" className="font-mono">
-                        v{schema.version}
-                      </Badge>
+                      <VersionBadge schema={schema} />
                       <Badge variant="primary" outline size="sm">
                         {domainLabel(schema.domain)}
                       </Badge>

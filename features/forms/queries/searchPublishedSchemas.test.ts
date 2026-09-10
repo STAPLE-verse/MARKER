@@ -23,6 +23,7 @@ function baseRow(overrides: Record<string, unknown> = {}) {
     keywords: ["cognitive", "assessment"],
     contributors: [{ name: "Jane Doe", roles: ["Creator"] }],
     createdAt: new Date("2026-09-01T00:00:00.000Z"),
+    familyId: "fam_abc123",
     author: { firstName: "Jane", lastName: "Doe" },
     ...overrides,
   };
@@ -77,6 +78,13 @@ describe("searchPublishedSchemas", () => {
         ],
         authorName: "Jane Doe",
         createdAt: new Date("2026-09-01T00:00:00.000Z"),
+        versions: [
+          {
+            pid: "ps_abc123",
+            version: "1.0.0",
+            createdAt: new Date("2026-09-01T00:00:00.000Z"),
+          },
+        ],
       },
     ]);
     expect(consoleErrorSpy).not.toHaveBeenCalled();
@@ -94,6 +102,22 @@ describe("searchPublishedSchemas", () => {
     expect(consoleErrorSpy.mock.calls[0][1]).toMatchObject({ pid: "ps_abc123" });
 
     consoleErrorSpy.mockRestore();
+  });
+
+  it("attaches every sibling version in the family, newest first, including the row itself", async () => {
+    findManyPublishedSchema
+      .mockResolvedValueOnce([baseRow({ pid: "ps_v2", version: "2.0.0", familyId: "fam_xyz" })])
+      .mockResolvedValueOnce([
+        { familyId: "fam_xyz", pid: "ps_v2", version: "2.0.0", createdAt: new Date("2026-09-05T00:00:00.000Z") },
+        { familyId: "fam_xyz", pid: "ps_v1", version: "1.0.0", createdAt: new Date("2026-01-01T00:00:00.000Z") },
+      ]);
+
+    const [result] = await searchPublishedSchemas();
+
+    expect(result.versions).toEqual([
+      { pid: "ps_v2", version: "2.0.0", createdAt: new Date("2026-09-05T00:00:00.000Z") },
+      { pid: "ps_v1", version: "1.0.0", createdAt: new Date("2026-01-01T00:00:00.000Z") },
+    ]);
   });
 
   it("falls back to the publishing user's name only when contributors is empty", async () => {

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db"
 import { PublishedSchemaCardDTO } from "../types"
 import { mapContributorsChecked, normalizeKeywordsChecked } from "../utils/publicationMetadata"
+import { getVersionsByFamilyIds } from "./publishedSchemaFamilyVersions"
 
 const MAX_RESULTS = 200
 
@@ -34,11 +35,17 @@ export async function searchPublishedSchemas(): Promise<PublishedSchemaCardDTO[]
       keywords: true,
       contributors: true,
       createdAt: true,
+      familyId: true,
       author: {
         select: { firstName: true, lastName: true },
       },
     },
   })
+
+  // familyId only exists to look up sibling versions below — it's dropped
+  // again before the DTO goes out (see §3.1: the card has no use for it
+  // once dedup/grouping has happened).
+  const versionsByFamily = await getVersionsByFamilyIds(schemas.map((schema) => schema.familyId))
 
   return schemas.map((schema) => ({
     pid: schema.pid,
@@ -53,6 +60,7 @@ export async function searchPublishedSchemas(): Promise<PublishedSchemaCardDTO[]
     contributors: mapContributorsChecked(schema.pid, schema.contributors),
     authorName: authorDisplayName(schema.author),
     createdAt: schema.createdAt,
+    versions: versionsByFamily.get(schema.familyId) ?? [{ pid: schema.pid, version: schema.version, createdAt: schema.createdAt }],
   }))
 }
 

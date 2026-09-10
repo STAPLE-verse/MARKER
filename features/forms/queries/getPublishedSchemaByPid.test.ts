@@ -1,10 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const findUniquePublishedSchema = vi.fn();
+const findManyPublishedSchema = vi.fn();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
-    publishedSchema: { findUnique: (...args: unknown[]) => findUniquePublishedSchema(...args) },
+    publishedSchema: {
+      findUnique: (...args: unknown[]) => findUniquePublishedSchema(...args),
+      findMany: (...args: unknown[]) => findManyPublishedSchema(...args),
+    },
   },
 }));
 
@@ -26,6 +30,7 @@ function baseRow(overrides: Record<string, unknown> = {}) {
     schemaJson: { type: "object" },
     uiSchema: null,
     createdAt: new Date("2026-09-01T00:00:00.000Z"),
+    familyId: "fam_abc123",
     ...overrides,
   };
 }
@@ -33,6 +38,12 @@ function baseRow(overrides: Record<string, unknown> = {}) {
 describe("getPublishedSchemaByPid", () => {
   beforeEach(() => {
     findUniquePublishedSchema.mockReset();
+    findManyPublishedSchema.mockReset();
+    // Sole sibling version by default (the row's own family) — most tests
+    // don't care about multi-version behavior, only that it doesn't blow up.
+    findManyPublishedSchema.mockResolvedValue([
+      { familyId: "fam_abc123", pid: "ps_abc123", version: "1.0.0", createdAt: new Date("2026-09-01T00:00:00.000Z") },
+    ]);
   });
 
   it("returns null when no row matches the pid", async () => {
@@ -70,6 +81,24 @@ describe("getPublishedSchemaByPid", () => {
     expect(consoleErrorSpy.mock.calls[0][1]).toMatchObject({ pid: "ps_abc123" });
 
     consoleErrorSpy.mockRestore();
+  });
+
+  it("attaches every sibling version in the family, newest first, for the version-history sidebar", async () => {
+    findUniquePublishedSchema.mockResolvedValue(baseRow({ pid: "ps_v2", version: "2.0.0" }));
+    findManyPublishedSchema.mockResolvedValue([
+      { familyId: "fam_abc123", pid: "ps_v2", version: "2.0.0", createdAt: new Date("2026-09-05T00:00:00.000Z") },
+      { familyId: "fam_abc123", pid: "ps_v1", version: "1.0.0", createdAt: new Date("2026-01-01T00:00:00.000Z") },
+    ]);
+
+    const result = await getPublishedSchemaByPid("ps_v2");
+
+    expect(result?.versions).toEqual([
+      { pid: "ps_v2", version: "2.0.0", createdAt: new Date("2026-09-05T00:00:00.000Z") },
+      { pid: "ps_v1", version: "1.0.0", createdAt: new Date("2026-01-01T00:00:00.000Z") },
+    ]);
+    expect(findManyPublishedSchema).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { familyId: { in: ["fam_abc123"] } } })
+    );
   });
 
   it("falls back to an empty object for null schemaJson/uiSchema", async () => {
