@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { Prisma } from "@prisma/client";
 
 const FORM_ID = 1;
 const VERSION_ID = 10;
@@ -202,5 +203,69 @@ describe("publishSchema identity + template-package validation gate", () => {
       metadata: expect.objectContaining({ status: "published", familyId: `urn:marker:family:${FAMILY_ID}` }),
       form: expect.objectContaining({ schema: expect.any(Object), uiSchema: expect.any(Object) }),
     });
+  });
+
+  // Reproduces the exact error shape captured live against this project's DB
+  // (@prisma/adapter-pg, Prisma 7.8.0): `meta.target` absent, field names
+  // only present in `message` and in the undocumented
+  // `meta.driverAdapterError.cause.constraint.fields` path.
+  function familyIdVersionConflictError() {
+    return new Prisma.PrismaClientKnownRequestError(
+      'Invalid `prisma.publishedSchema.create()` invocation:\n\n\nUnique constraint failed on the fields: (`"familyId"`, `version`)',
+      {
+        code: "P2002",
+        clientVersion: "7.8.0",
+        meta: {
+          modelName: "PublishedSchema",
+          driverAdapterError: {
+            cause: {
+              originalCode: "23505",
+              originalMessage:
+                'duplicate key value violates unique constraint "PublishedSchema_familyId_version_key"',
+              kind: "UniqueConstraintViolation",
+              constraint: { fields: ['"familyId"', "version"] },
+            },
+          },
+        },
+      }
+    );
+  }
+
+  it("shows a friendly conflict message when this version was already published, even though meta.target isn't populated under the pg driver adapter", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+    createPublishedSchema.mockRejectedValue(familyIdVersionConflictError());
+
+    const result = await publishSchema(basePublishInput());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe("CONFLICT");
+      expect(result.error).toContain("already been published for this schema");
+    }
+    // Fails fast on the real conflict — must not burn through the PID retry
+    // loop (which is for pid collisions, a different P2002 case entirely).
+    expect(createPublishedSchema).toHaveBeenCalledTimes(1);
+  });
+
+  it("still retries on a genuine pid collision, not just any P2002", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+    const pidCollisionError = new Prisma.PrismaClientKnownRequestError(
+      "Invalid `prisma.publishedSchema.create()` invocation:\n\n\nUnique constraint failed on the fields: (`pid`)",
+      {
+        code: "P2002",
+        clientVersion: "7.8.0",
+        meta: { modelName: "PublishedSchema", target: ["pid"] },
+      }
+    );
+    createPublishedSchema.mockRejectedValue(pidCollisionError);
+
+    const result = await publishSchema(basePublishInput());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe("UNKNOWN");
+    }
+    // MAX_PID_ATTEMPTS = 5 in publishSchema.ts.
+    expect(createPublishedSchema).toHaveBeenCalledTimes(5);
   });
 });

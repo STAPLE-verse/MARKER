@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { publishFormSchema, saveFormVersionSchema, strictPublicationContributorSchema } from "./schemas";
+import { publishFormSchema, publishFormSchemaForFamily, saveFormVersionSchema, strictPublicationContributorSchema } from "./schemas";
 
 describe("saveFormVersionSchema", () => {
   const validInput = {
@@ -87,6 +87,46 @@ describe("publishFormSchema version", () => {
     for (const version of ["01.2.3", "1.02.0", "1.2.030"]) {
       expect(publishFormSchema.safeParse({ ...validInput, version }).success).toBe(false);
     }
+  });
+});
+
+describe("publishFormSchemaForFamily", () => {
+  const validInput = {
+    domain: "Psychology",
+    language: "en",
+    license: "CC-BY-4.0",
+    keywords: ["memory"],
+    contributors: [{ name: "Jane Doe", roles: ["Author"] }],
+    description: "A catalog-facing description for other researchers.",
+    version: "1.0.0",
+  };
+
+  it("accepts a version that hasn't been published for this family yet", () => {
+    const schema = publishFormSchemaForFamily(["0.9.0"]);
+    expect(schema.safeParse(validInput).success).toBe(true);
+  });
+
+  it("rejects a version already published for this family, with a friendly message", () => {
+    const schema = publishFormSchemaForFamily(["1.0.0"]);
+    const result = schema.safeParse(validInput);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.version).toContain(
+        "This version has already been published. Please choose a higher version number."
+      );
+    }
+  });
+
+  it("accepts any version when no versions have been published yet", () => {
+    const schema = publishFormSchemaForFamily([]);
+    expect(schema.safeParse(validInput).success).toBe(true);
+  });
+
+  it("still enforces the underlying version format, not just uniqueness", () => {
+    const schema = publishFormSchemaForFamily([]);
+    const result = schema.safeParse({ ...validInput, version: "01.2.3" });
+    expect(result.success).toBe(false);
   });
 });
 

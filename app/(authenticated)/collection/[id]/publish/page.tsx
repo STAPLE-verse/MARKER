@@ -1,4 +1,4 @@
-import { getLatestVersionForConformanceCheck, loadOwnedForm } from "@/features/forms/queries";
+import { getLatestVersionForConformanceCheck, getPublishedVersionsForForm, loadOwnedForm } from "@/features/forms/queries";
 import { getUserProfile } from "@/features/users/queries/getUserProfile";
 import { assembleDraftPackage, formatDiagnosticsForUser, validateTemplatePackage } from "@/features/forms/utils/templatePackage";
 import PublishSchemaClient from "./PublishSchemaClient";
@@ -42,16 +42,18 @@ export default async function PublishSchemaPage({ params }: { params: Promise<{ 
   }
 
   const user = await getUserProfile(userId);
-  
+
   const authorName = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
   const isProfileIncomplete = !user?.firstName || !user?.lastName || !user?.orcid;
+  const publishedVersions = await getPublishedVersionsForForm(form.id);
 
   return (
-    <PublishSchemaClient 
-      formId={form.id} 
+    <PublishSchemaClient
+      formId={form.id}
       version={latestVersion}
-      currentUser={{ 
-        name: authorName || "", 
+      publishedVersions={publishedVersions}
+      currentUser={{
+        name: authorName || "",
         orcid: user?.orcid || "",
         isProfileIncomplete
       }}
