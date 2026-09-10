@@ -81,6 +81,19 @@ export interface PublishedSchemaCardDTO {
   versions: PublishedSchemaVersionDTO[]
 }
 
+/**
+ * One row in `/collection`'s "Published" tab — the user's own published
+ * schemas, one per family (latest published version only), same convention
+ * as `/explore`'s `PublishedSchemaCardDTO` rather than one row per historical
+ * version.
+ */
+export interface UserPublishedSchemaDTO {
+  pid: string
+  title: string
+  version: string
+  createdAt: Date
+}
+
 export interface PublishedSchemaSummaryDTO {
   pid: string
   version: string

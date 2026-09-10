@@ -17,7 +17,9 @@ export interface CollectionSchemaRow {
   title: string;
   status: "Draft" | "Published";
   statusLabel: string;
-  updatedAt: string;
+  date: string;
+  /** Where "View" navigates — the owner-authorized draft page, or the public catalog page for the Published tab. */
+  href: string;
 }
 
 interface CollectionClientProps {
@@ -28,6 +30,7 @@ interface CollectionClientProps {
 const TAB_LABELS: Record<CollectionTab, string> = {
   owned: "Owned",
   archived: "Archived",
+  published: "Published",
 };
 
 export default function CollectionClient({ tab, schemas }: CollectionClientProps) {
@@ -53,14 +56,14 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
       ),
     },
     {
-      accessorKey: "updatedAt",
-      header: "Last Updated",
+      accessorKey: "date",
+      header: tab === "published" ? "Published" : "Last Updated",
     },
     {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <Link href={`/collection/${row.original.id}`}>
+        <Link href={row.original.href}>
           <Button variant="ghost" size="sm">
             View
           </Button>
@@ -72,10 +75,16 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
   const emptyMessage =
     tab === "archived"
       ? "No archived schemas."
-      : "You haven't created any schemas yet.";
+      : tab === "published"
+        ? "You haven't published any schemas yet."
+        : "You haven't created any schemas yet.";
 
   const searchPlaceholder =
-    tab === "archived" ? "Search archived schemas..." : "Search my schemas...";
+    tab === "archived"
+      ? "Search archived schemas..."
+      : tab === "published"
+        ? "Search published schemas..."
+        : "Search my schemas...";
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300">

@@ -1,7 +1,7 @@
 import { requirePageAuth } from "@/utils/auth";
-import { getUserArchivedForms, getUserForms } from "@/features/forms/queries";
+import { getUserArchivedForms, getUserForms, getUserPublishedSchemas } from "@/features/forms/queries";
 import { getCollectionStatusBadgeLabel } from "@/features/forms/utils/versionLabel";
-import type { FormWithLatestVersion } from "@/features/forms/types";
+import type { FormWithLatestVersion, UserPublishedSchemaDTO } from "@/features/forms/types";
 import { redirect } from "next/navigation";
 import CollectionClient, { CollectionSchemaRow } from "./CollectionClient";
 import {
@@ -34,9 +34,22 @@ function mapFormsToRows(forms: FormWithLatestVersion[]): CollectionSchemaRow[] {
         latestVersion?.version ?? 1,
         latestVersion?.publishedSchemas[0]?.version
       ),
-      updatedAt: new Date(f.updatedAt).toLocaleDateString(),
+      date: new Date(f.updatedAt).toLocaleDateString(),
+      href: `/collection/${f.id}`,
     };
   });
+}
+
+/** `/schemas/[pid]` is the public catalog page — outside `/collection`'s own owner-authorized routes. */
+function mapPublishedSchemasToRows(schemas: UserPublishedSchemaDTO[]): CollectionSchemaRow[] {
+  return schemas.map((s, index) => ({
+    id: index,
+    title: s.title,
+    status: "Published",
+    statusLabel: `Published v${s.version}`,
+    date: new Date(s.createdAt).toLocaleDateString(),
+    href: `/schemas/${s.pid}`,
+  }));
 }
 
 export default async function CollectionPage({ searchParams }: CollectionPageProps) {
@@ -49,6 +62,12 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
   }
 
   const tab = parseCollectionTab(tabParam);
+
+  if (tab === "published") {
+    const schemas = await getUserPublishedSchemas(userId);
+    return <CollectionClient tab={tab} schemas={mapPublishedSchemasToRows(schemas)} />;
+  }
+
   const rawForms =
     tab === "archived" ? await getUserArchivedForms(userId) : await getUserForms(userId);
 
