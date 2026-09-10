@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { Path, useForm } from "react-hook-form";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -10,7 +10,7 @@ import { BackButton } from "@/components/ui/BackButton";
 import { Form } from "@/components/ui/Form";
 import { Stepper } from "@/components/ui/Stepper";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { publishFormSchema, PublishFormInput } from "@/features/forms/schemas";
+import { publishFormSchemaForFamily, PublishFormInput } from "@/features/forms/schemas";
 import { usePublishSchema } from "@/features/forms/hooks/usePublishSchema";
 import { useSavePublicationMetadata } from "@/features/forms/hooks/useSavePublicationMetadata";
 import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
@@ -19,6 +19,7 @@ import {
   DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
   publicationMetadataToFormValues,
 } from "@/features/forms/utils/publicationMetadata";
+import { suggestNextVersion } from "@/features/forms/utils/semver";
 import { extractSchemaDescription } from "@/utils/schema";
 import { Step1FairMetadata } from "./components/Step1FairMetadata";
 import { Step2Contributors } from "./components/Step2Contributors";
@@ -27,6 +28,11 @@ import { Step3Review } from "./components/Step3Review";
 interface PublishSchemaClientProps {
   formId: number;
   version: FormVersionDTO;
+  /** Every version already published for this form's schema family — see
+   * getPublishedVersionsForForm. Used to suggest the next version and to
+   * flag an already-taken one before the user submits (advisory only; the
+   * DB's unique constraint is still the authoritative gate). */
+  publishedVersions: string[];
   currentUser: {
     name: string;
     orcid: string;
@@ -34,7 +40,7 @@ interface PublishSchemaClientProps {
   };
 }
 
-export default function PublishSchemaClient({ formId, version, currentUser }: PublishSchemaClientProps) {
+export default function PublishSchemaClient({ formId, version, publishedVersions, currentUser }: PublishSchemaClientProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const publicationMetadata = version.publicationMetadata;
   const [metadataUpdatedAt, setMetadataUpdatedAt] = useState<Date | string | null>(
@@ -48,11 +54,15 @@ export default function PublishSchemaClient({ formId, version, currentUser }: Pu
     }],
   });
 
+  // publishedVersions is a one-time page-load snapshot (doesn't change while
+  // the wizard is open), so this only ever computes once per mount.
+  const versionSchema = useMemo(() => publishFormSchemaForFamily(publishedVersions), [publishedVersions]);
+
   const form = useForm<PublishFormInput>({
-    resolver: zodResolver(publishFormSchema),
+    resolver: zodResolver(versionSchema),
     defaultValues: {
       ...publicationMetadataDefaults,
-      version: "1.0.0",
+      version: suggestNextVersion(publishedVersions),
       // Starting point only — most templates' catalog description will
       // begin close to the form's own description and get expanded from
       // there, but the two are independently editable from here on.

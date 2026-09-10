@@ -141,6 +141,15 @@ export const publishSchema = authenticatedAction(
                 authorId: userId,
                 contributors: contributorsToJson(publicationMetadata.contributors),
                 originFormVersionId: latestVersion.id,
+                // Academic-credit lineage (architecture.md "Tracking Lineage
+                // (Forking)") — carried forward automatically, no user input:
+                // `form` already has every MarkerForm scalar column in scope
+                // (getAuthorizedLatestVersion's findUnique has no `select`),
+                // so this costs no extra query. Applies on every republish
+                // from a forked-origin form, not just the first — there's no
+                // "did they actually modify it" gate here (that's the
+                // separate, unbuilt modification-status system).
+                derivedFromPid: form.origin === "FORKED" ? form.forkedFromPid : null,
               },
             });
 
@@ -166,8 +175,25 @@ export const publishSchema = authenticatedAction(
           throw error;
         }
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+          // `error.meta.target` — the documented way to see which fields a
+          // P2002 violated — is NOT populated under `@prisma/adapter-pg`
+          // (this project's driver, see lib/db.ts): the field names only
+          // show up in `error.message` ('Unique constraint failed on the
+          // fields: (`"familyId"`, `version`)') and in an undocumented
+          // nested path (`meta.driverAdapterError.cause.constraint.fields`)
+          // that isn't part of Prisma's stable API. Verified directly
+          // against this project's real DB, not assumed. Checking `target`
+          // alone silently missed every real familyId+version conflict,
+          // falling through to the PID-retry loop below and eventually
+          // surfacing "Failed to generate a unique PID" instead of this
+          // actionable message — so check `message` too.
           const target = JSON.stringify(error.meta?.target ?? "");
-          if (target.includes("familyId") || target.includes("version")) {
+          if (
+            target.includes("familyId") ||
+            target.includes("version") ||
+            error.message.includes("familyId") ||
+            error.message.includes("version")
+          ) {
             throw new ActionError(
               "CONFLICT",
               `Version ${input.version} has already been published for this schema. Please choose a higher version number.`

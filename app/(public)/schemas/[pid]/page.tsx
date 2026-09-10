@@ -1,61 +1,54 @@
 import { notFound } from "next/navigation";
-import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { Card, CardBody, CardTitle } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { BackButton } from "@/components/ui/BackButton";
-import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
+import { auth } from "@/auth";
 import { getPublishedSchemaByPid } from "@/features/forms/queries";
-import { SchemaTabsCard } from "@/features/forms/components/SchemaTabsCard";
+import type { PublicPublishedSchemaDTO } from "@/features/forms/types";
+import SchemaDetailsClient from "./SchemaDetailsClient";
 
 export default async function SchemaDetailsPage({ params }: { params: Promise<{ pid: string }> }) {
-  const { pid } = await params;
+  // `params` and `auth()` are independent — resolve them together, same as
+  // the `params`+`searchParams` pattern in collection/[id]/page.tsx — then
+  // fetch the schema, which does depend on `pid`.
+  const [{ pid }, session] = await Promise.all([params, auth()]);
   const schema = await getPublishedSchemaByPid(pid);
 
   if (!schema) notFound();
 
+  const viewerUserId = session?.user?.id ? Number(session.user.id) : null;
+  const viewerIsAuthor = viewerUserId !== null && viewerUserId === schema.authorId;
+  const viewerFormId = viewerIsAuthor ? schema.originFormId : null;
+  const viewerVersionId = viewerIsAuthor ? schema.originVersionId : null;
+
+  // Built explicitly (not `{ authorId, originFormId, ...rest }`) so
+  // authorId/originFormId — resolved into the three viewer-state values
+  // above, and never meant to reach the client (authorId is another user's
+  // numeric id whenever the viewer isn't the author) — can't leak through
+  // by accident if PublishedSchemaDetailDTO ever grows a new field.
+  const publicSchema: PublicPublishedSchemaDTO = {
+    pid: schema.pid,
+    title: schema.title,
+    description: schema.description,
+    version: schema.version,
+    license: schema.license,
+    domain: schema.domain,
+    language: schema.language,
+    keywords: schema.keywords,
+    contributors: schema.contributors,
+    releaseNotes: schema.releaseNotes,
+    relatedPublicationDoi: schema.relatedPublicationDoi,
+    schema: schema.schema,
+    uiSchema: schema.uiSchema,
+    createdAt: schema.createdAt,
+    versions: schema.versions,
+    forkedFrom: schema.forkedFrom,
+  };
+
   return (
-    <FormPageLayout
-      backButton={<BackButton href="/explore">Back to Explore</BackButton>}
-    >
-      <PageHeader
-        title={schema.title}
-        description={`PID: ${schema.pid} • Version: ${schema.version}`}
-      >
-        <a href={`/api/schemas/${schema.pid}/package`} download={`${schema.pid}.json`}>
-          <Button variant="primary" outline size="sm">
-            Export JSON
-          </Button>
-        </a>
-      </PageHeader>
-
-      <div className="space-y-6">
-        <Card bordered>
-          <CardBody>
-            <CardTitle className="text-xl">Description</CardTitle>
-            <p className="text-base-content/85 leading-relaxed">
-              {schema.description || "No description provided."}
-            </p>
-            {schema.relatedPublicationDoi && (
-              <p className="text-sm text-base-content/60 mt-2">
-                Related publication:{" "}
-                <a
-                  href={`https://doi.org/${schema.relatedPublicationDoi}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link link-primary"
-                >
-                  {schema.relatedPublicationDoi}
-                </a>
-              </p>
-            )}
-          </CardBody>
-        </Card>
-
-        <PublicationMetadataCard metadata={schema} releaseNotes={schema.releaseNotes} />
-
-        <SchemaTabsCard schema={schema.schema} uiSchema={schema.uiSchema} />
-      </div>
-    </FormPageLayout>
+    <SchemaDetailsClient
+      schema={publicSchema}
+      isLoggedIn={viewerUserId !== null}
+      viewerIsAuthor={viewerIsAuthor}
+      viewerFormId={viewerFormId}
+      viewerVersionId={viewerVersionId}
+    />
   );
 }

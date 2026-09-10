@@ -18,6 +18,8 @@ interface SchemaDetailHeaderProps {
   archived: boolean;
   hasPublishedVersion: boolean;
   stapleImport: StapleImportInfoDTO | null;
+  /** Mutually exclusive with `stapleImport` — `MarkerForm.origin` is a single enum value. */
+  forkedFrom: { pid: string; title: string } | null;
   onClone: () => void;
   isCloning: boolean;
   onRestore: () => void;
@@ -57,6 +59,15 @@ interface StapleImportBadgesProps {
  * form's core lifecycle state and get the full/solid treatment; this badge
  * is supplementary provenance, so it stays visually subordinate rather than
  * competing with (or outshouting) the status badge it sits next to.
+ *
+ * TODO(generalize): named/shaped for STAPLE specifically because it's the
+ * only import source today. Once another import destination exists
+ * (`MarkerFormOrigin.IMPORTED_EXTERNAL` — CEDAR/REDCap adapters,
+ * `forms-feature-plan.md` Phase 3), generalize this to a source-agnostic
+ * `ImportBadge` rather than letting a second near-identical badge grow next
+ * to it. NOT the same thing as a "forked from a PublishedSchema" badge —
+ * forking isn't an import (no external system, no per-version recurrence,
+ * see `MarkerForm.forkedFromPid`) and should stay its own component.
  */
 function StapleImportBadge({ sourceVersionNumber, importedAt, modificationStatus }: StapleImportBadgesProps) {
   const isModified = modificationStatus === "MODIFIED";
@@ -79,12 +90,52 @@ function StapleImportBadge({ sourceVersionNumber, importedAt, modificationStatus
       variant={variant}
       outline
       className={
-        tooltip ? "shrink-0 mt-0.5 tooltip tooltip-bottom z-50 before:max-w-xs cursor-help" : "shrink-0 mt-0.5"
+        // z-10, not z-50: AppNavbar is `sticky ... z-50` — a badge at the
+        // same z-index sits in a different stacking context (page content
+        // vs. the sticky nav) and, at a tie, paints on top of it instead of
+        // scrolling behind it as the page scrolls. z-10 is still well above
+        // this badge's own unstacked siblings (enough for the tooltip
+        // popover to clear them) without ever competing with the navbar.
+        tooltip ? "shrink-0 mt-0.5 tooltip tooltip-bottom z-10 before:max-w-xs cursor-help" : "shrink-0 mt-0.5"
       }
       data-tip={tooltip}
     >
       {label}
     </Badge>
+  );
+}
+
+interface ForkedBadgeProps {
+  forkedFrom: { pid: string; title: string };
+}
+
+/**
+ * Distinct from `StapleImportBadge` — forking isn't an import (no external
+ * system, and `MarkerForm.forkedFromPid` is set once at creation and applies
+ * unchanged to every version, so there's no per-version/`isViewingLatest`
+ * logic to carry here). No modification-status color/label either: MARKER
+ * doesn't track a content hash for forks the way it does for STAPLE imports,
+ * so there's nothing to distinguish "still identical to the fork source"
+ * from "heavily modified since" — this is a permanent, undifferentiated
+ * lineage marker, not a status indicator.
+ *
+ * Wrapped in a `Link`, not just a hover tooltip — unlike a STAPLE source
+ * form (which needs a STAPLE session to view), the original `PublishedSchema`
+ * page is always public and reachable, so clicking through is meaningful.
+ */
+function ForkedBadge({ forkedFrom }: ForkedBadgeProps) {
+  return (
+    <Link href={`/schemas/${forkedFrom.pid}`}>
+      <Badge
+        variant="secondary"
+        outline
+        // Same z-10 reasoning as StapleImportBadge above.
+        className="shrink-0 mt-0.5 tooltip tooltip-bottom z-10 before:max-w-xs cursor-pointer"
+        data-tip={`Forked from ${forkedFrom.title}`}
+      >
+        Forked
+      </Badge>
+    </Link>
   );
 }
 
@@ -100,6 +151,7 @@ export function SchemaDetailHeader({
   archived,
   hasPublishedVersion,
   stapleImport,
+  forkedFrom,
   onClone,
   isCloning,
   onRestore,
@@ -132,8 +184,11 @@ export function SchemaDetailHeader({
       modificationStatus={modificationStatus}
     />
   ) : null;
+  // Mutually exclusive (see the ForkedBadgeProps comment above) — at most
+  // one of the two ever renders.
+  const provenanceBadge = stapleBadge ?? (forkedFrom ? <ForkedBadge forkedFrom={forkedFrom} /> : null);
   const description = pid ? <span className="font-mono text-primary text-xs">PID: {pid}</span> : null;
-  const title = <SchemaHeaderTitle version={version} extraBadges={stapleBadge} />;
+  const title = <SchemaHeaderTitle version={version} extraBadges={provenanceBadge} />;
 
   if (archived) {
     return (
@@ -156,31 +211,31 @@ export function SchemaDetailHeader({
             {isRestoring ? "Restoring..." : "Restore as New Draft"}
           </Button>
         )}
-        {isViewingLatest && (
+        {isViewingLatest && !isPublished && (
           <>
-            {!isPublished ? (
-              <>
-                <Link href={`/collection/${formId}/edit`}>
-                  <Button variant="primary" outline size="sm">
-                    Edit Structure
-                  </Button>
-                </Link>
-                <Link href={`/collection/${formId}/publish`}>
-                  <Button variant="primary" size="sm">
-                    Publish Schema
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              pid && (
-                <Link href={`/schemas/${pid}`}>
-                  <Button variant="secondary" size="sm">
-                    View Public URL
-                  </Button>
-                </Link>
-              )
-            )}
+            <Link href={`/collection/${formId}/edit`}>
+              <Button variant="primary" outline size="sm">
+                Edit Structure
+              </Button>
+            </Link>
+            <Link href={`/collection/${formId}/publish`}>
+              <Button variant="primary" size="sm">
+                Publish Schema
+              </Button>
+            </Link>
           </>
+        )}
+        {/* Independent of isViewingLatest — a family can have several
+            published versions (see docs/refactor/explore.md §7's version
+            history), and an older, non-latest version can be published too.
+            Previously nested under isViewingLatest, which hid this for any
+            published version that wasn't also the latest. */}
+        {isPublished && pid && (
+          <Link href={`/schemas/${pid}`}>
+            <Button variant="secondary" size="sm">
+              View Public URL
+            </Button>
+          </Link>
         )}
         {/* Secondary/occasional actions — kept out of the primary row so it
             doesn't grow with every action a form can support. */}

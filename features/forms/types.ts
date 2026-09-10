@@ -39,6 +39,48 @@ export interface ContributorDTO {
   affiliations?: ContributorAffiliationDTO[]
 }
 
+/**
+ * One sibling version within a `PublishedSchema` family, newest first —
+ * lets both the `/explore` card's version picker and `/schemas/[pid]`'s
+ * version-history sidebar link across a family without re-fetching.
+ */
+export interface PublishedSchemaVersionDTO {
+  pid: string
+  version: string
+  createdAt: Date
+}
+
+/**
+ * One row in the public `/explore` catalog — one per `familyId` (latest
+ * version only; see `docs/refactor/explore.md` §2.2). Deliberately reuses
+ * `ContributorDTO` rather than a narrower shape: the card needs the same
+ * "first contributor + role" info the `/schemas/[pid]` detail page already
+ * knows how to render.
+ *
+ * `authorName` is the publishing `User`'s display name
+ * (`firstName`/`lastName`), included only as a fallback for the rare row
+ * whose `contributors` comes back empty (see `docs/refactor/explore.md`
+ * §2.1) — MARKER's own model has no elevated "author" concept otherwise.
+ *
+ * `versions` always includes this row's own version and is sorted newest
+ * first; length 1 means this family has never had another version published.
+ */
+export interface PublishedSchemaCardDTO {
+  pid: string
+  title: string
+  description: string | null
+  version: string
+  domain: string | null
+  language: string
+  license: string
+  source: string
+  keywords: string[]
+  contributors: ContributorDTO[]
+  authorName: string | null
+  createdAt: Date
+  versions: PublishedSchemaVersionDTO[]
+}
+
 export interface PublishedSchemaSummaryDTO {
   pid: string
   version: string
@@ -56,6 +98,10 @@ export interface PublishedSchemaSummaryDTO {
  * display-shaped), not `PublishedSchemaPackage.packageJson` (the frozen
  * marker-template-spec snapshot, reserved for export/interop — see its own
  * schema.prisma comment on why it's kept separate).
+ *
+ * `versions` (see `PublishedSchemaVersionDTO`) is every published version in
+ * this schema's family, newest first, always including this row's own
+ * version — feeds the version-history sidebar.
  */
 export interface PublicPublishedSchemaDTO {
   pid: string
@@ -72,6 +118,26 @@ export interface PublicPublishedSchemaDTO {
   schema: Record<string, unknown>
   uiSchema: Record<string, unknown>
   createdAt: Date
+  versions: PublishedSchemaVersionDTO[]
+  /** Set when this schema's `derivedFromPid` resolves to another published schema — the fork lineage `architecture.md` describes. `null` for a schema with no fork ancestry (or a dangling pointer, which shouldn't happen). */
+  forkedFrom: { pid: string; title: string } | null
+}
+
+/**
+ * `getPublishedSchemaByPid`'s actual return shape — the public
+ * `PublicPublishedSchemaDTO` plus two fields that must NEVER reach the
+ * client directly: `authorId` (another user's numeric id) and
+ * `originFormId` (a MarkerForm id, only meaningful to its owner). Both exist
+ * solely for `app/(public)/schemas/[pid]/page.tsx` to resolve viewer-specific
+ * state server-side (via `auth()`) — is the viewer the author, what's their
+ * draft's formId — before stripping them and passing the rest down to
+ * `SchemaDetailsClient`.
+ */
+export interface PublishedSchemaDetailDTO extends PublicPublishedSchemaDTO {
+  authorId: number
+  originFormId: number | null
+  /** The exact `MarkerFormVersion.id` frozen into this pid — not just "a" version of `originFormId`'s form. See `getPublishedSchemaByPid`'s doc comment. */
+  originVersionId: number | null
 }
 
 export interface PublicationMetadataFieldsDTO {
@@ -147,4 +213,13 @@ export interface FormDetailDTO {
   /** Ordered by version descending; index 0 is the latest version. */
   versions: FormVersionDTO[]
   stapleImport: StapleImportInfoDTO | null
+  /**
+   * Present only when `MarkerForm.origin === "FORKED"`. Unlike `stapleImport`,
+   * this is form-level in the literal sense too — a fork happens once, at
+   * `MarkerForm` creation, so it applies unchanged to every version of the
+   * form (no per-version provenance/recurrence the way a STAPLE update-import
+   * has). `null` if the origin `PublishedSchema` row is somehow gone (should
+   * be unreachable — those rows are never deleted — but not fabricated).
+   */
+  forkedFrom: { pid: string; title: string } | null
 }

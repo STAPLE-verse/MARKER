@@ -147,6 +147,28 @@ export const publishFormSchema = strictPublicationMetadataSchema.merge(publishRe
 
 export type PublishFormInput = z.infer<typeof publishFormSchema>
 
+/**
+ * Same shape as `publishFormSchema`, plus a client-side "this version is
+ * already published" check — advisory only, not the source of truth. The
+ * DB's `@@unique([familyId, version])` constraint (see publishSchema.ts)
+ * remains the authoritative gate; this just surfaces the same conflict
+ * inline, before the round-trip, using a snapshot of already-published
+ * versions fetched once when the wizard page loads. A small staleness
+ * window against a concurrent publish elsewhere is fine — the server gate
+ * still catches that case correctly either way.
+ */
+export function publishFormSchemaForFamily(publishedVersions: string[]) {
+  const takenVersions = new Set(publishedVersions)
+  return strictPublicationMetadataSchema.merge(
+    publishReviewSchema.extend({
+      version: publishReviewSchema.shape.version.refine(
+        (version) => !takenVersions.has(version),
+        { message: "This version has already been published. Please choose a higher version number." }
+      ),
+    })
+  )
+}
+
 export const publishSchemaActionSchema = publishReviewSchema.extend({
   formId: z.number(),
   formVersionId: z.number(),
@@ -180,3 +202,9 @@ export const getStapleVersionPreviewSchema = z.object({
 })
 
 export type GetStapleVersionPreviewInput = z.infer<typeof getStapleVersionPreviewSchema>
+
+export const forkSchemaSchema = z.object({
+  publishedSchemaPid: z.string(),
+})
+
+export type ForkSchemaInput = z.infer<typeof forkSchemaSchema>

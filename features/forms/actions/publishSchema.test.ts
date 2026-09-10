@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { Prisma } from "@prisma/client";
 
 const FORM_ID = 1;
 const VERSION_ID = 10;
@@ -61,12 +62,19 @@ function mockPublicationMetadata(overrides: Record<string, unknown> = {}) {
   });
 }
 
-function mockFormWithSchema(schema: Record<string, unknown>, semantics: unknown = null) {
+function mockFormWithSchema(
+  schema: Record<string, unknown>,
+  semantics: unknown = null,
+  originOverrides: Record<string, unknown> = {}
+) {
   findUniqueMarkerForm.mockResolvedValue({
     id: FORM_ID,
     ownerId: OWNER_ID,
     archived: false,
     familyId: FAMILY_ID,
+    origin: "NATIVE",
+    forkedFromPid: null,
+    ...originOverrides,
     versions: [
       {
         id: VERSION_ID,
@@ -202,5 +210,91 @@ describe("publishSchema identity + template-package validation gate", () => {
       metadata: expect.objectContaining({ status: "published", familyId: `urn:marker:family:${FAMILY_ID}` }),
       form: expect.objectContaining({ schema: expect.any(Object), uiSchema: expect.any(Object) }),
     });
+  });
+
+  // Reproduces the exact error shape captured live against this project's DB
+  // (@prisma/adapter-pg, Prisma 7.8.0): `meta.target` absent, field names
+  // only present in `message` and in the undocumented
+  // `meta.driverAdapterError.cause.constraint.fields` path.
+  function familyIdVersionConflictError() {
+    return new Prisma.PrismaClientKnownRequestError(
+      'Invalid `prisma.publishedSchema.create()` invocation:\n\n\nUnique constraint failed on the fields: (`"familyId"`, `version`)',
+      {
+        code: "P2002",
+        clientVersion: "7.8.0",
+        meta: {
+          modelName: "PublishedSchema",
+          driverAdapterError: {
+            cause: {
+              originalCode: "23505",
+              originalMessage:
+                'duplicate key value violates unique constraint "PublishedSchema_familyId_version_key"',
+              kind: "UniqueConstraintViolation",
+              constraint: { fields: ['"familyId"', "version"] },
+            },
+          },
+        },
+      }
+    );
+  }
+
+  it("shows a friendly conflict message when this version was already published, even though meta.target isn't populated under the pg driver adapter", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+    createPublishedSchema.mockRejectedValue(familyIdVersionConflictError());
+
+    const result = await publishSchema(basePublishInput());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe("CONFLICT");
+      expect(result.error).toContain("already been published for this schema");
+    }
+    // Fails fast on the real conflict — must not burn through the PID retry
+    // loop (which is for pid collisions, a different P2002 case entirely).
+    expect(createPublishedSchema).toHaveBeenCalledTimes(1);
+  });
+
+  it("carries derivedFromPid forward from a forked-origin form", async () => {
+    mockFormWithSchema(
+      { type: "object", properties: {} },
+      null,
+      { origin: "FORKED", forkedFromPid: "ps_original123" }
+    );
+
+    await publishSchema(basePublishInput());
+
+    const data = createPublishedSchema.mock.calls[0][0].data;
+    expect(data.derivedFromPid).toBe("ps_original123");
+  });
+
+  it("leaves derivedFromPid null for a native (non-forked) form", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+
+    await publishSchema(basePublishInput());
+
+    const data = createPublishedSchema.mock.calls[0][0].data;
+    expect(data.derivedFromPid).toBeNull();
+  });
+
+  it("still retries on a genuine pid collision, not just any P2002", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+    const pidCollisionError = new Prisma.PrismaClientKnownRequestError(
+      "Invalid `prisma.publishedSchema.create()` invocation:\n\n\nUnique constraint failed on the fields: (`pid`)",
+      {
+        code: "P2002",
+        clientVersion: "7.8.0",
+        meta: { modelName: "PublishedSchema", target: ["pid"] },
+      }
+    );
+    createPublishedSchema.mockRejectedValue(pidCollisionError);
+
+    const result = await publishSchema(basePublishInput());
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.code).toBe("UNKNOWN");
+    }
+    // MAX_PID_ATTEMPTS = 5 in publishSchema.ts.
+    expect(createPublishedSchema).toHaveBeenCalledTimes(5);
   });
 });

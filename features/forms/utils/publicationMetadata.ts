@@ -82,6 +82,28 @@ export function normalizeKeywords(raw: unknown): string[] {
   return dedupeTrimmedStrings(raw, { caseInsensitive: true })
 }
 
+/**
+ * Same as `normalizeKeywords`, but for reading an already-published,
+ * immutable `PublishedSchema.keywords` value specifically. `publishSchema`
+ * already runs the draft's keywords through this same normalization before
+ * copying them onto the published row, so a correctly-written row's keywords
+ * are a no-op here — if this ever drops/merges an entry, that's the stored
+ * row disagreeing with what a correct write would have produced (a
+ * pre-validation legacy row, or a write path that bypassed `publishSchema`),
+ * not a display detail to absorb silently. Logged, not thrown: the public
+ * catalog must keep showing the row either way.
+ */
+export function normalizeKeywordsChecked(pid: string, raw: unknown): string[] {
+  const normalized = normalizeKeywords(raw)
+  if (Array.isArray(raw) && normalized.length !== raw.length) {
+    console.error(
+      "PublishedSchema.keywords changed under normalizeKeywords at read time — an immutable published record should already match this shape",
+      { pid, rawCount: raw.length, normalizedCount: normalized.length }
+    )
+  }
+  return normalized
+}
+
 export function normalizeRoles(raw: unknown): string[] {
   return dedupeTrimmedStrings(raw)
 }
@@ -156,6 +178,27 @@ export function mapContributors(raw: unknown): ContributorDTO[] {
     .filter((contributor) => {
       return Boolean(contributor.name || contributor.roles.length > 0 || contributor.orcid)
     })
+}
+
+/**
+ * Same as `mapContributors`, but for reading an already-published, immutable
+ * `PublishedSchema.contributors` value specifically. See
+ * `normalizeKeywordsChecked`'s comment above — the same "a correctly-written
+ * row is a no-op here" reasoning applies: `publishSchema` already validates
+ * every contributor has a name and at least one role before writing, so this
+ * function's junk-entry filter should never actually drop anything for a
+ * legitimately-published row. Logged, not thrown: the public catalog must
+ * keep showing the row either way.
+ */
+export function mapContributorsChecked(pid: string, raw: unknown): ContributorDTO[] {
+  const mapped = mapContributors(raw)
+  if (Array.isArray(raw) && mapped.length !== raw.length) {
+    console.error(
+      "PublishedSchema.contributors changed under mapContributors at read time — an immutable published record should already match this shape",
+      { pid, rawCount: raw.length, mappedCount: mapped.length }
+    )
+  }
+  return mapped
 }
 
 /**
