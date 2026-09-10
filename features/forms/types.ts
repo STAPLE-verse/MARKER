@@ -39,6 +39,33 @@ export interface ContributorDTO {
   affiliations?: ContributorAffiliationDTO[]
 }
 
+/**
+ * One row in the public `/explore` catalog — one per `familyId` (latest
+ * version only; see `docs/refactor/explore.md` §2.2). Deliberately reuses
+ * `ContributorDTO` rather than a narrower shape: the card needs the same
+ * "first contributor + role" info the `/schemas/[pid]` detail page already
+ * knows how to render.
+ *
+ * `authorName` is the publishing `User`'s display name
+ * (`firstName`/`lastName`), included only as a fallback for the rare row
+ * whose `contributors` comes back empty (see `docs/refactor/explore.md`
+ * §2.1) — MARKER's own model has no elevated "author" concept otherwise.
+ */
+export interface PublishedSchemaCardDTO {
+  pid: string
+  title: string
+  description: string | null
+  version: string
+  domain: string | null
+  language: string
+  license: string
+  source: string
+  keywords: string[]
+  contributors: ContributorDTO[]
+  authorName: string | null
+  createdAt: Date
+}
+
 export interface PublishedSchemaSummaryDTO {
   pid: string
   version: string

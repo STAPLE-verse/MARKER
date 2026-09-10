@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db"
 import { PublicPublishedSchemaDTO } from "../types"
-import { mapContributors, normalizeKeywords } from "../utils/publicationMetadata"
+import { mapContributorsChecked, normalizeKeywordsChecked } from "../utils/publicationMetadata"
 
 /**
  * Public, unauthenticated lookup for `/schemas/[pid]` — the catalog detail
@@ -38,8 +38,8 @@ export async function getPublishedSchemaByPid(pid: string): Promise<PublicPublis
     license: schema.license,
     domain: schema.domain,
     language: schema.language,
-    keywords: normalizeKeywords(schema.keywords),
-    contributors: mapContributors(schema.contributors),
+    keywords: normalizeKeywordsChecked(schema.pid, schema.keywords),
+    contributors: mapContributorsChecked(schema.pid, schema.contributors),
     releaseNotes: schema.releaseNotes,
     relatedPublicationDoi: schema.relatedPublicationDoi,
     schema: (schema.schemaJson ?? {}) as Record<string, unknown>,

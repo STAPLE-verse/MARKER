@@ -6,3 +6,4 @@ export { getLatestVersionForConformanceCheck } from "./getLatestVersionForConfor
 export { getAuthorizedArchivedForm } from "./getAuthorizedArchivedForm"
 export { loadOwnedForm } from "./loadOwnedForm"
 export { getPublishedSchemaByPid } from "./getPublishedSchemaByPid"
+export { searchPublishedSchemas } from "./searchPublishedSchemas"

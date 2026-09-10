@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   assembleContributorName,
   availableContributorRoles,
   mapContributors,
+  mapContributorsChecked,
   normalizeAffiliations,
   normalizeKeywords,
+  normalizeKeywordsChecked,
   normalizePublicationMetadata,
   normalizeRoles,
   sortRoles,
@@ -37,6 +39,40 @@ describe("normalizeKeywords", () => {
     expect(normalizeKeywords(undefined)).toEqual([]);
     expect(normalizeKeywords(null)).toEqual([]);
     expect(normalizeKeywords("not-an-array")).toEqual([]);
+  });
+});
+
+describe("normalizeKeywordsChecked", () => {
+  it("returns the same result as normalizeKeywords and logs nothing for already-clean data", () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(normalizeKeywordsChecked("ps_abc123", ["fmri", "eeg"])).toEqual(["fmri", "eeg"]);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("logs the pid when normalization drops or merges an entry", () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(normalizeKeywordsChecked("ps_abc123", ["fMRI", "FMRI"])).toEqual(["fMRI"]);
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy.mock.calls[0][1]).toMatchObject({
+      pid: "ps_abc123",
+      rawCount: 2,
+      normalizedCount: 1,
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("does not log for non-array input (nothing to compare against)", () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(normalizeKeywordsChecked("ps_abc123", null)).toEqual([]);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 });
 
@@ -120,6 +156,47 @@ describe("mapContributors", () => {
     ]);
 
     expect(contributor.affiliations).toEqual([{ name: "Acme University" }]);
+  });
+});
+
+describe("mapContributorsChecked", () => {
+  it("returns the same result as mapContributors and logs nothing for already-clean data", () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(
+      mapContributorsChecked("ps_abc123", [{ name: "Jane Doe", roles: ["Creator"] }])
+    ).toEqual([{ ...BASE_CONTRIBUTOR_FIELDS, name: "Jane Doe", roles: ["Creator"], orcid: null }]);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("logs the pid when a junk contributor entry is dropped", () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = mapContributorsChecked("ps_abc123", [
+      { name: "Jane Doe", roles: ["Creator"] },
+      { name: "  ", roles: [], orcid: "  " },
+    ]);
+
+    expect(result).toEqual([{ ...BASE_CONTRIBUTOR_FIELDS, name: "Jane Doe", roles: ["Creator"], orcid: null }]);
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy.mock.calls[0][1]).toMatchObject({
+      pid: "ps_abc123",
+      rawCount: 2,
+      mappedCount: 1,
+    });
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("does not log for non-array input (nothing to compare against)", () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(mapContributorsChecked("ps_abc123", undefined)).toEqual([]);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
   });
 });
 
