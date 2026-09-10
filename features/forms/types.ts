@@ -98,11 +98,17 @@ export interface PublicationMetadataDTO extends PublicationMetadataFieldsDTO {
  * form-level status, this is meaningful on historical versions too, since
  * both the content and the baseline are frozen at the row's creation. `null`
  * baseline (pre-migration rows) yields "UNKNOWN".
+ *
+ * `isDirectImport` is true only for the row created BY the import
+ * transaction itself — false for every descendant (native edit or restore)
+ * that merely carries the same lineage forward, even one that's currently
+ * `UNMODIFIED`. Never backfilled for versions predating this field.
  */
 export interface VersionStapleProvenanceDTO {
   sourceVersionNumber: number
   importedAt: Date
   modificationStatus: ImportModificationStatus
+  isDirectImport: boolean
 }
 
 export interface FormVersionDTO {

@@ -15,21 +15,33 @@ interface StapleImportModalProps {
   form: StapleImportFormDTO;
   open: boolean;
   onClose: () => void;
+  /**
+   * True when opened from a specific MarkerForm's own "Update from STAPLE"
+   * button — `getStapleSourceForUpdate` always returns exactly one target,
+   * that form itself. Locks the flow to update mode and hides both the
+   * create/update choice and the target picker: "create a new form" and
+   * "which target" are both nonsensical questions here, since the answer to
+   * the latter is always "this one."
+   */
+  updateOnly?: boolean;
 }
 
 /**
- * Opened per-row from StapleImportTable. Hosts the version picker,
- * create/update destination choice, the overwrite confirmation for a
- * modified update target, and a live SchemaTabsCard preview of the
- * currently-selected STAPLE version.
+ * Opened either per-row from StapleImportTable (the generic picker, where
+ * create-vs-update and target both need to be chosen) or from a single
+ * form's "Update from STAPLE" button (`updateOnly` — see above). Hosts the
+ * version picker, the overwrite confirmation for a modified update target,
+ * and a live SchemaTabsCard preview of the currently-selected STAPLE version.
  */
-export function StapleImportModal({ form, open, onClose }: StapleImportModalProps) {
+export function StapleImportModal({ form, open, onClose, updateOnly = false }: StapleImportModalProps) {
   const [versionId, setVersionId] = useState(form.versions[0]?.id);
   const [mode, setMode] = useState<"create" | "update">(
-    form.markerTargets.length > 0 ? "update" : "create"
+    updateOnly || form.markerTargets.length > 0 ? "update" : "create"
   );
   const [targetId, setTargetId] = useState(form.markerTargets[0]?.id);
   const [confirmOverwriteOpen, setConfirmOverwriteOpen] = useState(false);
+  const showModeChoice = !updateOnly && form.markerTargets.length > 0;
+  const showTargetSelect = !updateOnly && mode === "update" && form.markerTargets.length > 0;
 
   const { preview, isLoadingPreview } = useStapleVersionPreview(form.id, versionId);
   const { doImport, isImporting } = useImportFromStaple();
@@ -89,7 +101,7 @@ export function StapleImportModal({ form, open, onClose }: StapleImportModalProp
           </select>
         </div>
 
-        {form.markerTargets.length > 0 && (
+        {showModeChoice && (
           <div className="flex gap-6">
             <label className="label cursor-pointer gap-2">
               <input
@@ -112,7 +124,7 @@ export function StapleImportModal({ form, open, onClose }: StapleImportModalProp
           </div>
         )}
 
-        {mode === "update" && form.markerTargets.length > 0 && (
+        {showTargetSelect && (
           <select
             className="select select-bordered w-full"
             value={targetId}

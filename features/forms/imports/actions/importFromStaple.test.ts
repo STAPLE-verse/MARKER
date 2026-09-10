@@ -142,6 +142,7 @@ describe("importFromStaple", () => {
       expect(data.versions.create.importedFromStapleVersionNumber).toBe(4)
       expect(data.versions.create.importedAt).toEqual(data.importedAt)
       expect(data.versions.create.originalImportHash).toBe(data.originalImportHash)
+      expect(data.versions.create.isDirectStapleImport).toBe(true)
     })
 
     it("seeds fresh publication metadata with the importing user credited as Creator", async () => {
@@ -213,6 +214,7 @@ describe("importFromStaple", () => {
       expect(versionData.importedFromStapleVersionNumber).toBe(5)
       expect(versionData.importedAt).toEqual(updateData.importedAt)
       expect(versionData.originalImportHash).toBe(updateData.originalImportHash)
+      expect(versionData.isDirectStapleImport).toBe(true)
     })
 
     it("preserves the target's existing publication metadata rather than resetting to defaults", async () => {

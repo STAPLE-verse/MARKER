@@ -433,6 +433,17 @@ model MarkerFormVersion {
   importedFromStapleVersionNumber Int?
   importedAt                      DateTime?
   originalImportHash              String?
+  // Unlike the three fields above, this one is NEVER copied forward — it
+  // answers a third, different question: "was this exact row created BY an
+  // importFromStaple transaction," as opposed to a native edit or restore
+  // that merely carries an earlier import's lineage. A fresh native-edit
+  // copy starts byte-identical to its parent, so `originalImportHash`
+  // alone can't tell "this IS the import" apart from "this is an untouched
+  // copy of one" — only this flag can. Set true only in importFromStaple's
+  // two version-create paths; explicitly false everywhere else, including
+  // restoreFormVersionAsDraft (restoring is a different transaction, even
+  // when it reproduces a direct-import row's exact content).
+  isDirectStapleImport Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

@@ -40,6 +40,9 @@ export const createFormVersionFromLatest = authenticatedAction(
             importedFromStapleVersionNumber: latestVersion.importedFromStapleVersionNumber,
             importedAt: latestVersion.importedAt,
             originalImportHash: latestVersion.originalImportHash,
+            // Never copied forward — this row is a native edit, not an
+            // import transaction (see schema.prisma).
+            isDirectStapleImport: false,
             publicationMetadata: {
               create: copyPublicationMetadataFields(latestMetadata ?? DEFAULT_PUBLICATION_METADATA),
             },

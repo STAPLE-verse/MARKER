@@ -54,6 +54,7 @@ describe("createFormCheckpoint STAPLE provenance carry-forward", () => {
           importedFromStapleVersionNumber: 5,
           importedAt: new Date("2026-08-01T00:00:00.000Z"),
           originalImportHash: "sha256:abc123",
+          isDirectStapleImport: true,
         },
       ],
     })
@@ -69,6 +70,36 @@ describe("createFormCheckpoint STAPLE provenance carry-forward", () => {
     expect(data.importedFromStapleVersionNumber).toBe(5)
     expect(data.importedAt).toEqual(new Date("2026-08-01T00:00:00.000Z"))
     expect(data.originalImportHash).toBe("sha256:abc123")
+  })
+
+  it("never marks a checkpoint as the direct import, even when the head was one", async () => {
+    findUniqueMarkerForm.mockResolvedValue({
+      id: FORM_ID,
+      ownerId: OWNER_ID,
+      archived: false,
+      versions: [
+        {
+          id: VERSION_ID,
+          version: 3,
+          status: "DRAFT",
+          updatedAt: UPDATED_AT,
+          importedFromStapleVersionNumber: 5,
+          importedAt: new Date("2026-08-01T00:00:00.000Z"),
+          originalImportHash: "sha256:abc123",
+          isDirectStapleImport: true,
+        },
+      ],
+    })
+
+    await createFormCheckpoint({
+      formId: FORM_ID,
+      formVersionId: VERSION_ID,
+      expectedUpdatedAt: UPDATED_AT.toISOString(),
+      schema: { type: "object", properties: {} },
+    })
+
+    const data = createMarkerFormVersion.mock.calls[0][0].data
+    expect(data.isDirectStapleImport).toBe(false)
   })
 
   it("stays null for a native form with no STAPLE lineage", async () => {

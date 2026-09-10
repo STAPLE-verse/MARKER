@@ -94,6 +94,7 @@ export const importFromStaple = authenticatedAction(importFromStapleSchema, asyn
             importedFromStapleVersionNumber: source.sourceVersionNumber,
             importedAt,
             originalImportHash: importedContentHash,
+            isDirectStapleImport: true,
             publicationMetadata: {
               create: copyPublicationMetadataFields({
                 ...DEFAULT_PUBLICATION_METADATA,
@@ -166,6 +167,7 @@ export const importFromStaple = authenticatedAction(importFromStapleSchema, asyn
           importedFromStapleVersionNumber: source.sourceVersionNumber,
           importedAt,
           originalImportHash: importedContentHash,
+          isDirectStapleImport: true,
           // Preserve MARKER's own curated publication metadata across an
           // update-import — STAPLE never overwrites it (import.md §8.6).
           publicationMetadata: {

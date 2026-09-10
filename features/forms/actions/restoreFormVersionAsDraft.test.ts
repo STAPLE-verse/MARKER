@@ -74,6 +74,7 @@ describe("restoreFormVersionAsDraft STAPLE provenance", () => {
       importedFromStapleVersionNumber: 3,
       importedAt: new Date("2026-08-01T00:00:00.000Z"),
       originalImportHash: "sha256:source-hash",
+      isDirectStapleImport: true,
       publicationMetadata: null,
     })
 
@@ -83,6 +84,29 @@ describe("restoreFormVersionAsDraft STAPLE provenance", () => {
     expect(data.importedFromStapleVersionNumber).toBe(3)
     expect(data.importedAt).toEqual(new Date("2026-08-01T00:00:00.000Z"))
     expect(data.originalImportHash).toBe("sha256:source-hash")
+  })
+
+  it("never marks a restored draft as the direct import, even when the restored version was one", async () => {
+    findUniqueMarkerFormVersion.mockResolvedValue({
+      id: SOURCE_VERSION_ID,
+      formId: FORM_ID,
+      archived: false,
+      status: "DRAFT",
+      name: "v1",
+      schema: {},
+      uiSchema: {},
+      semantics: null,
+      importedFromStapleVersionNumber: 3,
+      importedAt: new Date("2026-08-01T00:00:00.000Z"),
+      originalImportHash: "sha256:source-hash",
+      isDirectStapleImport: true,
+      publicationMetadata: null,
+    })
+
+    await restoreFormVersionAsDraft({ formId: FORM_ID, versionId: SOURCE_VERSION_ID })
+
+    const data = createMarkerFormVersion.mock.calls[0][0].data
+    expect(data.isDirectStapleImport).toBe(false)
   })
 
   it("restores null provenance for a version that predates any STAPLE lineage", async () => {

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { ActionMenu } from "@/components/ui/ActionMenu";
+import { DropdownItem } from "@/components/ui/Dropdown";
 import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
 import { ArchiveFormButton } from "@/features/forms/components/ArchiveFormButton";
 import { PermanentlyDeleteFormButton } from "@/features/forms/components/PermanentlyDeleteFormButton";
@@ -28,7 +31,7 @@ interface StapleImportBadgesProps {
    * When this row's own import/last-update-import happened. STAPLE only bumps
    * a form's version number when it's task-attached — otherwise edits mutate
    * the same version number in place, so "v1" alone can silently mean
-   * different content at different times. Pairing it with this timestamp is
+   * different content at different times. Folding it into the tooltip is
    * what actually disambiguates two same-numbered imports in MARKER's history.
    */
   importedAt: Date | null;
@@ -36,31 +39,52 @@ interface StapleImportBadgesProps {
   modificationStatus?: StapleImportInfoDTO["modificationStatus"];
 }
 
-function StapleImportBadges({ sourceVersionNumber, importedAt, modificationStatus }: StapleImportBadgesProps) {
-  // "Imported from STAPLE" is a present-tense identity claim — only true
-  // while this version's content still matches that import verbatim. Once
-  // native edits diverge it, however many edits removed, "Based on STAPLE
-  // import" is the honest lineage claim instead. UNKNOWN (pre-migration
-  // rows with no baseline hash to compare against) keeps the stronger
-  // wording, matching its pre-existing behavior.
-  const label = modificationStatus === "MODIFIED" ? "Based on STAPLE import" : "Imported from STAPLE";
+/**
+ * A single terse, colored badge, rendered via the shared `Badge` component —
+ * same recipe (no `size`, no `font-mono`) as `SchemaStatusBadges`' Draft/
+ * Published pills it sits next to, so it matches them exactly rather than
+ * looking like a visually distinct chip. "STAPLE," the source version
+ * number, and the import timestamp all live in the tooltip rather than
+ * inline, matching the version history sidebar's Import badge (that's not
+ * upfront-visible detail most viewers need on every glance). Color + the
+ * one-word label jointly carry modification status (green "Imported" vs.
+ * amber "Based on import"), so no separate Modified/Unmodified badge is
+ * needed — the label itself already distinguishes them, not color alone, so
+ * this isn't a color-only signal. UNKNOWN (no baseline hash, e.g.
+ * pre-migration rows) gets no color claim either way.
+ *
+ * Outlined, not solid — Draft/Published (SchemaStatusBadges) are this
+ * form's core lifecycle state and get the full/solid treatment; this badge
+ * is supplementary provenance, so it stays visually subordinate rather than
+ * competing with (or outshouting) the status badge it sits next to.
+ */
+function StapleImportBadge({ sourceVersionNumber, importedAt, modificationStatus }: StapleImportBadgesProps) {
+  const isModified = modificationStatus === "MODIFIED";
+  const isKnown = modificationStatus != null && modificationStatus !== "UNKNOWN";
+  const label = isModified ? "Based on import" : "Imported";
+  const variant = isKnown ? (isModified ? "warning" : "success") : "ghost";
+
+  const detail = [
+    sourceVersionNumber != null ? `v${sourceVersionNumber}` : null,
+    importedAt != null
+      ? importedAt.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const tooltip = detail ? `Imported from STAPLE · ${detail}` : undefined;
+
   return (
-    <span className="inline-flex items-center gap-2 flex-wrap">
-      <span className="badge badge-ghost badge-sm font-mono">
-        {label}
-        {sourceVersionNumber != null && ` · v${sourceVersionNumber}`}
-        {importedAt != null && ` · ${importedAt.toLocaleDateString()}`}
-      </span>
-      {modificationStatus && modificationStatus !== "UNKNOWN" && (
-        <span
-          className={`badge badge-sm ${
-            modificationStatus === "MODIFIED" ? "badge-warning" : "badge-success"
-          }`}
-        >
-          {modificationStatus === "MODIFIED" ? "Modified since import" : "Unmodified since import"}
-        </span>
-      )}
-    </span>
+    <Badge
+      variant={variant}
+      outline
+      className={
+        tooltip ? "shrink-0 mt-0.5 tooltip tooltip-bottom z-50 before:max-w-xs cursor-help" : "shrink-0 mt-0.5"
+      }
+      data-tip={tooltip}
+    >
+      {label}
+    </Badge>
   );
 }
 
@@ -101,23 +125,19 @@ export function SchemaDetailHeader({
       : undefined;
   const importedAt =
     version.stapleProvenance?.importedAt ?? (isViewingLatest ? stapleImport?.importedAt ?? null : null);
-  const description =
-    pid || showStapleImportBadges ? (
-      <span className="inline-flex items-center gap-2 flex-wrap">
-        {pid && <span className="font-mono text-primary text-xs">PID: {pid}</span>}
-        {showStapleImportBadges && (
-          <StapleImportBadges
-            sourceVersionNumber={sourceVersionNumber}
-            importedAt={importedAt}
-            modificationStatus={modificationStatus}
-          />
-        )}
-      </span>
-    ) : null;
+  const stapleBadge = showStapleImportBadges ? (
+    <StapleImportBadge
+      sourceVersionNumber={sourceVersionNumber}
+      importedAt={importedAt}
+      modificationStatus={modificationStatus}
+    />
+  ) : null;
+  const description = pid ? <span className="font-mono text-primary text-xs">PID: {pid}</span> : null;
+  const title = <SchemaHeaderTitle version={version} extraBadges={stapleBadge} />;
 
   if (archived) {
     return (
-      <PageHeader title={<SchemaHeaderTitle version={version} />} description={description}>
+      <PageHeader title={title} description={description}>
         <div className="flex gap-2 items-center">
           <RecoverFormButton formId={formId} schemaTitle={schemaTitle} />
           {!hasPublishedVersion && (
@@ -129,11 +149,8 @@ export function SchemaDetailHeader({
   }
 
   return (
-    <PageHeader title={<SchemaHeaderTitle version={version} />} description={description}>
+    <PageHeader title={title} description={description}>
       <div className="flex gap-2 items-center">
-        <Button variant="secondary" outline size="sm" onClick={onClone} disabled={isCloning}>
-          {isCloning ? "Cloning..." : "Clone"}
-        </Button>
         {!isViewingLatest && (
           <Button variant="primary" size="sm" onClick={onRestore} disabled={isRestoring}>
             {isRestoring ? "Restoring..." : "Restore as New Draft"}
@@ -141,7 +158,6 @@ export function SchemaDetailHeader({
         )}
         {isViewingLatest && (
           <>
-            {stapleImport && <UpdateFromStapleButton formId={formId} />}
             {!isPublished ? (
               <>
                 <Link href={`/collection/${formId}/edit`}>
@@ -166,11 +182,34 @@ export function SchemaDetailHeader({
             )}
           </>
         )}
-        <ArchiveFormButton
-          formId={formId}
-          schemaTitle={schemaTitle}
-          hasPublishedVersion={hasPublishedVersion}
-        />
+        {/* Secondary/occasional actions — kept out of the primary row so it
+            doesn't grow with every action a form can support. */}
+        <ActionMenu>
+          <DropdownItem>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start"
+              onClick={onClone}
+              disabled={isCloning}
+            >
+              {isCloning ? "Cloning..." : "Clone"}
+            </Button>
+          </DropdownItem>
+          {isViewingLatest && stapleImport && (
+            <DropdownItem>
+              <UpdateFromStapleButton formId={formId} />
+            </DropdownItem>
+          )}
+          <DropdownItem>
+            <ArchiveFormButton
+              formId={formId}
+              schemaTitle={schemaTitle}
+              hasPublishedVersion={hasPublishedVersion}
+              className="w-full justify-start"
+            />
+          </DropdownItem>
+        </ActionMenu>
       </div>
     </PageHeader>
   );

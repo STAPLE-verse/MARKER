@@ -17,7 +17,7 @@ export function SchemaStatusBadges({ version }: SchemaStatusBadgesProps) {
 
   return (
     <>
-      <Badge variant="primary" outline className="shrink-0 mt-0.5">
+      <Badge variant="primary" className="shrink-0 mt-0.5">
         {versionLabel}
       </Badge>
       {isPublished && (

@@ -59,6 +59,10 @@ export const restoreFormVersionAsDraft = authenticatedAction(
             importedFromStapleVersionNumber: sourceVersion.importedFromStapleVersionNumber,
             importedAt: sourceVersion.importedAt,
             originalImportHash: sourceVersion.originalImportHash,
+            // Never copied forward, even from a direct-import source — a
+            // restore is its own transaction, not the original import
+            // (see schema.prisma).
+            isDirectStapleImport: false,
             publicationMetadata: {
               create: copyPublicationMetadataFields(
                 sourceVersion.publicationMetadata ?? DEFAULT_PUBLICATION_METADATA

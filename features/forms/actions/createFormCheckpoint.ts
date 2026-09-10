@@ -38,6 +38,9 @@ export const createFormCheckpoint = authenticatedAction(saveFormVersionSchema, a
           importedFromStapleVersionNumber: latestVersion.importedFromStapleVersionNumber,
           importedAt: latestVersion.importedAt,
           originalImportHash: latestVersion.originalImportHash,
+          // Never copied forward — this row is a native edit, not an
+          // import transaction (see schema.prisma).
+          isDirectStapleImport: false,
         },
       })
   )

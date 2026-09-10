@@ -13,6 +13,7 @@ const LATEST_VERSION = {
   importedFromStapleVersionNumber: 5,
   importedAt: new Date("2026-09-01T00:00:00.000Z"),
   originalImportHash: "sha256:abc123",
+  isDirectStapleImport: true,
 };
 
 const findUniqueMarkerForm = vi.fn();
@@ -88,6 +89,13 @@ describe("createFormVersionFromLatest identity invariants", () => {
     expect(data.importedFromStapleVersionNumber).toBe(5);
     expect(data.importedAt).toEqual(LATEST_VERSION.importedAt);
     expect(data.originalImportHash).toBe(LATEST_VERSION.originalImportHash);
+  });
+
+  it("never marks a native edit as the direct import, even when its source was one", async () => {
+    await createFormVersionFromLatest({ formId: FORM_ID });
+
+    const data = createMarkerFormVersion.mock.calls[0][0].data;
+    expect(data.isDirectStapleImport).toBe(false);
   });
 
   it("leaves STAPLE provenance null when the previous version had none (native form)", async () => {

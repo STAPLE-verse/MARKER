@@ -93,6 +93,7 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
                   schema: (v.schema ?? {}) as Record<string, unknown>,
                   uiSchema: v.uiSchema as Record<string, unknown> | null,
                 }),
+                isDirectImport: v.isDirectStapleImport,
               }
             : null,
       }

@@ -7,6 +7,12 @@ interface SchemaHeaderTitleProps {
   prefix?: string;
   /** Overrides the displayed name (defaults to the version's name). */
   name?: string;
+  /**
+   * Extra badges appended after the built-in Draft/Published ones, in the
+   * same row — e.g. the detail page's STAPLE provenance badge. Opt-in and
+   * omitted by every other caller, so the edit/publish headers are unchanged.
+   */
+  extraBadges?: React.ReactNode;
 }
 
 /**
@@ -14,7 +20,7 @@ interface SchemaHeaderTitleProps {
  * publish): an optionally-prefixed, truncating name followed by version/status
  * labels. Keeps the three headers visually consistent.
  */
-export function SchemaHeaderTitle({ version, prefix, name }: SchemaHeaderTitleProps) {
+export function SchemaHeaderTitle({ version, prefix, name, extraBadges }: SchemaHeaderTitleProps) {
   const displayName = name || version.name || "Untitled Form";
   const tooltip = prefix ? `${prefix}: ${displayName}` : displayName;
 
@@ -30,6 +36,7 @@ export function SchemaHeaderTitle({ version, prefix, name }: SchemaHeaderTitlePr
         )}
       </span>
       <SchemaStatusBadges version={version} />
+      {extraBadges}
     </div>
   );
 }
