@@ -27,7 +27,11 @@ export function useImportFromStaple() {
       );
       // Navigate to the form for review, not directly into the editor
       // (unlike native creation) — see docs/refactor/staple-import-phase3.md §8.
+      // Update mode can be triggered from that same detail page (see
+      // UpdateFromStapleButton) — push() alone is a no-op navigation there,
+      // so refresh() explicitly re-fetches the now-stale server data.
       router.push(`/collection/${res.data.formId}`);
+      router.refresh();
     });
   };
 

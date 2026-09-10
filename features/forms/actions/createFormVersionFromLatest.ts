@@ -34,6 +34,12 @@ export const createFormVersionFromLatest = authenticatedAction(
             // New MarkerFormVersion row under the same, existing MarkerForm —
             // mint a fresh versionId; familyId is untouched.
             versionId: generatePID("mv"),
+            // Continuation of the same lineage, not a new import — carry the
+            // previous version's own STAPLE provenance forward unchanged
+            // (see schema.prisma's comment on these fields).
+            importedFromStapleVersionNumber: latestVersion.importedFromStapleVersionNumber,
+            importedAt: latestVersion.importedAt,
+            originalImportHash: latestVersion.originalImportHash,
             publicationMetadata: {
               create: copyPublicationMetadataFields(latestMetadata ?? DEFAULT_PUBLICATION_METADATA),
             },

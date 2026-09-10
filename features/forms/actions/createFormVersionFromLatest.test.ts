@@ -10,6 +10,9 @@ const LATEST_VERSION = {
   schema: { type: "object", properties: {} },
   uiSchema: {},
   semantics: { root: { classIri: "https://schema.org/Thing" }, bindings: [] },
+  importedFromStapleVersionNumber: 5,
+  importedAt: new Date("2026-09-01T00:00:00.000Z"),
+  originalImportHash: "sha256:abc123",
 };
 
 const findUniqueMarkerForm = vi.fn();
@@ -76,5 +79,32 @@ describe("createFormVersionFromLatest identity invariants", () => {
 
     const data = createMarkerFormVersion.mock.calls[0][0].data;
     expect(data.semantics).toEqual(LATEST_VERSION.semantics);
+  });
+
+  it("carries the previous version's own STAPLE provenance forward unchanged", async () => {
+    await createFormVersionFromLatest({ formId: FORM_ID });
+
+    const data = createMarkerFormVersion.mock.calls[0][0].data;
+    expect(data.importedFromStapleVersionNumber).toBe(5);
+    expect(data.importedAt).toEqual(LATEST_VERSION.importedAt);
+    expect(data.originalImportHash).toBe(LATEST_VERSION.originalImportHash);
+  });
+
+  it("leaves STAPLE provenance null when the previous version had none (native form)", async () => {
+    findUniqueMarkerForm.mockResolvedValue({
+      id: FORM_ID,
+      ownerId: OWNER_ID,
+      archived: false,
+      versions: [
+        { ...LATEST_VERSION, importedFromStapleVersionNumber: null, importedAt: null, originalImportHash: null },
+      ],
+    });
+
+    await createFormVersionFromLatest({ formId: FORM_ID });
+
+    const data = createMarkerFormVersion.mock.calls[0][0].data;
+    expect(data.importedFromStapleVersionNumber).toBeNull();
+    expect(data.importedAt).toBeNull();
+    expect(data.originalImportHash).toBeNull();
   });
 });

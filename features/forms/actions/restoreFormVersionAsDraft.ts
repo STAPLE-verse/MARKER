@@ -51,6 +51,14 @@ export const restoreFormVersionAsDraft = authenticatedAction(
             // New MarkerFormVersion row under the same, existing MarkerForm —
             // mint a fresh versionId; familyId is untouched.
             versionId: generatePID("mv"),
+            // The restored content's own provenance travels with it — not
+            // the (possibly different) provenance of whatever version this
+            // is replacing as head. Restoring v1 (imported from STAPLE v3)
+            // as a new v5 means v5 truly is "STAPLE v3, as of that import,"
+            // regardless of what happened on v2-v4 in between.
+            importedFromStapleVersionNumber: sourceVersion.importedFromStapleVersionNumber,
+            importedAt: sourceVersion.importedAt,
+            originalImportHash: sourceVersion.originalImportHash,
             publicationMetadata: {
               create: copyPublicationMetadataFields(
                 sourceVersion.publicationMetadata ?? DEFAULT_PUBLICATION_METADATA

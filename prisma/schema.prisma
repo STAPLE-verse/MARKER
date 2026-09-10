@@ -406,6 +406,34 @@ model MarkerFormVersion {
   versionId String @unique
   archived Boolean @default(false)
 
+  // Per-version STAPLE import provenance — distinct from the same-named
+  // fields on MarkerForm, which only ever hold the *most recent* import
+  // (mutable, overwritten on every update-import). These are set once, at
+  // the moment this specific version row is created, and never touched
+  // again:
+  //  - a version created BY an import (create or update mode) gets a fresh
+  //    value matching that import;
+  //  - a version created by a native edit (createFormVersionFromLatest,
+  //    createFormCheckpoint) copies the value forward from the version it
+  //    was copied from, unchanged;
+  //  - a version restored from history (restoreFormVersionAsDraft) copies
+  //    it from the version being restored, not from the current head.
+  // This lets any historical version answer "what STAPLE version was I
+  // last tied to" without consulting MarkerForm's mutable field (which may
+  // have since moved on) or walking version history.
+  //
+  // originalImportHash carries the same copy-forward/fresh-on-import rules
+  // as the two fields above, and answers a *different* question: "was THIS
+  // version's own content already changed from that STAPLE baseline, at the
+  // moment this row was created?" (hashImportedSnapshot's `{schema,
+  // uiSchema}` baseline — see utils/importHash.ts). Unlike
+  // MarkerForm.originalImportHash (mutable, always the latest import's
+  // baseline), this is frozen per row, so the modification badge can be
+  // shown correctly on historical versions too, not just the current head.
+  importedFromStapleVersionNumber Int?
+  importedAt                      DateTime?
+  originalImportHash              String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 

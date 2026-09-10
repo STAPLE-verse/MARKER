@@ -33,6 +33,11 @@ export const createFormCheckpoint = authenticatedAction(saveFormVersionSchema, a
           // mint a fresh versionId; familyId is untouched (it lives on the
           // parent MarkerForm and isn't written here).
           versionId: generatePID("mv"),
+          // Continuation of the same lineage, not a new import — carry the
+          // previous version's own STAPLE provenance forward unchanged.
+          importedFromStapleVersionNumber: latestVersion.importedFromStapleVersionNumber,
+          importedAt: latestVersion.importedAt,
+          originalImportHash: latestVersion.originalImportHash,
         },
       })
   )

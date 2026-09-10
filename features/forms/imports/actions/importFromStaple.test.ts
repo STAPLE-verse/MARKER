@@ -135,6 +135,15 @@ describe("importFromStaple", () => {
       expect(data.versions.create.schema).toEqual(VALID_SCHEMA)
     })
 
+    it("also stamps the version-level provenance fields, matching the form-level ones exactly", async () => {
+      await importFromStaple({ mode: "create", sourceFormId: SOURCE_FORM_ID, sourceVersionId: SOURCE_VERSION_ID })
+
+      const data = createMarkerForm.mock.calls[0][0].data
+      expect(data.versions.create.importedFromStapleVersionNumber).toBe(4)
+      expect(data.versions.create.importedAt).toEqual(data.importedAt)
+      expect(data.versions.create.originalImportHash).toBe(data.originalImportHash)
+    })
+
     it("seeds fresh publication metadata with the importing user credited as Creator", async () => {
       await importFromStaple({ mode: "create", sourceFormId: SOURCE_FORM_ID, sourceVersionId: SOURCE_VERSION_ID })
 
@@ -198,6 +207,12 @@ describe("importFromStaple", () => {
       const updateData = updateMarkerForm.mock.calls[0][0].data
       expect(updateData.importedFromStapleVersionNumber).toBe(5)
       expect(updateData.originalImportHash).toMatch(/^sha256:[0-9a-f]{64}$/)
+
+      // Version-level fields stamp fresh (this version IS the import
+      // event) — never copied forward from the previous head.
+      expect(versionData.importedFromStapleVersionNumber).toBe(5)
+      expect(versionData.importedAt).toEqual(updateData.importedAt)
+      expect(versionData.originalImportHash).toBe(updateData.originalImportHash)
     })
 
     it("preserves the target's existing publication metadata rather than resetting to defaults", async () => {

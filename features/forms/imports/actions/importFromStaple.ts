@@ -52,6 +52,9 @@ export const importFromStaple = authenticatedAction(importFromStapleSchema, asyn
   const source = await resolveStapleSource(input.sourceFormId, input.sourceVersionId, userId)
   const title = source.title || (source.schema.title as string | undefined) || "Untitled imported schema"
   const importedContentHash = hashImportedSnapshot(source.schema, source.uiSchema)
+  // Shared between the MarkerForm's (mutable, latest-only) fields and this
+  // version's own (frozen) fields, so both record exactly the same instant.
+  const importedAt = new Date()
 
   if (input.mode === "create") {
     const familyId = generatePID("mf")
@@ -76,7 +79,7 @@ export const importFromStaple = authenticatedAction(importFromStapleSchema, asyn
         origin: "IMPORTED_STAPLE",
         importedFromStapleFormId: source.sourceFormId,
         importedFromStapleVersionNumber: source.sourceVersionNumber,
-        importedAt: new Date(),
+        importedAt,
         originalImportHash: importedContentHash,
         versions: {
           create: {
@@ -86,6 +89,11 @@ export const importFromStaple = authenticatedAction(importFromStapleSchema, asyn
             uiSchema: (source.uiSchema ?? {}) as Prisma.InputJsonValue,
             semantics: (source.semantics ?? Prisma.JsonNull) as Prisma.InputJsonValue,
             versionId,
+            // This version row IS the import event — fresh values, not
+            // copied forward from anything (see schema.prisma).
+            importedFromStapleVersionNumber: source.sourceVersionNumber,
+            importedAt,
+            originalImportHash: importedContentHash,
             publicationMetadata: {
               create: copyPublicationMetadataFields({
                 ...DEFAULT_PUBLICATION_METADATA,
@@ -153,6 +161,11 @@ export const importFromStaple = authenticatedAction(importFromStapleSchema, asyn
           uiSchema: (source.uiSchema ?? {}) as Prisma.InputJsonValue,
           semantics: (source.semantics ?? Prisma.JsonNull) as Prisma.InputJsonValue,
           versionId,
+          // This version row IS the import event — fresh values, not
+          // copied forward from the previous head (see schema.prisma).
+          importedFromStapleVersionNumber: source.sourceVersionNumber,
+          importedAt,
+          originalImportHash: importedContentHash,
           // Preserve MARKER's own curated publication metadata across an
           // update-import — STAPLE never overwrites it (import.md §8.6).
           publicationMetadata: {
@@ -165,7 +178,7 @@ export const importFromStaple = authenticatedAction(importFromStapleSchema, asyn
         where: { id: form.id },
         data: {
           importedFromStapleVersionNumber: source.sourceVersionNumber,
-          importedAt: new Date(),
+          importedAt,
           originalImportHash: importedContentHash,
         },
       })

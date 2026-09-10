@@ -1,4 +1,5 @@
 import { Prisma, VersionStatus } from "@prisma/client"
+import type { ImportModificationStatus } from "./utils/importHash"
 
 export type FormWithLatestVersion = Prisma.MarkerFormGetPayload<{
   include: {
@@ -85,6 +86,25 @@ export interface PublicationMetadataDTO extends PublicationMetadataFieldsDTO {
   updatedAt: Date
 }
 
+/**
+ * This version's own frozen STAPLE provenance — distinct from
+ * `StapleImportInfoDTO` below, which is form-level and mutable (always the
+ * *most recent* import). `null` for a version that isn't itself part of a
+ * STAPLE import lineage (native forms, and any version predating this
+ * field's introduction — never backfilled/fabricated).
+ *
+ * `modificationStatus` compares THIS version's own content against its own
+ * frozen baseline hash (`originalImportHash`) — unlike `StapleImportInfoDTO`'s
+ * form-level status, this is meaningful on historical versions too, since
+ * both the content and the baseline are frozen at the row's creation. `null`
+ * baseline (pre-migration rows) yields "UNKNOWN".
+ */
+export interface VersionStapleProvenanceDTO {
+  sourceVersionNumber: number
+  importedAt: Date
+  modificationStatus: ImportModificationStatus
+}
+
 export interface FormVersionDTO {
   id: number
   name: string
@@ -97,6 +117,20 @@ export interface FormVersionDTO {
   semantics: Record<string, unknown> | null
   publishedSchema: PublishedSchemaSummaryDTO | null
   publicationMetadata: PublicationMetadataDTO | null
+  stapleProvenance: VersionStapleProvenanceDTO | null
+}
+
+/**
+ * Present only when `MarkerForm.origin === "IMPORTED_STAPLE"`. `modificationStatus`
+ * reflects the current latest version against the most recent import's
+ * baseline hash (docs/refactor/import.md §8.4) — never the version currently
+ * being viewed, if that's an older one.
+ */
+export interface StapleImportInfoDTO {
+  sourceFormId: number
+  sourceVersionNumber: number | null
+  importedAt: Date | null
+  modificationStatus: ImportModificationStatus
 }
 
 export interface FormDetailDTO {
@@ -106,4 +140,5 @@ export interface FormDetailDTO {
   hasPublishedVersion: boolean
   /** Ordered by version descending; index 0 is the latest version. */
   versions: FormVersionDTO[]
+  stapleImport: StapleImportInfoDTO | null
 }
