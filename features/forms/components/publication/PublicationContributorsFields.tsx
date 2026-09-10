@@ -11,6 +11,7 @@ import {
 import { PencilIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
 import { Alert } from "@/components/ui/Alert"
 import { Button } from "@/components/ui/Button"
+import { Checkbox } from "@/components/ui/Checkbox"
 import { Input } from "@/components/ui/Input"
 import { Modal, ModalActions } from "@/components/ui/Modal"
 import { TextListInput } from "@/components/ui/TextListInput"
@@ -337,15 +338,13 @@ function ContributorEditorModal({
           </label>
           <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
             {roleChecklist.map((role) => (
-              <label key={role} className="label cursor-pointer justify-start gap-3">
-                <input
-                  type="checkbox"
-                  className="checkbox checkbox-primary"
-                  checked={values.roles.includes(role)}
-                  onChange={() => toggleRole(role)}
-                />
-                <span className="label-text">{role}</span>
-              </label>
+              <Checkbox
+                key={role}
+                label={role}
+                className="checkbox-primary"
+                checked={values.roles.includes(role)}
+                onChange={() => toggleRole(role)}
+              />
             ))}
           </div>
           <div className="flex gap-2 mt-2">

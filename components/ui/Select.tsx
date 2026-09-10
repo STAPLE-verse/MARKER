@@ -23,6 +23,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   className,
   ...props
 }, ref) => {
+  // Only default the initial value for uncontrolled usage (react-hook-form's
+  // `register()`, the only consumer until Explore's filters). A `value` prop
+  // means the caller controls this select; also passing `defaultValue` in
+  // that case is what triggers React's controlled/uncontrolled warning.
+  const isControlled = props.value !== undefined
+
   return (
     <div className="form-control w-full">
       {label && (
@@ -37,7 +43,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
           error && "select-error",
           className
         )}
-        defaultValue=""
+        {...(isControlled ? {} : { defaultValue: "" })}
         {...props}
       >
         {placeholder && (
