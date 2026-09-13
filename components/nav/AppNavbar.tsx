@@ -10,6 +10,9 @@ import Link from "next/link";
 import React from "react";
 import { auth } from "@/auth";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
+import { NotificationBell } from "@/features/notifications/components/NotificationBell";
+import { getUnreadNotificationsCount } from "@/features/notifications/queries/getUnreadNotificationsCount";
+import { getLatestUnreadNotifications } from "@/features/notifications/queries/getLatestUnreadNotifications";
 
 /**
  * AppNavbar — the shared navigation bar used across all pages with navigation.
@@ -25,6 +28,13 @@ export default async function AppNavbar() {
   const session = await auth();
   const isLoggedIn = !!session?.user;
 
+  const [unreadCount, latestUnread] = isLoggedIn
+    ? await Promise.all([
+        getUnreadNotificationsCount(Number(session.user.id)),
+        getLatestUnreadNotifications(Number(session.user.id)),
+      ])
+    : [0, []];
+
   return (
     <Navbar className="border-b border-base-300 sticky top-0 z-50 bg-base-100">
       <NavbarStart>
@@ -39,9 +49,7 @@ export default async function AppNavbar() {
         {isLoggedIn ? (
           <>
             {/* Authenticated nav */}
-            <Link href="/notifications" className="btn btn-ghost btn-sm">
-              Notifications
-            </Link>
+            <NotificationBell initialUnreadCount={unreadCount} initialLatest={latestUnread} />
             <Link href="/dashboard" className="btn btn-ghost btn-sm">
               Dashboard
             </Link>

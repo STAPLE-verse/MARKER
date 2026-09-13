@@ -7,6 +7,8 @@ import { publishSchemaActionSchema, strictPublicationMetadataSchema } from "../s
 import { revalidatePath } from "next/cache";
 import { generatePID } from "@/utils/id";
 import { extractOntologyIds } from "@/utils/schema";
+import { createNotification } from "@/features/notifications/actions/createNotification";
+import { prisma } from "@/lib/db";
 import {
   CONCURRENT_EDIT_MESSAGE,
   parseExpectedUpdatedAt,
@@ -167,6 +169,69 @@ export const publishSchema = authenticatedAction(
             return created;
           }
         );
+
+        // Fires only after the transaction above has committed — never
+        // inside it, since `createNotification` writes through the plain
+        // `prisma` client, not `tx`, and would otherwise survive a rollback
+        // of the publish it's supposedly announcing.
+        const publisher = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { username: true },
+        });
+        const publisherUsername = publisher?.username ?? "Someone";
+
+        // 1. This publish is itself a fork of someone else's schema — tell
+        //    the original author their work was built on.
+        if (publishedSchema.derivedFromPid) {
+          const originalSchema = await prisma.publishedSchema.findUnique({
+            where: { pid: publishedSchema.derivedFromPid },
+            select: { authorId: true },
+          });
+
+          if (originalSchema && originalSchema.authorId !== userId) {
+            await createNotification({
+              recipients: [originalSchema.authorId],
+              kind: "SCHEMA_FORK_PUBLISHED",
+              data: {
+                publisherUsername,
+                forkedTitle: publishedSchema.title,
+                version: publishedSchema.version,
+                forkedPid: publishedSchema.pid,
+              },
+            });
+          }
+        }
+
+        // 2. This family (any of its versions) has been forked before — tell
+        //    those forkers a new version just landed. `forkedFromPid` is a
+        //    bare string, not a Prisma relation (same reasoning as
+        //    `getFormById.ts`'s `forkedFrom` lookup), so this is a second
+        //    query rather than an `include`.
+        const familyVersionPids = await prisma.publishedSchema.findMany({
+          where: { familyId: publishedSchema.familyId },
+          select: { pid: true },
+        });
+        const forkers = await prisma.markerForm.findMany({
+          where: {
+            forkedFromPid: { in: familyVersionPids.map((v) => v.pid) },
+            ownerId: { not: userId },
+          },
+          select: { ownerId: true },
+          distinct: ["ownerId"],
+        });
+
+        if (forkers.length > 0) {
+          await createNotification({
+            recipients: forkers.map((f) => f.ownerId),
+            kind: "FORKED_SCHEMA_UPDATED",
+            data: {
+              publisherUsername,
+              originalTitle: publishedSchema.title,
+              version: publishedSchema.version,
+              originalPid: publishedSchema.pid,
+            },
+          });
+        }
 
         revalidatePath(`/collection/${input.formId}`);
         return { success: true, pid: publishedSchema.pid };

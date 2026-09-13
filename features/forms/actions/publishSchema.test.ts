@@ -13,14 +13,28 @@ const updateMany = vi.fn();
 const createPublishedSchema = vi.fn();
 const createPublishedSchemaPackage = vi.fn();
 const queryRaw = vi.fn();
+const findUniquePublishedSchemaByPid = vi.fn();
+const findManyPublishedSchemaByFamily = vi.fn();
+const findManyMarkerFormForkers = vi.fn();
+const findUniqueUser = vi.fn();
+const createNotificationRow = vi.fn();
 
 vi.mock("@/lib/db", () => {
   const client = {
-    markerForm: { findUnique: (...args: unknown[]) => findUniqueMarkerForm(...args) },
+    markerForm: {
+      findUnique: (...args: unknown[]) => findUniqueMarkerForm(...args),
+      findMany: (...args: unknown[]) => findManyMarkerFormForkers(...args),
+    },
     markerFormVersion: { updateMany: (...args: unknown[]) => updateMany(...args) },
     publicationMetadata: { findUnique: (...args: unknown[]) => findUniquePublicationMetadata(...args) },
-    publishedSchema: { create: (...args: unknown[]) => createPublishedSchema(...args) },
+    publishedSchema: {
+      create: (...args: unknown[]) => createPublishedSchema(...args),
+      findUnique: (...args: unknown[]) => findUniquePublishedSchemaByPid(...args),
+      findMany: (...args: unknown[]) => findManyPublishedSchemaByFamily(...args),
+    },
     publishedSchemaPackage: { create: (...args: unknown[]) => createPublishedSchemaPackage(...args) },
+    user: { findUnique: (...args: unknown[]) => findUniqueUser(...args) },
+    notification: { create: (...args: unknown[]) => createNotificationRow(...args) },
     $queryRaw: (...args: unknown[]) => queryRaw(...args),
     $transaction: async (cb: (tx: unknown) => unknown) => cb(client),
   };
@@ -99,12 +113,20 @@ describe("publishSchema identity + template-package validation gate", () => {
     createPublishedSchema.mockReset();
     createPublishedSchemaPackage.mockReset();
     queryRaw.mockReset();
+    findUniquePublishedSchemaByPid.mockReset();
+    findManyPublishedSchemaByFamily.mockReset();
+    findManyMarkerFormForkers.mockReset();
+    findUniqueUser.mockReset();
+    createNotificationRow.mockReset();
 
     updateMany.mockResolvedValue({ count: 1 });
     mockPublicationMetadata();
     createPublishedSchema.mockImplementation(async ({ data }) => data);
     createPublishedSchemaPackage.mockImplementation(async ({ data }) => data);
     queryRaw.mockResolvedValue([]);
+    findUniqueUser.mockResolvedValue({ username: "jane_doe" });
+    findManyPublishedSchemaByFamily.mockResolvedValue([]);
+    findManyMarkerFormForkers.mockResolvedValue([]);
   });
 
   it("publishes using the real stored MarkerForm.familyId, not an ad-hoc value", async () => {
@@ -274,6 +296,114 @@ describe("publishSchema identity + template-package validation gate", () => {
 
     const data = createPublishedSchema.mock.calls[0][0].data;
     expect(data.derivedFromPid).toBeNull();
+  });
+
+  it("notifies the original author when a forked-origin form is published", async () => {
+    mockFormWithSchema(
+      { type: "object", properties: {} },
+      null,
+      { origin: "FORKED", forkedFromPid: "ps_original123" }
+    );
+    findUniquePublishedSchemaByPid.mockResolvedValue({ authorId: 99 });
+
+    await publishSchema(basePublishInput());
+
+    expect(findUniquePublishedSchemaByPid).toHaveBeenCalledWith({
+      where: { pid: "ps_original123" },
+      select: { authorId: true },
+    });
+    expect(createNotificationRow).toHaveBeenCalledWith({
+      data: {
+        message: 'jane_doe published "Test schema" v1.0.0, forked from your schema.',
+        routeData: expect.objectContaining({ path: expect.stringContaining("/schemas/") }),
+        recipients: { connect: [{ id: 99 }] },
+      },
+    });
+  });
+
+  it("does not notify when the original schema record is gone", async () => {
+    mockFormWithSchema(
+      { type: "object", properties: {} },
+      null,
+      { origin: "FORKED", forkedFromPid: "ps_original123" }
+    );
+    findUniquePublishedSchemaByPid.mockResolvedValue(null);
+
+    await publishSchema(basePublishInput());
+
+    expect(createNotificationRow).not.toHaveBeenCalled();
+  });
+
+  it("does not notify the publisher about their own republish, even if they somehow are the original author", async () => {
+    mockFormWithSchema(
+      { type: "object", properties: {} },
+      null,
+      { origin: "FORKED", forkedFromPid: "ps_original123" }
+    );
+    findUniquePublishedSchemaByPid.mockResolvedValue({ authorId: OWNER_ID });
+
+    await publishSchema(basePublishInput());
+
+    expect(createNotificationRow).not.toHaveBeenCalled();
+  });
+
+  it("does not send the fork-published notification for a native (non-forked) publish", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+
+    await publishSchema(basePublishInput());
+
+    expect(findUniquePublishedSchemaByPid).not.toHaveBeenCalled();
+  });
+
+  it("notifies distinct forkers of this family when a new version is published", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+    findManyPublishedSchemaByFamily.mockResolvedValue([{ pid: "ps_v1" }, { pid: "ps_v2" }]);
+    findManyMarkerFormForkers.mockResolvedValue([{ ownerId: 50 }, { ownerId: 51 }]);
+
+    await publishSchema(basePublishInput());
+
+    expect(findManyPublishedSchemaByFamily).toHaveBeenCalledWith({
+      where: { familyId: FAMILY_ID },
+      select: { pid: true },
+    });
+    expect(findManyMarkerFormForkers).toHaveBeenCalledWith({
+      where: { forkedFromPid: { in: ["ps_v1", "ps_v2"] }, ownerId: { not: OWNER_ID } },
+      select: { ownerId: true },
+      distinct: ["ownerId"],
+    });
+    expect(createNotificationRow).toHaveBeenCalledWith({
+      data: {
+        message: 'jane_doe published a new version of "Test schema" (v1.0.0), which you forked from.',
+        routeData: { path: expect.stringContaining("/schemas/") },
+        recipients: { connect: [{ id: 50 }, { id: 51 }] },
+      },
+    });
+  });
+
+  it("does not notify when nobody has forked this family", async () => {
+    mockFormWithSchema({ type: "object", properties: {} });
+    findManyMarkerFormForkers.mockResolvedValue([]);
+
+    await publishSchema(basePublishInput());
+
+    expect(createNotificationRow).not.toHaveBeenCalled();
+  });
+
+  it("sends both fork-related notifications on one publish when both conditions apply", async () => {
+    mockFormWithSchema(
+      { type: "object", properties: {} },
+      null,
+      { origin: "FORKED", forkedFromPid: "ps_original123" }
+    );
+    findUniquePublishedSchemaByPid.mockResolvedValue({ authorId: 99 });
+    findManyMarkerFormForkers.mockResolvedValue([{ ownerId: 50 }]);
+
+    await publishSchema(basePublishInput());
+
+    expect(createNotificationRow).toHaveBeenCalledTimes(2);
+    const kinds = createNotificationRow.mock.calls.map((call) => call[0].data.message);
+    expect(kinds.some((m: string) => m.includes("forked from your schema"))).toBe(true);
+    expect(kinds.some((m: string) => m.includes("which you forked from"))).toBe(true);
   });
 
   it("still retries on a genuine pid collision, not just any P2002", async () => {

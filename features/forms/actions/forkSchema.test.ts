@@ -8,12 +8,14 @@ const PID = "ps_original123";
 const findUniquePublishedSchema = vi.fn();
 const findUniqueUser = vi.fn();
 const createMarkerForm = vi.fn();
+const createNotificationRow = vi.fn();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
     publishedSchema: { findUnique: (...args: unknown[]) => findUniquePublishedSchema(...args) },
     user: { findUnique: (...args: unknown[]) => findUniqueUser(...args) },
     markerForm: { create: (...args: unknown[]) => createMarkerForm(...args) },
+    notification: { create: (...args: unknown[]) => createNotificationRow(...args) },
   },
 }));
 
@@ -34,6 +36,7 @@ function publishedRow(overrides: Record<string, unknown> = {}) {
     authorId: OTHER_AUTHOR_ID,
     schemaJson: { type: "object", title: "Cognitive Assessment Template", properties: {} },
     uiSchema: { "ui:order": ["*"] },
+    originFormVersion: { formId: 7 },
     packageSnapshot: {
       packageJson: {
         form: {
@@ -52,8 +55,9 @@ describe("forkSchema", () => {
     findUniquePublishedSchema.mockReset();
     findUniqueUser.mockReset();
     createMarkerForm.mockReset();
+    createNotificationRow.mockReset();
 
-    findUniqueUser.mockResolvedValue({ firstName: "Jane", lastName: "Doe", orcid: null });
+    findUniqueUser.mockResolvedValue({ username: "jane_doe", firstName: "Jane", lastName: "Doe", orcid: null });
     createMarkerForm.mockImplementation(async ({ data }) => ({ id: 42, ...data }));
   });
 
@@ -143,5 +147,41 @@ describe("forkSchema", () => {
     const data = createMarkerForm.mock.calls[0][0].data;
     expect(data.versions.create.schema.$schema).toBeUndefined();
     expect(data.versions.create.semantics).toBe(Prisma.JsonNull);
+  });
+
+  it("notifies the original author, linking back to their own draft", async () => {
+    findUniquePublishedSchema.mockResolvedValue(publishedRow());
+
+    await forkSchema({ publishedSchemaPid: PID });
+
+    expect(createNotificationRow).toHaveBeenCalledWith({
+      data: {
+        message: 'jane_doe forked your schema "Cognitive Assessment Template".',
+        routeData: { path: "/collection/7" },
+        recipients: { connect: [{ id: OTHER_AUTHOR_ID }] },
+      },
+    });
+  });
+
+  it("falls back to the public catalog link when the original author's draft is gone", async () => {
+    findUniquePublishedSchema.mockResolvedValue(publishedRow({ originFormVersion: null }));
+
+    await forkSchema({ publishedSchemaPid: PID });
+
+    expect(createNotificationRow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ routeData: { path: `/schemas/${PID}` } }),
+      })
+    );
+  });
+
+  it("does not notify anyone when the fork is rejected (self-fork or missing schema)", async () => {
+    findUniquePublishedSchema.mockResolvedValue(null);
+    await forkSchema({ publishedSchemaPid: "ps_missing" });
+
+    findUniquePublishedSchema.mockResolvedValue(publishedRow({ authorId: OWNER_ID }));
+    await forkSchema({ publishedSchemaPid: PID });
+
+    expect(createNotificationRow).not.toHaveBeenCalled();
   });
 });
