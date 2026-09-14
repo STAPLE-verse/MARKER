@@ -55,18 +55,22 @@ export default async function AppNavbar() {
           <>
             {/* Authenticated nav */}
             <NotificationBell initialUnreadCount={unreadCount} initialLatest={latestUnread} />
-            <Link href="/dashboard" className="btn btn-ghost btn-sm">
-              Dashboard
-            </Link>
-            <Link href="/collection" className="btn btn-ghost btn-sm">
-              My Collection
-            </Link>
-            <Link href="/explore" className="btn btn-ghost btn-sm">
-              Explore
-            </Link>
 
-            {/* Avatar dropdown */}
-            <Dropdown position="end">
+            {/* Nav links stay tight together as one group, set apart from the bell and the avatar. */}
+            <div className="flex items-center gap-1 ml-3">
+              <Link href="/dashboard" className="btn btn-ghost btn-sm">
+                Dashboard
+              </Link>
+              <Link href="/collection" className="btn btn-ghost btn-sm">
+                My Collection
+              </Link>
+              <Link href="/explore" className="btn btn-ghost btn-sm">
+                Explore
+              </Link>
+            </div>
+
+            {/* Avatar dropdown — extra left margin to visually separate it from the nav links */}
+            <Dropdown position="end" className="ml-6">
               <DropdownTrigger>
                 <div className="btn btn-ghost btn-circle avatar">
                   <Avatar
