@@ -1,20 +1,30 @@
 "use client";
 
 import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Alert } from "@/components/ui/Alert";
 import { useRouter } from "next/navigation";
+import { changePasswordSchema, type ChangePasswordFormData } from "@/features/users/schemas";
+import { useChangePassword } from "@/features/users/hooks/useChangePassword";
 
 export default function ChangePasswordPage() {
   const router = useRouter();
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Real implementation will update password using Argon2id/Prisma on the server
-    router.push("/profile");
-  };
+  const form = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
+  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = form;
+
+  const { save, isSaving, formError } = useChangePassword(form);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-xl animate-in fade-in duration-300">
@@ -32,32 +42,42 @@ export default function ChangePasswordPage() {
       <Card bordered>
         <CardBody>
           <CardTitle className="text-xl mb-4">Credentials Update</CardTitle>
-          <form className="space-y-4" onSubmit={handleSave}>
+
+          {formError && (
+            <Alert variant="error" className="mb-4">
+              {formError}
+            </Alert>
+          )}
+
+          <form className="space-y-4" onSubmit={handleSubmit(save)}>
             <Input
               label="Current Password"
               type="password"
-              required
               placeholder="••••••••"
+              {...register("currentPassword")}
+              error={errors.currentPassword?.message}
             />
             <Input
               label="New Password"
               type="password"
-              required
               placeholder="••••••••"
+              {...register("newPassword")}
+              error={errors.newPassword?.message}
             />
             <Input
               label="Confirm New Password"
               type="password"
-              required
               placeholder="••••••••"
+              {...register("confirmPassword")}
+              error={errors.confirmPassword?.message}
             />
 
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="ghost" type="button" onClick={() => router.push("/profile")}>
                 Cancel
               </Button>
-              <Button variant="primary" type="submit">
-                Update Password
+              <Button variant="primary" type="submit" disabled={isSaving}>
+                {isSaving ? "Updating..." : "Update Password"}
               </Button>
             </div>
           </form>
