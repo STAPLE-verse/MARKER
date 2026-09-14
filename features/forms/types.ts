@@ -57,11 +57,6 @@ export interface PublishedSchemaVersionDTO {
  * "first contributor + role" info the `/schemas/[pid]` detail page already
  * knows how to render.
  *
- * `authorName` is the publishing `User`'s display name
- * (`firstName`/`lastName`), included only as a fallback for the rare row
- * whose `contributors` comes back empty (see `docs/refactor/explore.md`
- * §2.1) — MARKER's own model has no elevated "author" concept otherwise.
- *
  * `versions` always includes this row's own version and is sorted newest
  * first; length 1 means this family has never had another version published.
  */
@@ -76,7 +71,6 @@ export interface PublishedSchemaCardDTO {
   source: string
   keywords: string[]
   contributors: ContributorDTO[]
-  authorName: string | null
   createdAt: Date
   versions: PublishedSchemaVersionDTO[]
 }

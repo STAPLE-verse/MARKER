@@ -667,7 +667,10 @@ model PublishedSchema {
   // Authorship — the MARKER user who published this
   authorId              Int
   author                User    @relation(fields: [authorId], references: [id])
-  contributors          Json?
+  // Always written by publishSchema.ts, which requires (and validates) at
+  // least one contributor before allowing publish — never optional past
+  // that gate.
+  contributors          Json
   relatedPublicationDoi String?
 
   // Stats & Social

@@ -24,7 +24,6 @@ function baseRow(overrides: Record<string, unknown> = {}) {
     contributors: [{ name: "Jane Doe", roles: ["Creator"] }],
     createdAt: new Date("2026-09-01T00:00:00.000Z"),
     familyId: "fam_abc123",
-    author: { firstName: "Jane", lastName: "Doe" },
     ...overrides,
   };
 }
@@ -76,7 +75,6 @@ describe("searchPublishedSchemas", () => {
             affiliations: [],
           },
         ],
-        authorName: "Jane Doe",
         createdAt: new Date("2026-09-01T00:00:00.000Z"),
         versions: [
           {
@@ -118,24 +116,5 @@ describe("searchPublishedSchemas", () => {
       { pid: "ps_v2", version: "2.0.0", createdAt: new Date("2026-09-05T00:00:00.000Z") },
       { pid: "ps_v1", version: "1.0.0", createdAt: new Date("2026-01-01T00:00:00.000Z") },
     ]);
-  });
-
-  it("falls back to the publishing user's name only when contributors is empty", async () => {
-    findManyPublishedSchema.mockResolvedValue([
-      baseRow({ contributors: [], author: { firstName: "Jane", lastName: "Doe" } }),
-    ]);
-
-    const [result] = await searchPublishedSchemas();
-
-    expect(result.contributors).toEqual([]);
-    expect(result.authorName).toBe("Jane Doe");
-  });
-
-  it("returns null authorName when the publishing user has no first/last name on file", async () => {
-    findManyPublishedSchema.mockResolvedValue([baseRow({ author: { firstName: null, lastName: null } })]);
-
-    const [result] = await searchPublishedSchemas();
-
-    expect(result.authorName).toBeNull();
   });
 });

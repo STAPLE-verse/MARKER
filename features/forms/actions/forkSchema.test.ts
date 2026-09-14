@@ -1,5 +1,4 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { Prisma } from "@prisma/client";
 
 const OWNER_ID = 1;
 const OTHER_AUTHOR_ID = 2;
@@ -34,8 +33,6 @@ function publishedRow(overrides: Record<string, unknown> = {}) {
     pid: PID,
     title: "Cognitive Assessment Template",
     authorId: OTHER_AUTHOR_ID,
-    schemaJson: { type: "object", title: "Cognitive Assessment Template", properties: {} },
-    uiSchema: { "ui:order": ["*"] },
     originFormVersion: { formId: 7 },
     packageSnapshot: {
       packageJson: {
@@ -137,16 +134,16 @@ describe("forkSchema", () => {
     ]);
   });
 
-  it("falls back to Core-only content when packageSnapshot is missing (legacy row)", async () => {
+  it("rejects forking a published schema with no package snapshot", async () => {
     findUniquePublishedSchema.mockResolvedValue(
       publishedRow({ packageSnapshot: null })
     );
 
-    await forkSchema({ publishedSchemaPid: PID });
+    const result = await forkSchema({ publishedSchemaPid: PID });
 
-    const data = createMarkerForm.mock.calls[0][0].data;
-    expect(data.versions.create.schema.$schema).toBeUndefined();
-    expect(data.versions.create.semantics).toBe(Prisma.JsonNull);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.code).toBe("NOT_FOUND");
+    expect(createMarkerForm).not.toHaveBeenCalled();
   });
 
   it("notifies the original author, linking back to their own draft", async () => {

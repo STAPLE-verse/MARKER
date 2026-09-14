@@ -159,6 +159,14 @@ export const publishSchema = authenticatedAction(
             // permanent snapshot — see PublishedSchemaPackage's own comment
             // in schema.prisma for why this isn't re-derived from `created`
             // on read.
+            //
+            // Deliberately inside the same `tx` as the `publishedSchema.create`
+            // above: this is the only writer of either table, and
+            // forkSchema.ts / api/schemas/[pid]/package both assume every
+            // PublishedSchema row has a matching PublishedSchemaPackage row.
+            // packageSnapshot can't be a DB-level NOT NULL (it's a relation,
+            // not a scalar column) — this transaction's atomicity is what
+            // actually upholds that invariant. Keep both creates in one `tx`.
             await tx.publishedSchemaPackage.create({
               data: {
                 pid,
