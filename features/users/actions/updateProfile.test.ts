@@ -32,6 +32,7 @@ const VALID_INPUT = {
   orcid: "0000-0002-1825-0097",
   gravatar: "ada@example.com",
   language: "en-US",
+  theme: "dark",
 };
 
 describe("updateProfile", () => {
@@ -63,6 +64,7 @@ describe("updateProfile", () => {
         orcid: "0000-0002-1825-0097",
         gravatar: "ada@example.com",
         language: "en-US",
+        theme: "dark",
       },
       select: {
         username: true,
@@ -73,6 +75,7 @@ describe("updateProfile", () => {
         orcid: true,
         gravatar: true,
         language: true,
+        theme: true,
       },
     });
   });
@@ -124,6 +127,13 @@ describe("updateProfile", () => {
 
   it("rejects a language outside the supported list", async () => {
     const res = await updateProfile({ ...VALID_INPUT, language: "fr-FR" });
+
+    expect(res.ok).toBe(false);
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects a theme outside the supported list", async () => {
+    const res = await updateProfile({ ...VALID_INPUT, theme: "solarized" });
 
     expect(res.ok).toBe(false);
     expect(updateUser).not.toHaveBeenCalled();

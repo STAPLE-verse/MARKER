@@ -25,6 +25,44 @@ const PROFILE_LANGUAGE_VALUES = PROFILE_LANGUAGE_OPTIONS.map((option) => option.
   ...string[],
 ];
 
+// Same catalog STAPLE's ThemeSelect offers, kept in sync with the `themes:`
+// list declared in app/globals.css's `@plugin "daisyui"` — a theme picked
+// here only actually renders if it's also compiled into that stylesheet.
+export const PROFILE_THEME_OPTIONS: SelectOption[] = [
+  { value: "light", label: "☼ Light" },
+  { value: "dark", label: "☾ Dark" },
+  { value: "retro", label: "🪩 Retro" },
+  { value: "dracula", label: "🧛🏽 Dracula" },
+  { value: "cyberpunk", label: "🤖 Cyberpunk" },
+  { value: "cupcake", label: "🧁 Cupcake" },
+  { value: "bumblebee", label: "🐝 Bumblebee" },
+  { value: "emerald", label: "💚 Emerald" },
+  { value: "corporate", label: "👔 Corporate" },
+  { value: "halloween", label: "🎃 Halloween" },
+  { value: "garden", label: "🌿 Garden" },
+  { value: "forest", label: "🌲 Forest" },
+  { value: "aqua", label: "🐠 Aqua" },
+  { value: "lofi", label: "😎 Lofi" },
+  { value: "pastel", label: "🌸 Pastel" },
+  { value: "fantasy", label: "🐉 Fantasy" },
+  { value: "wireframe", label: "🖼️ Wireframe" },
+  { value: "black", label: "◼️ Black" },
+  { value: "luxury", label: "💰 Luxury" },
+  { value: "cmyk", label: "🎨 CMYK" },
+  { value: "autumn", label: "🍁 Autumn" },
+  { value: "business", label: "💼 Business" },
+  { value: "acid", label: "🏜️ Acid" },
+  { value: "lemonade", label: "🍋 Lemonade" },
+  { value: "night", label: "🌃 Night" },
+  { value: "coffee", label: "☕ Coffee" },
+  { value: "winter", label: "❄️ Winter" },
+  { value: "dim", label: "🔅 Dim" },
+  { value: "nord", label: "🐺 Nord" },
+  { value: "sunset", label: "🌇 Sunset" },
+];
+
+const PROFILE_THEME_VALUES = PROFILE_THEME_OPTIONS.map((option) => option.value) as [string, ...string[]];
+
 // Format-only (not the ISO 7064 mod-11-2 checksum), same rule MARKER already
 // applies to publication contributors (features/forms/schemas.ts) — kept as
 // its own copy here since the two features validate unrelated data and
@@ -68,6 +106,7 @@ export const updateProfileSchema = z.object({
       message: "Must be a valid email address.",
     }),
   language: z.enum(PROFILE_LANGUAGE_VALUES),
+  theme: z.enum(PROFILE_THEME_VALUES),
 });
 
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;

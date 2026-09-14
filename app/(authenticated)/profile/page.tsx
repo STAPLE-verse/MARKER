@@ -87,6 +87,10 @@ export default async function ProfilePage() {
                 <span className="text-xs text-base-content/60 font-semibold block">Preferred Language</span>
                 <span className="text-base font-medium">{dbUser.language || "en-US"}</span>
               </div>
+              <div>
+                <span className="text-xs text-base-content/60 font-semibold block">Theme</span>
+                <span className="text-base font-medium capitalize">{dbUser.theme || "dark"}</span>
+              </div>
             </div>
           </CardBody>
         </Card>

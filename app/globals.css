@@ -1,7 +1,13 @@
 @import "tailwindcss";
 /* Form Studio is installed from GitHub, so Tailwind must scan its bundled component classes. */
 @source "../node_modules/@staple-verse/form-studio/dist";
-@plugin "daisyui";
+/* Kept in sync with PROFILE_THEME_OPTIONS in features/users/schemas.ts — a
+   theme selectable there only actually renders if it's also listed here. */
+@plugin "daisyui" {
+  themes: dark --default, light, retro, dracula, cyberpunk, cupcake, bumblebee, emerald, corporate,
+    halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, cmyk, autumn,
+    business, acid, lemonade, night, coffee, winter, dim, nord, sunset;
+}
 
 body {
   font-family: Arial, Helvetica, sans-serif;

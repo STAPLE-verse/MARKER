@@ -47,6 +47,7 @@ export const updateProfile = authenticatedAction(updateProfileSchema, async ({ i
         orcid: emptyToNull(input.orcid),
         gravatar: emptyToNull(input.gravatar),
         language: input.language,
+        theme: input.theme,
       },
       select: {
         username: true,
@@ -57,6 +58,7 @@ export const updateProfile = authenticatedAction(updateProfileSchema, async ({ i
         orcid: true,
         gravatar: true,
         language: true,
+        theme: true,
       },
     });
 
