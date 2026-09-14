@@ -20,6 +20,7 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
       firstName: true,
       lastName: true,
       orcid: true,
+      institution: true,
     },
   })
   const authorName = assembleContributorName({
@@ -65,6 +66,7 @@ export const createForm = authenticatedAction(createFormSchema, async ({ input, 
                     // The form's own author is definitionally its creator.
                     roles: [DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE, "Creator"],
                     orcid: user?.orcid ?? "",
+                    affiliations: user?.institution ? [{ name: user.institution }] : undefined,
                   }]
                 : [],
             }),

@@ -43,7 +43,6 @@ export default async function PublishSchemaPage({ params }: { params: Promise<{ 
 
   const user = await getUserProfile(userId);
 
-  const authorName = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
   const isProfileIncomplete = !user?.firstName || !user?.lastName || !user?.orcid;
   const publishedVersions = await getPublishedVersionsForForm(form.id);
 
@@ -53,8 +52,10 @@ export default async function PublishSchemaPage({ params }: { params: Promise<{ 
       version={latestVersion}
       publishedVersions={publishedVersions}
       currentUser={{
-        name: authorName || "",
+        givenName: user?.firstName || "",
+        familyName: user?.lastName || "",
         orcid: user?.orcid || "",
+        institution: user?.institution || "",
         isProfileIncomplete
       }}
     />

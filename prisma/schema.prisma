@@ -34,6 +34,7 @@ model User {
   lastName                      String?
   email                         String              @unique
   language                      String              @default("en-US")
+  theme                         String              @default("dark")
   gravatar                      String?
   tooltips                      Boolean             @default(true)
   // relational information

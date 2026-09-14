@@ -54,4 +54,32 @@ describe("createForm identity minting", () => {
     const familyIdB = createMarkerForm.mock.calls[1][0].data.familyId;
     expect(familyIdA).not.toEqual(familyIdB);
   });
+
+  it("seeds the initial contributor's affiliation from the user's institution", async () => {
+    findUniqueUser.mockResolvedValue({
+      firstName: "Jane",
+      lastName: "Doe",
+      orcid: "0000-0002-1825-0097",
+      institution: "Analytical Engines Ltd",
+    });
+
+    await createForm({ title: "Test form" });
+
+    const call = createMarkerForm.mock.calls[0][0];
+    const [contributor] = call.data.versions.create.publicationMetadata.create.contributors;
+    expect(contributor.givenName).toBe("Jane");
+    expect(contributor.familyName).toBe("Doe");
+    expect(contributor.orcid).toBe("0000-0002-1825-0097");
+    expect(contributor.affiliations).toEqual([{ name: "Analytical Engines Ltd" }]);
+  });
+
+  it("omits the affiliation when the user has no institution set", async () => {
+    findUniqueUser.mockResolvedValue({ firstName: "Jane", lastName: "Doe", orcid: null, institution: null });
+
+    await createForm({ title: "Test form" });
+
+    const call = createMarkerForm.mock.calls[0][0];
+    const [contributor] = call.data.versions.create.publicationMetadata.create.contributors;
+    expect(contributor.affiliations).toEqual([]);
+  });
 });

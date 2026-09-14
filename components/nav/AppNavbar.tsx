@@ -13,6 +13,7 @@ import { LogoutButton } from "@/features/auth/components/LogoutButton";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { getUnreadNotificationsCount } from "@/features/notifications/queries/getUnreadNotificationsCount";
 import { getLatestUnreadNotifications } from "@/features/notifications/queries/getLatestUnreadNotifications";
+import { getUserProfile } from "@/features/users/queries/getUserProfile";
 
 /**
  * AppNavbar — the shared navigation bar used across all pages with navigation.
@@ -28,12 +29,16 @@ export default async function AppNavbar() {
   const session = await auth();
   const isLoggedIn = !!session?.user;
 
-  const [unreadCount, latestUnread] = isLoggedIn
+  // `session.user.username`/`.email` are JWT-cached at sign-in and only
+  // change again at next login — reading a fresh `profile` row here means a
+  // just-changed username/email/gravatar shows up in the navbar immediately.
+  const [unreadCount, latestUnread, profile] = isLoggedIn
     ? await Promise.all([
         getUnreadNotificationsCount(Number(session.user.id)),
         getLatestUnreadNotifications(Number(session.user.id)),
+        getUserProfile(Number(session.user.id)),
       ])
-    : [0, []];
+    : [0, [], null];
 
   return (
     <Navbar className="border-b border-base-300 sticky top-0 z-50 bg-base-100">
@@ -50,23 +55,27 @@ export default async function AppNavbar() {
           <>
             {/* Authenticated nav */}
             <NotificationBell initialUnreadCount={unreadCount} initialLatest={latestUnread} />
-            <Link href="/dashboard" className="btn btn-ghost btn-sm">
-              Dashboard
-            </Link>
-            <Link href="/collection" className="btn btn-ghost btn-sm">
-              My Collection
-            </Link>
-            <Link href="/explore" className="btn btn-ghost btn-sm">
-              Explore
-            </Link>
 
-            {/* Avatar dropdown */}
-            <Dropdown position="end">
+            {/* Nav links stay tight together as one group, set apart from the bell and the avatar. */}
+            <div className="flex items-center gap-1 ml-3">
+              <Link href="/dashboard" className="btn btn-ghost btn-sm">
+                Dashboard
+              </Link>
+              <Link href="/collection" className="btn btn-ghost btn-sm">
+                My Collection
+              </Link>
+              <Link href="/explore" className="btn btn-ghost btn-sm">
+                Explore
+              </Link>
+            </div>
+
+            {/* Avatar dropdown — extra left margin to visually separate it from the nav links */}
+            <Dropdown position="end" className="ml-6">
               <DropdownTrigger>
                 <div className="btn btn-ghost btn-circle avatar">
                   <Avatar
-                    email={session.user.email}
-                    fallback={session.user.username?.[0]}
+                    email={profile?.gravatar || profile?.email || session.user.email}
+                    fallback={(profile?.username ?? session.user.username)?.[0]}
                   />
                 </div>
               </DropdownTrigger>
