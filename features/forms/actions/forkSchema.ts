@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
 import { ActionError } from "@/utils/action-result"
 import { generatePID } from "@/utils/id"
+import { createNotification } from "@/features/notifications/actions/createNotification"
 import { forkSchemaSchema } from "../schemas"
 import {
   assembleContributorName,
@@ -53,6 +54,9 @@ export const forkSchema = authenticatedAction(forkSchemaSchema, async ({ input, 
       schemaJson: true,
       uiSchema: true,
       packageSnapshot: { select: { packageJson: true } },
+      // Only used to build the fork notification's deep link back to the
+      // original author's own draft — see the `createNotification` call below.
+      originFormVersion: { select: { formId: true } },
     },
   })
 
@@ -75,7 +79,7 @@ export const forkSchema = authenticatedAction(forkSchemaSchema, async ({ input, 
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { firstName: true, lastName: true, orcid: true },
+    select: { username: true, firstName: true, lastName: true, orcid: true },
   })
   const authorName = assembleContributorName({
     nameType: "Personal",
@@ -122,6 +126,17 @@ export const forkSchema = authenticatedAction(forkSchemaSchema, async ({ input, 
           },
         },
       },
+    },
+  })
+
+  await createNotification({
+    recipients: [published.authorId],
+    kind: "SCHEMA_FORKED",
+    data: {
+      forkedByUsername: user?.username ?? "Someone",
+      originalTitle: published.title || "Untitled Schema",
+      originalFormId: published.originFormVersion?.formId ?? null,
+      originalPid: published.pid,
     },
   })
 
