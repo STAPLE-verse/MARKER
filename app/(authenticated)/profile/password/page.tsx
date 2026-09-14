@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Alert } from "@/components/ui/Alert";
 import { useRouter } from "next/navigation";
 import { changePasswordSchema, type ChangePasswordFormData } from "@/features/users/schemas";
@@ -50,23 +50,20 @@ export default function ChangePasswordPage() {
           )}
 
           <form className="space-y-4" onSubmit={handleSubmit(save)}>
-            <Input
+            <PasswordInput
               label="Current Password"
-              type="password"
               placeholder="••••••••"
               {...register("currentPassword")}
               error={errors.currentPassword?.message}
             />
-            <Input
+            <PasswordInput
               label="New Password"
-              type="password"
               placeholder="••••••••"
               {...register("newPassword")}
               error={errors.newPassword?.message}
             />
-            <Input
+            <PasswordInput
               label="Confirm New Password"
-              type="password"
               placeholder="••••••••"
               {...register("confirmPassword")}
               error={errors.confirmPassword?.message}

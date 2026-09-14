@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, type SignupFormData } from "@/features/auth/schemas";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { signUp } from "@/features/auth/actions";
@@ -70,16 +71,14 @@ export default function SignupForm({ next }: SignupFormProps) {
               {...register("email")}
               error={errors.email?.message}
             />
-            <Input
+            <PasswordInput
               label="Password"
-              type="password"
               placeholder="••••••••"
               {...register("password")}
               error={errors.password?.message}
             />
-            <Input
+            <PasswordInput
               label="Confirm Password"
-              type="password"
               placeholder="••••••••"
               {...register("confirmPassword")}
               error={errors.confirmPassword?.message}

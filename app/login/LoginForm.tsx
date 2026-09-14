@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginFormData } from "@/features/auth/schemas";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { login } from "@/features/auth/actions";
@@ -64,9 +65,8 @@ export default function LoginForm({ next }: LoginFormProps) {
               {...register("email")}
               error={errors.email?.message}
             />
-            <Input
+            <PasswordInput
               label="Password"
-              type="password"
               placeholder="••••••••"
               {...register("password")}
               error={errors.password?.message}
