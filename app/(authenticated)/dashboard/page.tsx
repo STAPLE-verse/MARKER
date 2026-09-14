@@ -4,16 +4,19 @@ import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import { getDashboardStats, getRecentActivity } from "@/features/dashboard/queries";
-import { formatRelativeTime } from "@/features/dashboard/utils/formatRelativeTime";
+import { formatRelativeTime } from "@/lib/formatRelativeTime";
 import { getActivityActionLabel, getActivityTargetLabel } from "@/features/dashboard/utils/activityLabel";
+import { getLatestUnreadNotifications } from "@/features/notifications/queries/getLatestUnreadNotifications";
+import { DashboardNotificationsCard } from "@/features/notifications/components/DashboardNotificationsCard";
 import { collectionTabHref } from "../collection/collectionTabs";
 
 export default async function DashboardPage() {
   const { session, userId } = await requirePageAuth();
 
-  const [stats, activity] = await Promise.all([
+  const [stats, activity, notifications] = await Promise.all([
     getDashboardStats(userId),
     getRecentActivity(userId),
+    getLatestUnreadNotifications(userId),
   ]);
 
   return (
@@ -64,6 +67,18 @@ export default async function DashboardPage() {
                   ))}
                 </div>
               )}
+            </CardBody>
+          </Card>
+
+          <Card bordered>
+            <CardBody>
+              <CardTitle className="text-xl font-bold">Notifications</CardTitle>
+              <DashboardNotificationsCard notifications={notifications} />
+              <div className="text-right mt-2">
+                <Link href="/notifications" className="text-sm font-medium text-primary hover:underline">
+                  View all notifications
+                </Link>
+              </div>
             </CardBody>
           </Card>
         </div>

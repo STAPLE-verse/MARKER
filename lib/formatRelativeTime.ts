@@ -10,8 +10,10 @@ const UNITS: { unit: Intl.RelativeTimeFormatUnit; ms: number }[] = [
 const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" })
 
 /**
- * "2 hours ago" / "in 3 days" style label for activity feeds. `now` is
- * injectable so tests don't depend on the wall clock.
+ * "2 hours ago" / "in 3 days" style label for activity/notification feeds.
+ * `now` is injectable so tests don't depend on the wall clock. Shared
+ * between `features/dashboard` and `features/notifications` — neither
+ * feature owns it.
  */
 export function formatRelativeTime(date: Date, now: Date = new Date()): string {
   const diffMs = date.getTime() - now.getTime()

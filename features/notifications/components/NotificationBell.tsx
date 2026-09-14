@@ -8,7 +8,7 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from "@/comp
 import { runAction } from "@/lib/action";
 import { getNotificationBellData } from "@/features/notifications/actions/getNotificationBellData";
 import { setNotificationRead } from "@/features/notifications/actions/setNotificationRead";
-import { onNotificationsChanged } from "@/features/notifications/utils/notificationEvents";
+import { broadcastNotificationsChanged, onNotificationsChanged } from "@/features/notifications/utils/notificationEvents";
 import { NotificationListItemDTO } from "@/features/notifications/types";
 
 const POLL_INTERVAL_MS = 60_000;
@@ -87,6 +87,7 @@ export function NotificationBell({ initialUnreadCount, initialLatest }: Notifica
     setUnreadCount((prev) => Math.max(0, prev - 1));
     startTransition(async () => {
       await runAction(setNotificationRead({ notificationId: notification.id, read: true }));
+      broadcastNotificationsChanged();
     });
   };
 
