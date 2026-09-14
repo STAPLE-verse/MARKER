@@ -1,79 +1,25 @@
-"use client";
+import { requirePageAuth } from "@/utils/auth";
+import { getUserProfile } from "@/features/users/queries/getUserProfile";
+import { PROFILE_LANGUAGE_OPTIONS } from "@/features/users/schemas";
+import EditProfileForm from "./EditProfileForm";
 
-import React from "react";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { Card, CardBody, CardTitle } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { useRouter } from "next/navigation";
+const KNOWN_LANGUAGES = PROFILE_LANGUAGE_OPTIONS.map((option) => option.value);
 
-export default function EditProfilePage() {
-  const router = useRouter();
+export default async function EditProfilePage() {
+  const { userId } = await requirePageAuth();
+  const profile = await getUserProfile(userId);
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Real implementation will save to Prisma via server action
-    router.push("/profile");
-  };
+  const language = KNOWN_LANGUAGES.includes(profile?.language ?? "") ? profile!.language : "en-US";
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl animate-in fade-in duration-300">
-      <div className="mb-4">
-        <Button variant="ghost" onClick={() => router.push("/profile")} size="sm">
-          ← Back to Profile
-        </Button>
-      </div>
-
-      <PageHeader
-        title="Edit Profile"
-        description="Update your personal details and academic credentials."
-      />
-
-      <Card bordered>
-        <CardBody>
-          <CardTitle className="text-xl mb-4">Profile Information</CardTitle>
-          <form className="space-y-4" onSubmit={handleSave}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input label="First Name" placeholder="e.g. Jane" />
-              <Input label="Last Name" placeholder="e.g. Doe" />
-            </div>
-
-            <Input
-              label="Institution"
-              placeholder="e.g. University of California, Berkeley"
-            />
-
-            <Input
-              label="ORCID iD"
-              placeholder="e.g. 0000-0002-1825-0097"
-              helperText="Optional. Connecting your ORCID identifier makes your published templates citeable."
-            />
-
-            <div>
-              <label className="label">
-                <span className="label-text font-medium">Preferred Language</span>
-              </label>
-              <select
-                defaultValue="en-US"
-                className="select select-bordered w-full"
-              >
-                <option value="en-US">English (United States)</option>
-                <option value="en-GB">English (United Kingdom)</option>
-                <option value="hu-HU">Hungarian (Magyar)</option>
-              </select>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="ghost" type="button" onClick={() => router.push("/profile")}>
-                Cancel
-              </Button>
-              <Button variant="primary" type="submit">
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        </CardBody>
-      </Card>
-    </div>
+    <EditProfileForm
+      initialValues={{
+        firstName: profile?.firstName ?? "",
+        lastName: profile?.lastName ?? "",
+        institution: profile?.institution ?? "",
+        orcid: profile?.orcid ?? "",
+        language,
+      }}
+    />
   );
 }

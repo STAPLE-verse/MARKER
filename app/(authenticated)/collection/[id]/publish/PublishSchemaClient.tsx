@@ -16,6 +16,7 @@ import { useSavePublicationMetadata } from "@/features/forms/hooks/useSavePublic
 import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
 import { FormVersionDTO } from "@/features/forms/types";
 import {
+  assembleContributorName,
   DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE,
   publicationMetadataToFormValues,
 } from "@/features/forms/utils/publicationMetadata";
@@ -34,8 +35,10 @@ interface PublishSchemaClientProps {
    * DB's unique constraint is still the authoritative gate). */
   publishedVersions: string[];
   currentUser: {
-    name: string;
+    givenName: string;
+    familyName: string;
     orcid: string;
+    institution: string;
     isProfileIncomplete: boolean;
   };
 }
@@ -48,9 +51,12 @@ export default function PublishSchemaClient({ formId, version, publishedVersions
   );
   const publicationMetadataDefaults = publicationMetadataToFormValues(publicationMetadata, {
     fallbackContributors: [{
-      name: currentUser.name,
+      name: assembleContributorName({ givenName: currentUser.givenName, familyName: currentUser.familyName }),
+      givenName: currentUser.givenName,
+      familyName: currentUser.familyName,
       roles: [DEFAULT_PUBLICATION_CONTRIBUTOR_ROLE],
       orcid: currentUser.orcid,
+      affiliations: currentUser.institution ? [{ name: currentUser.institution }] : undefined,
     }],
   });
 

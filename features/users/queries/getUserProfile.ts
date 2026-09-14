@@ -4,6 +4,8 @@ export type UserProfile = {
   firstName: string | null;
   lastName: string | null;
   orcid: string | null;
+  institution: string | null;
+  language: string;
 };
 
 export async function getUserProfile(userId: number): Promise<UserProfile | null> {
@@ -13,6 +15,8 @@ export async function getUserProfile(userId: number): Promise<UserProfile | null
       firstName: true,
       lastName: true,
       orcid: true,
+      institution: true,
+      language: true,
     },
   });
 }
