@@ -28,12 +28,6 @@ export default function ChangePasswordPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-xl animate-in fade-in duration-300">
-      <div className="mb-4">
-        <Button variant="ghost" onClick={() => router.push("/profile")} size="sm">
-          ← Back to Profile
-        </Button>
-      </div>
-
       <PageHeader
         title="Change Password"
         description="Secure your account by updating your password credentials."

@@ -37,12 +37,6 @@ export default function EditProfileForm({ initialValues }: EditProfileFormProps)
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl animate-in fade-in duration-300">
-      <div className="mb-4">
-        <Button variant="ghost" onClick={() => router.push("/profile")} size="sm">
-          ← Back to Profile
-        </Button>
-      </div>
-
       <PageHeader
         title="Edit Profile"
         description="Update your personal details and academic credentials."
