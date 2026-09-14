@@ -48,6 +48,23 @@ export default function EditProfileForm({ initialValues }: EditProfileFormProps)
           <form className="space-y-4" onSubmit={handleSubmit(save)}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
+                label="Username"
+                placeholder="e.g. cooldev99"
+                {...register("username")}
+                error={errors.username?.message}
+              />
+              <Input
+                label="Email Address"
+                type="email"
+                placeholder="name@example.com"
+                helperText="Also your login email."
+                {...register("email")}
+                error={errors.email?.message}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
                 label="First Name"
                 placeholder="e.g. Jane"
                 {...register("firstName")}

@@ -35,6 +35,19 @@ const optionalProfileText = (max: number, label: string) =>
   z.string().trim().max(max, `${label} must be at most ${max} characters.`);
 
 export const updateProfileSchema = z.object({
+  // `@unique` in the DB (see prisma/schema.prisma) even though it's purely a
+  // display name — MARKER never authenticates with it — so a duplicate still
+  // needs a real conflict check (see updateProfile.ts), not just format
+  // validation. Same length rule as signup's own `username` field.
+  username: z
+    .string()
+    .trim()
+    .min(3, "Username must be at least 3 characters.")
+    .max(20, "Username must be at most 20 characters."),
+  // The login identity, also `@unique` — a duplicate here is a real privacy
+  // risk (two accounts could otherwise share a mailbox), so this gets the
+  // same conflict check as username, not just format validation.
+  email: z.string().trim().toLowerCase().email("Please enter a valid email address."),
   firstName: optionalProfileText(100, "First name"),
   lastName: optionalProfileText(100, "Last name"),
   institution: optionalProfileText(200, "Institution"),

@@ -14,6 +14,8 @@ export default async function EditProfilePage() {
   return (
     <EditProfileForm
       initialValues={{
+        username: profile?.username ?? "",
+        email: profile?.email ?? "",
         firstName: profile?.firstName ?? "",
         lastName: profile?.lastName ?? "",
         institution: profile?.institution ?? "",

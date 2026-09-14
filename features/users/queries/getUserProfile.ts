@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 
 export type UserProfile = {
+  username: string;
+  email: string;
   firstName: string | null;
   lastName: string | null;
   orcid: string | null;
@@ -13,6 +15,8 @@ export async function getUserProfile(userId: number): Promise<UserProfile | null
   return prisma.user.findUnique({
     where: { id: userId },
     select: {
+      username: true,
+      email: true,
       firstName: true,
       lastName: true,
       orcid: true,

@@ -29,6 +29,9 @@ export default async function AppNavbar() {
   const session = await auth();
   const isLoggedIn = !!session?.user;
 
+  // `session.user.username`/`.email` are JWT-cached at sign-in and only
+  // change again at next login — reading a fresh `profile` row here means a
+  // just-changed username/email/gravatar shows up in the navbar immediately.
   const [unreadCount, latestUnread, profile] = isLoggedIn
     ? await Promise.all([
         getUnreadNotificationsCount(Number(session.user.id)),
@@ -67,8 +70,8 @@ export default async function AppNavbar() {
               <DropdownTrigger>
                 <div className="btn btn-ghost btn-circle avatar">
                   <Avatar
-                    email={profile?.gravatar || session.user.email}
-                    fallback={session.user.username?.[0]}
+                    email={profile?.gravatar || profile?.email || session.user.email}
+                    fallback={(profile?.username ?? session.user.username)?.[0]}
                   />
                 </div>
               </DropdownTrigger>

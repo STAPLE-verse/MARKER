@@ -8,22 +8,27 @@ import { formatRelativeTime } from "@/lib/formatRelativeTime";
 import { getActivityActionLabel, getActivityTargetLabel } from "@/features/dashboard/utils/activityLabel";
 import { getLatestUnreadNotifications } from "@/features/notifications/queries/getLatestUnreadNotifications";
 import { DashboardNotificationsCard } from "@/features/notifications/components/DashboardNotificationsCard";
+import { getUserProfile } from "@/features/users/queries/getUserProfile";
 import { collectionTabHref } from "../collection/collectionTabs";
 
 export default async function DashboardPage() {
   const { session, userId } = await requirePageAuth();
 
-  const [stats, activity, notifications] = await Promise.all([
+  const [stats, activity, notifications, profile] = await Promise.all([
     getDashboardStats(userId),
     getRecentActivity(userId),
     getLatestUnreadNotifications(userId),
+    getUserProfile(userId),
   ]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300">
       <PageHeader
         title="Dashboard"
-        description={`Welcome back, ${session.user.username || session.user.email}! Here's your workspace overview.`}
+        // `profile` is a fresh DB read; `session.user` is JWT-cached at
+        // sign-in, so it would show a stale username/email right after an
+        // edit until the next login.
+        description={`Welcome back, ${profile?.username || profile?.email || session.user.username || session.user.email}! Here's your workspace overview.`}
       >
         <Link href="/collection/new">
           <Button variant="primary" size="sm">
