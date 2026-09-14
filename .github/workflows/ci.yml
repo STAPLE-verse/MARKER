@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  # No test or build step connects to a real database — Prisma just needs
+  # these set (non-empty) to generate the client / evaluate config at
+  # import time. Not real credentials.
+  DATABASE_URL: "postgresql://user:password@localhost:5432/marker"
+  AUTH_SECRET: "ci-placeholder-secret"
+  NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prisma generate
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
