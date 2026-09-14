@@ -73,7 +73,7 @@ export default function LoginForm({ next }: LoginFormProps) {
             />
 
             <div className="pt-4">
-              <Button type="submit" variant="primary" wide disabled={isSubmitting}>
+              <Button type="submit" variant="primary" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Logging in..." : "Login"}
               </Button>
             </div>

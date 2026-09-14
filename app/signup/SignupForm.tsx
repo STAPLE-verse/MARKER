@@ -85,7 +85,7 @@ export default function SignupForm({ next }: SignupFormProps) {
             />
 
             <div className="pt-4">
-              <Button type="submit" variant="secondary" wide disabled={isSubmitting}>
+              <Button type="submit" variant="secondary" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Creating account..." : "Sign Up"}
               </Button>
             </div>
