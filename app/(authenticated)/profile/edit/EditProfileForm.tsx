@@ -76,6 +76,15 @@ export default function EditProfileForm({ initialValues }: EditProfileFormProps)
               error={errors.orcid?.message}
             />
 
+            <Input
+              label="Gravatar Email"
+              type="email"
+              placeholder="e.g. name@example.com"
+              helperText="Optional. Used only to look up your Gravatar picture — it can be different from your login email."
+              {...register("gravatar")}
+              error={errors.gravatar?.message}
+            />
+
             <Select
               label="Preferred Language"
               options={PROFILE_LANGUAGE_OPTIONS}

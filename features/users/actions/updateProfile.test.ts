@@ -28,6 +28,7 @@ describe("updateProfile", () => {
       lastName: "Lovelace",
       institution: "Analytical Engines Ltd",
       orcid: "0000-0002-1825-0097",
+      gravatar: "ada@example.com",
       language: "en-US",
     });
   });
@@ -38,6 +39,7 @@ describe("updateProfile", () => {
       lastName: "Lovelace",
       institution: "Analytical Engines Ltd",
       orcid: "0000-0002-1825-0097",
+      gravatar: "  Ada@Example.com  ",
       language: "en-US",
     });
 
@@ -49,6 +51,7 @@ describe("updateProfile", () => {
         lastName: "Lovelace",
         institution: "Analytical Engines Ltd",
         orcid: "0000-0002-1825-0097",
+        gravatar: "ada@example.com",
         language: "en-US",
       },
       select: {
@@ -56,6 +59,7 @@ describe("updateProfile", () => {
         lastName: true,
         institution: true,
         orcid: true,
+        gravatar: true,
         language: true,
       },
     });
@@ -67,6 +71,7 @@ describe("updateProfile", () => {
       lastName: "",
       institution: "",
       orcid: "",
+      gravatar: "",
       language: "en-US",
     });
 
@@ -77,6 +82,7 @@ describe("updateProfile", () => {
           lastName: null,
           institution: null,
           orcid: null,
+          gravatar: null,
         }),
       })
     );
@@ -88,6 +94,7 @@ describe("updateProfile", () => {
       lastName: "Lovelace",
       institution: "",
       orcid: "not-an-orcid",
+      gravatar: "",
       language: "en-US",
     });
 
@@ -99,12 +106,31 @@ describe("updateProfile", () => {
     expect(updateUser).not.toHaveBeenCalled();
   });
 
+  it("rejects a malformed gravatar email before touching the database", async () => {
+    const res = await updateProfile({
+      firstName: "",
+      lastName: "",
+      institution: "",
+      orcid: "",
+      gravatar: "not-an-email",
+      language: "en-US",
+    });
+
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(res.code).toBe("VALIDATION");
+      expect(res.fieldErrors?.gravatar).toBeTruthy();
+    }
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
   it("rejects a language outside the supported list", async () => {
     const res = await updateProfile({
       firstName: "",
       lastName: "",
       institution: "",
       orcid: "",
+      gravatar: "",
       language: "fr-FR",
     });
 

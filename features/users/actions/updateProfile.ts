@@ -16,6 +16,7 @@ export const updateProfile = authenticatedAction(updateProfileSchema, async ({ i
       lastName: emptyToNull(input.lastName),
       institution: emptyToNull(input.institution),
       orcid: emptyToNull(input.orcid),
+      gravatar: emptyToNull(input.gravatar),
       language: input.language,
     },
     select: {
@@ -23,6 +24,7 @@ export const updateProfile = authenticatedAction(updateProfileSchema, async ({ i
       lastName: true,
       institution: true,
       orcid: true,
+      gravatar: true,
       language: true,
     },
   });

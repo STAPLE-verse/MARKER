@@ -18,6 +18,7 @@ export default async function EditProfilePage() {
         lastName: profile?.lastName ?? "",
         institution: profile?.institution ?? "",
         orcid: profile?.orcid ?? "",
+        gravatar: profile?.gravatar ?? "",
         language,
       }}
     />

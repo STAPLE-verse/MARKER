@@ -13,6 +13,7 @@ import { LogoutButton } from "@/features/auth/components/LogoutButton";
 import { NotificationBell } from "@/features/notifications/components/NotificationBell";
 import { getUnreadNotificationsCount } from "@/features/notifications/queries/getUnreadNotificationsCount";
 import { getLatestUnreadNotifications } from "@/features/notifications/queries/getLatestUnreadNotifications";
+import { getUserProfile } from "@/features/users/queries/getUserProfile";
 
 /**
  * AppNavbar — the shared navigation bar used across all pages with navigation.
@@ -28,12 +29,13 @@ export default async function AppNavbar() {
   const session = await auth();
   const isLoggedIn = !!session?.user;
 
-  const [unreadCount, latestUnread] = isLoggedIn
+  const [unreadCount, latestUnread, profile] = isLoggedIn
     ? await Promise.all([
         getUnreadNotificationsCount(Number(session.user.id)),
         getLatestUnreadNotifications(Number(session.user.id)),
+        getUserProfile(Number(session.user.id)),
       ])
-    : [0, []];
+    : [0, [], null];
 
   return (
     <Navbar className="border-b border-base-300 sticky top-0 z-50 bg-base-100">
@@ -65,7 +67,7 @@ export default async function AppNavbar() {
               <DropdownTrigger>
                 <div className="btn btn-ghost btn-circle avatar">
                   <Avatar
-                    email={session.user.email}
+                    email={profile?.gravatar || session.user.email}
                     fallback={session.user.username?.[0]}
                   />
                 </div>

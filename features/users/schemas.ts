@@ -44,6 +44,16 @@ export const updateProfileSchema = z.object({
     .refine((value) => !value || ORCID_PATTERN.test(value), {
       message: "Must be a valid ORCID (e.g. 0000-0002-1825-0097)",
     }),
+  // Deliberately separate from the account's login email — lets a user keep
+  // a private login address while showing a Gravatar tied to a different,
+  // public-facing one. Same field STAPLE's User row already has.
+  gravatar: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .refine((value) => !value || z.string().email().safeParse(value).success, {
+      message: "Must be a valid email address.",
+    }),
   language: z.enum(PROFILE_LANGUAGE_VALUES),
 });
 
