@@ -309,32 +309,25 @@ model Folder {
 }
 
 model Form {
-  id                 Int           @id @default(autoincrement())
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  userId             Int
-  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  versions           FormVersion[]
-  archived           Boolean       @default(false)
-  tags               Json?
-  folderId           Int?
-  folder             Folder?       @relation(fields: [folderId], references: [id])
-  // MARKER-owned additions on a STAPLE-owned table (`Form`). Exist in the
+  id        Int           @id @default(autoincrement())
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  userId    Int
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions  FormVersion[]
+  archived  Boolean       @default(false)
+  tags      Json?
+  folderId  Int?
+  folder    Folder?       @relation(fields: [folderId], references: [id])
+  // MARKER-owned addition on a STAPLE-owned table (`Form`). Exists in the
   // shared database today only via MARKER's own migration history
   // (20260615093209_publish_schema_update baseline) — STAPLE's repo has no
-  // matching migration. Need to become real migrations in STAPLE's repo
-  // before this can safely reach STAPLE's production database; do not add
-  // further columns to shared tables this way, request them in STAPLE's
-  // repo instead.
-  //
-  // `app` is a live dependency — resolveStapleSource.ts gates on
-  // `form.app === "staple"` before allowing an import. `originalImportHash`
-  // has no current callers against this table (MarkerForm has its own,
-  // separate field of the same name that's actually used) — worth
-  // confirming it's genuinely dead before migrating it forward, rather than
-  // carrying it into STAPLE's history unexamined.
-  app                String        @default("staple")
-  originalImportHash String?
+  // matching migration. A live dependency: resolveStapleSource.ts gates on
+  // `form.app === "staple"` before allowing an import. Needs to become a
+  // real migration in STAPLE's repo before this can safely reach STAPLE's
+  // production database; do not add further columns to shared tables this
+  // way, request them in STAPLE's repo instead.
+  app       String        @default("staple")
 }
 
 enum VersionStatus {
@@ -357,7 +350,7 @@ enum MarkerFormCollaboratorRole {
 }
 
 model FormVersion {
-  id        Int           @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
   formId    Int
   version   Int
@@ -367,28 +360,13 @@ model FormVersion {
   // table). Mirrored here only so MARKER's passive read-side model matches the
   // live shared-database shape and `prisma migrate dev` doesn't try to drop it.
   semantics Json?
-  archived  Boolean       @default(false)
-  createdAt DateTime      @default(now())
-  // MARKER-owned additions on a STAPLE-owned table (`FormVersion`). Exist in
-  // the shared database today only via MARKER's own migration history
-  // (20260619101518_published_state, 20260624105540_update_from_version,
-  // 20260624113818) — STAPLE's repo has no matching migrations. resolveStapleSource.ts,
-  // the only place MARKER reads this table directly, selects neither
-  // `updatedAt`, `status`, nor relies on the unique constraint below — these
-  // three appear to be dead weight from an earlier design (STAPLE forms were
-  // once meant to be imported in place here, before MARKER got its own
-  // `MarkerForm`/`MarkerFormVersion` tables). Worth confirming they're
-  // genuinely unused and just dropping them, rather than migrating them
-  // forward into STAPLE's history unexamined — the unique constraint in
-  // particular would need STAPLE's real production data checked for existing
-  // duplicate (formId, version) rows before it could ever be added there.
-  updatedAt DateTime      @default(now()) @updatedAt
-  form      Form          @relation(fields: [formId], references: [id], onDelete: Cascade)
+  archived  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  form      Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
   tasks     Task[]
   projects  Project[]
-  status    VersionStatus @default(DRAFT)
 
-  @@unique([formId, version])
+  @@index([formId, version], name: "formVersionIndex")
 }
 
 model MarkerForm {
