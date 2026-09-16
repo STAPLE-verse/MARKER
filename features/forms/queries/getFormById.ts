@@ -10,8 +10,13 @@ import { getImportModificationStatus } from "../utils/importHash"
  * (docs/form-delete-policy.md §4.3).
  *
  * Accepted collaborators (any role) can see the form (docs/refactor/
- * form-collaboration.md §4.3) — this is visibility only; write actions still
- * gate on role via `getAuthorizedLatestVersion`.
+ * form-collaboration.md §4.3) — but only while it's active. Archived shared
+ * forms are never shown to collaborators, not even by direct link (the
+ * `archived: false` constraint on the collaborator branch below) — same
+ * decision as excluding them from `getUserArchivedForms`, just closing the
+ * direct-URL loophole that a list-only exclusion would leave open. The owner
+ * branch has no such constraint; owners can always reach their own archived
+ * forms.
  */
 export async function getFormById(formId: number, userId: number): Promise<FormDetailDTO | null> {
   const form = await prisma.markerForm.findFirst({
@@ -19,7 +24,7 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
       id: formId,
       OR: [
         { ownerId: userId },
-        { collaborators: { some: { userId, acceptedAt: { not: null } } } },
+        { archived: false, collaborators: { some: { userId, acceptedAt: { not: null } } } },
       ],
     },
   })
