@@ -31,6 +31,9 @@ export const publishSchema = authenticatedAction(
     for (let attempt = 0; attempt < MAX_PID_ATTEMPTS; attempt++) {
       const pid = generatePID("ps");
       try {
+        // OWNER-only (docs/refactor/form-collaboration.md §4.6) — publishing
+        // is irreversible-in-spirit and affects the whole form's public
+        // record, not just the caller's own draft edits.
         const publishedSchema = await withLockedEditableFormVersionHead(
           input.formId,
           userId,
@@ -175,7 +178,8 @@ export const publishSchema = authenticatedAction(
             });
 
             return created;
-          }
+          },
+          "OWNER"
         );
 
         // Fires only after the transaction above has committed — never

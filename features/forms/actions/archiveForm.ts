@@ -12,7 +12,9 @@ import { setFormArchivedState } from "../queries/setFormArchivedState"
  * docs/form-delete-policy.md §4.3).
  */
 export const archiveForm = authenticatedAction(formIdActionSchema, async ({ input, userId }) => {
-  await getAuthorizedLatestVersion(input.formId, userId)
+  // OWNER-only (docs/refactor/form-collaboration.md §4.6) — archiving affects
+  // every collaborator's access to the form, not just the caller's own edits.
+  await getAuthorizedLatestVersion(input.formId, userId, prisma, "OWNER")
 
   await prisma.$transaction(async (tx) => {
     await setFormArchivedState(tx, input.formId, true)

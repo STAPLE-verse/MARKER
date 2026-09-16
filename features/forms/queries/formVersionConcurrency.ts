@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client"
+import { MarkerFormCollaboratorRole, Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db"
 import { ActionError } from "@/utils/action-result"
 import { getAuthorizedArchivedForm } from "./getAuthorizedArchivedForm"
@@ -34,9 +34,10 @@ export async function withLockedAuthorizedLatestVersion<T>(
   callback: (
     tx: Prisma.TransactionClient,
     context: AuthorizedLatestVersion
-  ) => Promise<T>
+  ) => Promise<T>,
+  minimumRole: MarkerFormCollaboratorRole = "EDITOR"
 ): Promise<T> {
-  await getAuthorizedLatestVersion(formId, userId)
+  await getAuthorizedLatestVersion(formId, userId, prisma, minimumRole)
 
   return prisma.$transaction(async (tx) => {
     await tx.$queryRaw`
@@ -46,7 +47,7 @@ export async function withLockedAuthorizedLatestVersion<T>(
       FOR UPDATE
     `
 
-    const context = await getAuthorizedLatestVersion(formId, userId, tx)
+    const context = await getAuthorizedLatestVersion(formId, userId, tx, minimumRole)
     return callback(tx, context)
   })
 }
@@ -63,9 +64,10 @@ export async function withLockedAuthorizedArchivedForm<T>(
   callback: (
     tx: Prisma.TransactionClient,
     context: AuthorizedArchivedForm
-  ) => Promise<T>
+  ) => Promise<T>,
+  minimumRole: MarkerFormCollaboratorRole = "OWNER"
 ): Promise<T> {
-  await getAuthorizedArchivedForm(formId, userId)
+  await getAuthorizedArchivedForm(formId, userId, prisma, minimumRole)
 
   return prisma.$transaction(async (tx) => {
     await tx.$queryRaw`
@@ -75,7 +77,7 @@ export async function withLockedAuthorizedArchivedForm<T>(
       FOR UPDATE
     `
 
-    const context = await getAuthorizedArchivedForm(formId, userId, tx)
+    const context = await getAuthorizedArchivedForm(formId, userId, tx, minimumRole)
     return callback(tx, context)
   })
 }
@@ -92,7 +94,8 @@ export async function withLockedEditableFormVersionHead<T>(
   callback: (
     tx: Prisma.TransactionClient,
     context: AuthorizedLatestVersion
-  ) => Promise<T>
+  ) => Promise<T>,
+  minimumRole: MarkerFormCollaboratorRole = "EDITOR"
 ): Promise<T> {
   return withLockedAuthorizedLatestVersion(formId, userId, async (tx, context) => {
     const { latestVersion } = context
@@ -116,7 +119,7 @@ export async function withLockedEditableFormVersionHead<T>(
     }
 
     return callback(tx, context)
-  })
+  }, minimumRole)
 }
 
 export const CONCURRENT_EDIT_MESSAGE =

@@ -1,4 +1,5 @@
 export { getUserForms } from "./getUserForms"
+export { getSharedWithMeForms } from "./getSharedWithMeForms"
 export { getUserArchivedForms } from "./getUserArchivedForms"
 export { getUserPublishedSchemas } from "./getUserPublishedSchemas"
 export { getFormById } from "./getFormById"

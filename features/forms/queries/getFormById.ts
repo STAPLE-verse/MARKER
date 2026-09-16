@@ -4,15 +4,23 @@ import { mapContributors, normalizePublicationMetadata, normalizeKeywords } from
 import { getImportModificationStatus } from "../utils/importHash"
 
 /**
- * Owner-scoped form detail. Active forms return non-archived versions only;
- * archived forms return their soft-archived version history so `/collection/[id]`
- * remains openable from the Archived tab (docs/form-delete-policy.md §4.3).
+ * Owner-or-collaborator-scoped form detail. Active forms return non-archived
+ * versions only; archived forms return their soft-archived version history so
+ * `/collection/[id]` remains openable from the Archived tab
+ * (docs/form-delete-policy.md §4.3).
+ *
+ * Accepted collaborators (any role) can see the form (docs/refactor/
+ * form-collaboration.md §4.3) — this is visibility only; write actions still
+ * gate on role via `getAuthorizedLatestVersion`.
  */
 export async function getFormById(formId: number, userId: number): Promise<FormDetailDTO | null> {
   const form = await prisma.markerForm.findFirst({
     where: {
       id: formId,
-      ownerId: userId,
+      OR: [
+        { ownerId: userId },
+        { collaborators: { some: { userId, acceptedAt: { not: null } } } },
+      ],
     },
   })
 
