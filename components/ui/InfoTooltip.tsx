@@ -17,7 +17,7 @@ export interface InfoTooltipProps {
 export function InfoTooltip({ text }: InfoTooltipProps) {
   return (
     <span
-      className="tooltip tooltip-right tooltip-info z-50 before:max-w-xs inline-flex cursor-help"
+      className="tooltip tooltip-right tooltip-info z-10 before:max-w-xs inline-flex cursor-help"
       data-tip={text}
     >
       <InformationCircleIcon className="h-6 w-6 text-info" strokeWidth={2} />
