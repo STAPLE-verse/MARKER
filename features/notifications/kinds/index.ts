@@ -11,6 +11,26 @@ import {
   renderForkedSchemaUpdated,
   ForkedSchemaUpdatedPayload,
 } from "./forkedSchemaUpdated"
+import {
+  formCollaboratorInvitedPayloadSchema,
+  renderFormCollaboratorInvited,
+  FormCollaboratorInvitedPayload,
+} from "./formCollaboratorInvited"
+import {
+  formArchivedForCollaboratorsPayloadSchema,
+  renderFormArchivedForCollaborators,
+  FormArchivedForCollaboratorsPayload,
+} from "./formArchivedForCollaborators"
+import {
+  formCollaboratorRemovedPayloadSchema,
+  renderFormCollaboratorRemoved,
+  FormCollaboratorRemovedPayload,
+} from "./formCollaboratorRemoved"
+import {
+  formOwnershipTransferredPayloadSchema,
+  renderFormOwnershipTransferred,
+  FormOwnershipTransferredPayload,
+} from "./formOwnershipTransferred"
 
 /**
  * The registry STAPLE never quite had: `templateId` there was a bare string
@@ -22,12 +42,23 @@ import {
  * literal union, so adding a kind without wiring up its payload type is a
  * compile error, not a silent runtime gap.
  */
-export type NotificationKind = "SCHEMA_FORKED" | "SCHEMA_FORK_PUBLISHED" | "FORKED_SCHEMA_UPDATED"
+export type NotificationKind =
+  | "SCHEMA_FORKED"
+  | "SCHEMA_FORK_PUBLISHED"
+  | "FORKED_SCHEMA_UPDATED"
+  | "FORM_COLLABORATOR_INVITED"
+  | "FORM_ARCHIVED_FOR_COLLABORATORS"
+  | "FORM_COLLABORATOR_REMOVED"
+  | "FORM_OWNERSHIP_TRANSFERRED"
 
 export interface NotificationKindPayloadMap {
   SCHEMA_FORKED: SchemaForkedPayload
   SCHEMA_FORK_PUBLISHED: SchemaForkPublishedPayload
   FORKED_SCHEMA_UPDATED: ForkedSchemaUpdatedPayload
+  FORM_COLLABORATOR_INVITED: FormCollaboratorInvitedPayload
+  FORM_ARCHIVED_FOR_COLLABORATORS: FormArchivedForCollaboratorsPayload
+  FORM_COLLABORATOR_REMOVED: FormCollaboratorRemovedPayload
+  FORM_OWNERSHIP_TRANSFERRED: FormOwnershipTransferredPayload
 }
 
 interface NotificationKindDefinition<TPayload> {
@@ -49,5 +80,21 @@ export const NOTIFICATION_KINDS: {
   FORKED_SCHEMA_UPDATED: {
     payloadSchema: forkedSchemaUpdatedPayloadSchema,
     render: renderForkedSchemaUpdated,
+  },
+  FORM_COLLABORATOR_INVITED: {
+    payloadSchema: formCollaboratorInvitedPayloadSchema,
+    render: renderFormCollaboratorInvited,
+  },
+  FORM_ARCHIVED_FOR_COLLABORATORS: {
+    payloadSchema: formArchivedForCollaboratorsPayloadSchema,
+    render: renderFormArchivedForCollaborators,
+  },
+  FORM_COLLABORATOR_REMOVED: {
+    payloadSchema: formCollaboratorRemovedPayloadSchema,
+    render: renderFormCollaboratorRemoved,
+  },
+  FORM_OWNERSHIP_TRANSFERRED: {
+    payloadSchema: formOwnershipTransferredPayloadSchema,
+    render: renderFormOwnershipTransferred,
   },
 }

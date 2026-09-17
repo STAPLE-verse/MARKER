@@ -7,13 +7,16 @@ import { authenticatedAction } from "@/utils/safe-action"
 import { ActionError } from "@/utils/action-result"
 import { generatePID } from "@/utils/id"
 import { cloneFormVersionSchema } from "../schemas"
+import { assertFormRole } from "../queries/formRole"
 import { copyPublicationMetadataFields, DEFAULT_PUBLICATION_METADATA } from "../utils/publicationMetadata"
 
 export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, async ({ input, userId }) => {
   const version = await prisma.markerFormVersion.findUnique({
     where: { id: input.versionId },
     include: {
-      form: true,
+      form: {
+        include: { collaborators: { where: { userId, acceptedAt: { not: null } } } },
+      },
       publicationMetadata: true,
     }
   });
@@ -22,9 +25,12 @@ export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, asyn
     throw new ActionError("NOT_FOUND", "Form version not found");
   }
 
-  if (version.form.ownerId !== userId) {
-    throw new ActionError("FORBIDDEN", "You do not have permission to clone this form");
-  }
+  // Keyed by versionId rather than "the current head of formId", and never
+  // mutates the source (only reads it, then creates an independent new
+  // MarkerForm) — so this can't route through `getAuthorizedLatestVersion`
+  // as-is, but reuses the same role-resolution primitive it does
+  // (docs/refactor/form-collaboration.md §4.2).
+  assertFormRole(version.form, userId, "EDITOR", "You do not have permission to clone this form");
 
   const newName = `Copy of ${version.name || "Untitled Form"}`;
 

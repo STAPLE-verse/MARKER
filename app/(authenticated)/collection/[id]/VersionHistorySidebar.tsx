@@ -15,8 +15,10 @@ interface VersionHistorySidebarProps {
   formId: number;
   onNewVersion: () => void;
   isCreatingVersion: boolean;
-  /** When true, hide version-creation controls (archived forms are read-only). */
+  /** When true, hide version-creation controls (archived forms are read-only, or the viewer is below EDITOR). */
   readOnly?: boolean;
+  /** Delete-version is OWNER-only regardless of `readOnly` (docs/refactor/form-collaboration.md §4.6) — an EDITOR can create versions but not delete them. */
+  canDelete?: boolean;
 }
 
 function getVersionLabel(version: FormVersionType): string {
@@ -34,8 +36,9 @@ export function VersionHistorySidebar({
   onNewVersion,
   isCreatingVersion,
   readOnly = false,
+  canDelete = false,
 }: VersionHistorySidebarProps) {
-  const canDeleteVersions = !readOnly && versions.length > 1;
+  const canDeleteVersions = canDelete && versions.length > 1;
 
   return (
     <CollapsibleHistorySidebar

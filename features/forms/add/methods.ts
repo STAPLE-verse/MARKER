@@ -16,18 +16,4 @@ export const ADD_SCHEMA_METHODS = [
     href: "/collection/new/staple",
     availability: "available",
   },
-  {
-    id: SCHEMA_SOURCE_IDS.CEDAR,
-    title: "From CEDAR",
-    description: "Import and transform a schema from the CEDAR ecosystem.",
-    href: "/collection/new/cedar",
-    availability: "coming-soon",
-  },
-  {
-    id: SCHEMA_SOURCE_IDS.DATACITE,
-    title: "From DataCite",
-    description: "Import a schema from the DataCite ecosystem.",
-    href: "/collection/new/datacite",
-    availability: "coming-soon",
-  },
 ] as const satisfies readonly AddSchemaMethod[];

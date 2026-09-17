@@ -5,9 +5,10 @@ import { PublicationContributorsFields } from "@/features/forms/components/publi
 
 export interface Step2ContributorsProps {
   isProfileIncomplete?: boolean;
+  formId: number;
 }
 
-export function Step2Contributors({ isProfileIncomplete }: Step2ContributorsProps) {
+export function Step2Contributors({ isProfileIncomplete, formId }: Step2ContributorsProps) {
   const { control, formState: { errors } } = useFormContext<PublishFormInput>();
 
   return (
@@ -19,6 +20,7 @@ export function Step2Contributors({ isProfileIncomplete }: Step2ContributorsProp
         control={control}
         errors={errors}
         isProfileIncomplete={isProfileIncomplete}
+        formId={formId}
       />
     </WizardStep>
   );

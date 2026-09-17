@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FormDetailDTO, FormVersionDTO } from "@/features/forms/types";
+import { canEditForm } from "@/features/forms/utils/formPermissions";
 import { BackButton } from "@/components/ui/BackButton";
 import { Alert } from "@/components/ui/Alert";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
@@ -14,10 +15,15 @@ import { useRestoreFormVersion } from "@/features/forms/hooks/useRestoreFormVers
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
 import { SchemaDetailHeader } from "./SchemaDetailHeader";
 import { SchemaViewerCard } from "./SchemaViewerCard";
+import { PendingInviteBanner } from "@/features/forms/collaborators/components/PendingInviteBanner";
+import type { CollaborationSummaryDTO } from "@/features/forms/collaborators/queries/getCollaborationSummary";
 
 interface UserSchemaDetailsClientProps {
   form: FormDetailDTO;
   selectedVersion: FormVersionDTO;
+  viewerUserId: number;
+  /** `null` for a pending invitee — see page.tsx. */
+  collaboration: CollaborationSummaryDTO | null;
 }
 
 function getVersionLabel(version: FormVersionDTO): string {
@@ -29,6 +35,8 @@ function getVersionLabel(version: FormVersionDTO): string {
 export default function UserSchemaDetailsClient({
   form,
   selectedVersion,
+  viewerUserId,
+  collaboration,
 }: UserSchemaDetailsClientProps) {
   const latestVersion = form.versions[0];
   const isViewingLatest = selectedVersion.id === latestVersion.id;
@@ -39,10 +47,13 @@ export default function UserSchemaDetailsClient({
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
 
   const publishedSchema = selectedVersion.publishedSchema;
-  const isLatestDraft =
-    !form.archived && isViewingLatest && selectedVersion.status === "DRAFT";
-  const isHistoricalDraft =
-    !form.archived && !isViewingLatest && selectedVersion.status === "DRAFT";
+  // Editing publication metadata is a content edit like any other — EDITOR
+  // gets it, VIEWER gets the same read-only card a historical draft shows
+  // (docs/refactor/form-collaboration.md §4.6).
+  const canEdit = canEditForm(form);
+  const isDraftVersion = !form.archived && selectedVersion.status === "DRAFT";
+  const isLatestDraft = isDraftVersion && isViewingLatest && canEdit;
+  const isReadOnlyDraft = isDraftVersion && !isLatestDraft;
 
   return (
     <FormPageLayout
@@ -60,7 +71,8 @@ export default function UserSchemaDetailsClient({
           formId={form.id}
           onNewVersion={createVersion}
           isCreatingVersion={isCreating}
-          readOnly={form.archived}
+          readOnly={form.archived || !canEdit}
+          canDelete={form.role === "OWNER"}
         />
       }
     >
@@ -73,6 +85,10 @@ export default function UserSchemaDetailsClient({
         </Alert>
       )}
 
+      {form.isPendingInvite && form.pendingCollaboratorId != null && (
+        <PendingInviteBanner collaboratorId={form.pendingCollaboratorId} role={form.role} className="mb-6" />
+      )}
+
       <SchemaDetailHeader
         formId={form.id}
         version={selectedVersion}
@@ -81,6 +97,10 @@ export default function UserSchemaDetailsClient({
         hasPublishedVersion={form.hasPublishedVersion}
         stapleImport={form.stapleImport}
         forkedFrom={form.forkedFrom}
+        role={form.role}
+        isPendingInvite={form.isPendingInvite}
+        viewerUserId={viewerUserId}
+        collaboration={collaboration}
         onClone={() => clone(selectedVersion.id)}
         isCloning={isCloning}
         onRestore={() => restoreVersion(selectedVersion.id)}
@@ -109,7 +129,7 @@ export default function UserSchemaDetailsClient({
         {isLatestDraft && (
           <DraftPublicationMetadataCard formId={form.id} version={selectedVersion} />
         )}
-        {isHistoricalDraft && (
+        {isReadOnlyDraft && (
           <PublicationMetadataCard metadata={selectedVersion.publicationMetadata} />
         )}
       </div>

@@ -28,6 +28,9 @@ function baseForm(overrides: Record<string, unknown> = {}) {
     importedFromStapleVersionNumber: null,
     importedAt: null,
     originalImportHash: null,
+    // Unfiltered by acceptedAt now (see getFormById's own comment) — at most
+    // one row per caller, pending or accepted.
+    collaborators: [],
     ...overrides,
   };
 }
@@ -90,5 +93,64 @@ describe("getFormById — forkedFrom resolution", () => {
     const result = await getFormById(FORM_ID, OWNER_ID);
 
     expect(result?.forkedFrom).toBeNull();
+  });
+});
+
+describe("getFormById — role resolution", () => {
+  const COLLABORATOR_ID = 7;
+
+  beforeEach(() => {
+    findFirstMarkerForm.mockReset();
+    findManyMarkerFormVersion.mockReset();
+    findUniquePublishedSchema.mockReset();
+
+    findManyMarkerFormVersion.mockResolvedValue([baseVersion()]);
+  });
+
+  it("resolves OWNER for the form's owner", async () => {
+    findFirstMarkerForm.mockResolvedValue(baseForm({ collaborators: [] }));
+
+    const result = await getFormById(FORM_ID, OWNER_ID);
+
+    expect(result?.role).toBe("OWNER");
+    expect(result?.isPendingInvite).toBe(false);
+    expect(result?.pendingCollaboratorId).toBeNull();
+  });
+
+  it("resolves the accepted collaborator's own role, not the owner's, and reports it as not pending", async () => {
+    findFirstMarkerForm.mockResolvedValue(
+      baseForm({ collaborators: [{ id: 501, role: "EDITOR", acceptedAt: new Date("2026-09-01T00:00:00.000Z") }] })
+    );
+
+    const result = await getFormById(FORM_ID, COLLABORATOR_ID);
+
+    expect(result?.role).toBe("EDITOR");
+    expect(result?.isPendingInvite).toBe(false);
+    expect(result?.pendingCollaboratorId).toBeNull();
+  });
+
+  it("resolves a still-pending invitee's invited role, but flags it as not yet granted", async () => {
+    findFirstMarkerForm.mockResolvedValue(
+      baseForm({ collaborators: [{ id: 502, role: "VIEWER", acceptedAt: null }] })
+    );
+
+    const result = await getFormById(FORM_ID, COLLABORATOR_ID);
+
+    expect(result?.role).toBe("VIEWER");
+    expect(result?.isPendingInvite).toBe(true);
+    expect(result?.pendingCollaboratorId).toBe(502);
+  });
+
+  it("queries for the caller's collaborator row unfiltered by acceptedAt, on both the where and include side", async () => {
+    findFirstMarkerForm.mockResolvedValue(baseForm({ collaborators: [] }));
+
+    await getFormById(FORM_ID, COLLABORATOR_ID);
+
+    const call = findFirstMarkerForm.mock.calls[0][0];
+    expect(call.where.OR).toContainEqual({
+      archived: false,
+      collaborators: { some: { userId: COLLABORATOR_ID } },
+    });
+    expect(call.include.collaborators).toEqual({ where: { userId: COLLABORATOR_ID } });
   });
 });

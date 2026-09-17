@@ -31,6 +31,9 @@ export const publishSchema = authenticatedAction(
     for (let attempt = 0; attempt < MAX_PID_ATTEMPTS; attempt++) {
       const pid = generatePID("ps");
       try {
+        // OWNER-only (docs/refactor/form-collaboration.md §4.6) — publishing
+        // is irreversible-in-spirit and affects the whole form's public
+        // record, not just the caller's own draft edits.
         const publishedSchema = await withLockedEditableFormVersionHead(
           input.formId,
           userId,
@@ -159,6 +162,14 @@ export const publishSchema = authenticatedAction(
             // permanent snapshot — see PublishedSchemaPackage's own comment
             // in schema.prisma for why this isn't re-derived from `created`
             // on read.
+            //
+            // Deliberately inside the same `tx` as the `publishedSchema.create`
+            // above: this is the only writer of either table, and
+            // forkSchema.ts / api/schemas/[pid]/package both assume every
+            // PublishedSchema row has a matching PublishedSchemaPackage row.
+            // packageSnapshot can't be a DB-level NOT NULL (it's a relation,
+            // not a scalar column) — this transaction's atomicity is what
+            // actually upholds that invariant. Keep both creates in one `tx`.
             await tx.publishedSchemaPackage.create({
               data: {
                 pid,
@@ -167,7 +178,8 @@ export const publishSchema = authenticatedAction(
             });
 
             return created;
-          }
+          },
+          "OWNER"
         );
 
         // Fires only after the transaction above has committed — never

@@ -1,4 +1,5 @@
 export { getUserForms } from "./getUserForms"
+export { getSharedWithMeForms } from "./getSharedWithMeForms"
 export { getUserArchivedForms } from "./getUserArchivedForms"
 export { getUserPublishedSchemas } from "./getUserPublishedSchemas"
 export { getFormById } from "./getFormById"
@@ -7,5 +8,6 @@ export { getLatestVersionForConformanceCheck } from "./getLatestVersionForConfor
 export { getAuthorizedArchivedForm } from "./getAuthorizedArchivedForm"
 export { loadOwnedForm } from "./loadOwnedForm"
 export { getPublishedSchemaByPid } from "./getPublishedSchemaByPid"
+export { getViewerFormAccess } from "./getViewerFormAccess"
 export { getPublishedVersionsForForm } from "./getPublishedVersionsForForm"
 export { searchPublishedSchemas } from "./searchPublishedSchemas"

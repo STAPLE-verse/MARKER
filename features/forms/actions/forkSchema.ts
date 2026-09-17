@@ -20,27 +20,21 @@ import {
  * Reads from the frozen `PublishedSchemaPackage.packageJson` snapshot, not
  * `PublishedSchema.schemaJson`/`.uiSchema` — those columns encode the same
  * content but the package is the only place `semantics` exists at all (see
- * docs/refactor/explore.md's fork-planning discussion). Falls back to the
- * bare columns only for a legacy row with no snapshot, in which case
- * semantics simply isn't available to fork.
+ * docs/refactor/explore.md's fork-planning discussion). publishSchema.ts
+ * always creates both rows together in one transaction, so a missing
+ * snapshot means data corruption, not a legacy row to gracefully degrade.
  */
 function resolveForkedContent(published: {
-  schemaJson: unknown
-  uiSchema: unknown
   packageSnapshot: { packageJson: unknown } | null
 }): { schema: Record<string, unknown>; uiSchema: Record<string, unknown>; semantics: unknown } {
-  if (published.packageSnapshot) {
-    const pkg = published.packageSnapshot.packageJson as unknown as MarkerTemplatePackage
-    return {
-      schema: pkg.form.schema as Record<string, unknown>,
-      uiSchema: (pkg.form.uiSchema ?? {}) as Record<string, unknown>,
-      semantics: pkg.semantics ?? null,
-    }
+  if (!published.packageSnapshot) {
+    throw new ActionError("NOT_FOUND", "This published schema has no package snapshot and cannot be forked.")
   }
+  const pkg = published.packageSnapshot.packageJson as unknown as MarkerTemplatePackage
   return {
-    schema: (published.schemaJson ?? {}) as Record<string, unknown>,
-    uiSchema: (published.uiSchema ?? {}) as Record<string, unknown>,
-    semantics: null,
+    schema: pkg.form.schema as Record<string, unknown>,
+    uiSchema: (pkg.form.uiSchema ?? {}) as Record<string, unknown>,
+    semantics: pkg.semantics ?? null,
   }
 }
 
@@ -51,8 +45,6 @@ export const forkSchema = authenticatedAction(forkSchemaSchema, async ({ input, 
       pid: true,
       title: true,
       authorId: true,
-      schemaJson: true,
-      uiSchema: true,
       packageSnapshot: { select: { packageJson: true } },
       // Only used to build the fork notification's deep link back to the
       // original author's own draft — see the `createNotification` call below.
@@ -64,14 +56,12 @@ export const forkSchema = authenticatedAction(forkSchemaSchema, async ({ input, 
     throw new ActionError("NOT_FOUND", "This published schema could not be found.")
   }
 
-  // The UI hides the Fork button for the schema's own author (ForkSchemaButton.tsx
-  // links to their existing draft instead), but the action itself must not
-  // rely on that — enforce it server-side too, not just via the client not
-  // rendering a button.
-  if (published.authorId === userId) {
-    throw new ActionError("FORBIDDEN", "You already own this schema — open your draft instead of forking it.")
-  }
-
+  // Forking your own published schema is allowed, deliberately — cloning the
+  // live draft (the "Clone" action on /collection/[id]) also makes an
+  // independent copy, but without provenance (no forkedFromPid, no "Forked"
+  // badge). Forking is the only way to get an explicit, traceable lineage
+  // back to *this* published version, which is a legitimate reason to want
+  // it even with full draft access. See ForkSchemaButton.tsx.
   const { schema, uiSchema, semantics } = resolveForkedContent(published)
 
   const newName = `Copy of ${published.title || "Untitled Schema"}`
@@ -129,8 +119,12 @@ export const forkSchema = authenticatedAction(forkSchemaSchema, async ({ input, 
     },
   })
 
+  // Self-forking is now allowed (see above) — createNotification has no
+  // built-in self-notify guard (by design, per its own doc comment: it
+  // trusts each caller's already-authorized recipient list), so skip it
+  // explicitly rather than tell someone they forked their own schema.
   await createNotification({
-    recipients: [published.authorId],
+    recipients: published.authorId === userId ? [] : [published.authorId],
     kind: "SCHEMA_FORKED",
     data: {
       forkedByUsername: user?.username ?? "Someone",

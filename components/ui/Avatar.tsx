@@ -32,7 +32,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(({
     >
       <div className="bg-neutral text-neutral-content rounded-full" style={{ width: size, height: size }}>
         {imageSrc ? (
-          <img src={imageSrc} alt="Avatar" width={size} height={size} className="rounded-full object-cover" />
+          <img src={imageSrc} alt="" width={size} height={size} className="rounded-full object-cover" />
         ) : (
           <span className="text-xl uppercase">{fallback || "?"}</span>
         )}

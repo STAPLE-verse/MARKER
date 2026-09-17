@@ -1,5 +1,5 @@
 import { requirePageAuth } from "@/utils/auth";
-import { getUserArchivedForms, getUserForms, getUserPublishedSchemas } from "@/features/forms/queries";
+import { getUserArchivedForms, getUserForms, getUserPublishedSchemas, getSharedWithMeForms } from "@/features/forms/queries";
 import { getCollectionStatusBadgeLabel } from "@/features/forms/utils/versionLabel";
 import type { FormWithLatestVersion, UserPublishedSchemaDTO } from "@/features/forms/types";
 import { redirect } from "next/navigation";
@@ -69,7 +69,11 @@ export default async function CollectionPage({ searchParams }: CollectionPagePro
   }
 
   const rawForms =
-    tab === "archived" ? await getUserArchivedForms(userId) : await getUserForms(userId);
+    tab === "archived"
+      ? await getUserArchivedForms(userId)
+      : tab === "shared"
+        ? await getSharedWithMeForms(userId)
+        : await getUserForms(userId);
 
   return <CollectionClient tab={tab} schemas={mapFormsToRows(rawForms)} />;
 }

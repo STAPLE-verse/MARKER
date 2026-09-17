@@ -16,17 +16,19 @@ import { ForkSchemaButton } from "./ForkSchemaButton";
 interface SchemaDetailsClientProps {
   schema: PublicPublishedSchemaDTO;
   isLoggedIn: boolean;
-  viewerIsAuthor: boolean;
+  /** Non-null when the viewer currently has real (accepted) access to the origin form — see getViewerFormAccess. */
   viewerFormId: number | null;
   viewerVersionId: number | null;
+  /** Set when this page was reached from a form's own detail page (`?fromForm=`) — "Back" returns there instead of /explore. */
+  backFormId: number | null;
 }
 
 export default function SchemaDetailsClient({
   schema,
   isLoggedIn,
-  viewerIsAuthor,
   viewerFormId,
   viewerVersionId,
+  backFormId,
 }: SchemaDetailsClientProps) {
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   // A family with only one published version has nothing to show a history
@@ -35,7 +37,13 @@ export default function SchemaDetailsClient({
 
   return (
     <FormPageLayout
-      backButton={<BackButton href="/explore">Back to Explore</BackButton>}
+      backButton={
+        backFormId != null ? (
+          <BackButton href={`/collection/${backFormId}`}>Back to Schema</BackButton>
+        ) : (
+          <BackButton href="/explore">Back to Explore</BackButton>
+        )
+      }
       sidebar={
         hasHistory ? (
           <PublishedVersionsSidebar
@@ -54,7 +62,6 @@ export default function SchemaDetailsClient({
         <ForkSchemaButton
           pid={schema.pid}
           isLoggedIn={isLoggedIn}
-          viewerIsAuthor={viewerIsAuthor}
           viewerFormId={viewerFormId}
           viewerVersionId={viewerVersionId}
         />

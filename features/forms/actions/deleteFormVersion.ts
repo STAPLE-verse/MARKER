@@ -14,6 +14,7 @@ import { nonArchivedVersionFilter } from "../queries/versionSelectors";
 export const deleteFormVersion = authenticatedAction(
   deleteFormVersionSchema,
   async ({ input, userId }) => {
+    // OWNER-only (docs/refactor/form-collaboration.md §4.6).
     await withLockedAuthorizedLatestVersion(input.formId, userId, async (tx) => {
       const targetVersion = await tx.markerFormVersion.findUnique({
         where: { id: input.versionId },
@@ -48,7 +49,7 @@ export const deleteFormVersion = authenticatedAction(
       await tx.markerFormVersion.delete({
         where: { id: input.versionId },
       });
-    });
+    }, "OWNER");
 
     revalidatePath(`/collection/${input.formId}`);
     revalidatePath(`/collection/${input.formId}/edit`);

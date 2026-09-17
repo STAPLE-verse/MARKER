@@ -30,16 +30,16 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
   const isControlled = props.value !== undefined
 
   return (
-    <div className="form-control w-full">
+    <div className="flex w-full flex-col gap-1.5">
       {label && (
-        <label className="label pb-2">
+        <label className="label">
           <span className="label-text font-medium">{label}</span>
         </label>
       )}
       <select
         ref={ref}
         className={cn(
-          "select select-bordered w-full",
+          "select w-full",
           error && "select-error",
           className
         )}
@@ -56,7 +56,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
         ))}
       </select>
       {(error || helperText) && (
-        <label className="label pt-2">
+        <label className="label">
           <span className={cn(
             "label-text-alt",
             error ? "text-error" : "text-base-content/70"

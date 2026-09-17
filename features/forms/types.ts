@@ -57,11 +57,6 @@ export interface PublishedSchemaVersionDTO {
  * "first contributor + role" info the `/schemas/[pid]` detail page already
  * knows how to render.
  *
- * `authorName` is the publishing `User`'s display name
- * (`firstName`/`lastName`), included only as a fallback for the rare row
- * whose `contributors` comes back empty (see `docs/refactor/explore.md`
- * §2.1) — MARKER's own model has no elevated "author" concept otherwise.
- *
  * `versions` always includes this row's own version and is sorted newest
  * first; length 1 means this family has never had another version published.
  */
@@ -76,7 +71,6 @@ export interface PublishedSchemaCardDTO {
   source: string
   keywords: string[]
   contributors: ContributorDTO[]
-  authorName: string | null
   createdAt: Date
   versions: PublishedSchemaVersionDTO[]
 }
@@ -221,6 +215,27 @@ export interface StapleImportInfoDTO {
 export interface FormDetailDTO {
   id: number
   archived: boolean
+  /** Always `MarkerForm.ownerId`, regardless of the caller's own role. */
+  ownerId: number
+  /**
+   * The caller's own resolved role (docs/refactor/form-collaboration.md §4.6)
+   * — OWNER via `MarkerForm.ownerId`, EDITOR/VIEWER via a `MarkerFormCollaborator`
+   * row, accepted *or* still-pending (see `isPendingInvite`). Write actions
+   * re-check role from an accepted-only row server-side regardless, so this
+   * alone is never a permission grant — it's what to *display*. Any UI that
+   * uses `role` to gate an edit affordance must also check `!isPendingInvite`;
+   * a pending row's invited role otherwise reads as fully granted.
+   */
+  role: "OWNER" | "EDITOR" | "VIEWER"
+  /**
+   * True when `role` comes from a `MarkerFormCollaborator` row this viewer
+   * hasn't accepted yet — they can see the form (read-only, regardless of
+   * the invited role) so they can act on the invite from the page itself,
+   * but have none of `role`'s actual permissions until they accept.
+   */
+  isPendingInvite: boolean
+  /** The `MarkerFormCollaborator.id` to pass to accept/decline — set only when `isPendingInvite` is true. */
+  pendingCollaboratorId: number | null
   /** True if any version has a related PublishedSchema (blocks permanent delete). */
   hasPublishedVersion: boolean
   /** Ordered by version descending; index 0 is the latest version. */

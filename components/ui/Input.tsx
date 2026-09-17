@@ -18,9 +18,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   ...props
 }, ref) => {
   return (
-    <div className="form-control w-full">
+    <div className="flex w-full flex-col gap-1.5">
       {label && (
-        <label className="label pb-2">
+        <label className="label">
           <span className="label-text font-medium">{label}</span>
         </label>
       )}
@@ -28,7 +28,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
         <input
           ref={ref}
           className={cn(
-            "input input-bordered w-full",
+            "input w-full",
             error && "input-error",
             endAdornment && "pr-10",
             className
@@ -40,7 +40,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
         )}
       </div>
       {(error || helperText) && (
-        <label className="label pt-2">
+        <label className="label">
           <span className={cn(
             "label-text-alt",
             error ? "text-error" : "text-base-content/70"

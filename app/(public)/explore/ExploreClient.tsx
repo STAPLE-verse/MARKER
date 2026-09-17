@@ -96,7 +96,6 @@ function FilterCheckboxGroup({
 }
 
 function contributorNamesLabel(schema: PublishedSchemaCardDTO): string {
-  if (schema.contributors.length === 0) return schema.authorName ?? "Unknown";
   return schema.contributors.map((contributor) => contributor.name || "Unnamed").join(", ");
 }
 

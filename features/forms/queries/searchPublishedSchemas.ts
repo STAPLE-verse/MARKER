@@ -36,9 +36,6 @@ export async function searchPublishedSchemas(): Promise<PublishedSchemaCardDTO[]
       contributors: true,
       createdAt: true,
       familyId: true,
-      author: {
-        select: { firstName: true, lastName: true },
-      },
     },
   })
 
@@ -58,13 +55,7 @@ export async function searchPublishedSchemas(): Promise<PublishedSchemaCardDTO[]
     source: schema.source,
     keywords: normalizeKeywordsChecked(schema.pid, schema.keywords),
     contributors: mapContributorsChecked(schema.pid, schema.contributors),
-    authorName: authorDisplayName(schema.author),
     createdAt: schema.createdAt,
     versions: versionsByFamily.get(schema.familyId) ?? [{ pid: schema.pid, version: schema.version, createdAt: schema.createdAt }],
   }))
-}
-
-function authorDisplayName(author: { firstName: string | null; lastName: string | null }): string | null {
-  const name = [author.firstName, author.lastName].filter(Boolean).join(" ").trim()
-  return name.length > 0 ? name : null
 }
