@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { runAction } from "@/lib/action";
 import { toast } from "@/lib/toast";
@@ -26,6 +26,7 @@ interface UseCollaboratorManagementOptions {
 export function useCollaboratorManagement({ formId, initialCollaborators }: UseCollaboratorManagementOptions) {
   const router = useRouter();
   const [collaborators, setCollaborators] = useState(initialCollaborators);
+  const [prevInitialCollaborators, setPrevInitialCollaborators] = useState(initialCollaborators);
   const [isPending, startTransition] = useTransition();
 
   // `useState(initialCollaborators)` only seeds state on first mount — the
@@ -36,9 +37,13 @@ export function useCollaboratorManagement({ formId, initialCollaborators }: UseC
   // transfer below which changes who owns the form entirely) would never
   // reach this list: it'd keep showing whatever was last patched in locally,
   // silently drifting from the server truth every fresh prop delivers.
-  useEffect(() => {
+  // Resynced during render rather than in a useEffect — React's documented
+  // pattern for "adjusting state when a prop changes" — which avoids the
+  // extra render a useEffect-based sync would cost.
+  if (initialCollaborators !== prevInitialCollaborators) {
+    setPrevInitialCollaborators(initialCollaborators);
     setCollaborators(initialCollaborators);
-  }, [initialCollaborators]);
+  }
 
   const invite = (invitee: InvitableUserDTO, role: CollaboratorRole, onDone?: () => void) => {
     startTransition(async () => {

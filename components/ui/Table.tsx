@@ -121,6 +121,9 @@ function SortIndicator({ direction }: { direction: false | "asc" | "desc" }) {
  * Default global filter: simple case-insensitive substring match across
  * all string values in a row. Apps can override with `globalFilterFn`.
  */
+// `any` here is the same deliberate tanstack-table generic-inference escape
+// hatch as `columns` above — see that comment.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const defaultGlobalFilterFn: FilterFn<any> = (row, _columnId, filterValue) => {
   const search = String(filterValue ?? "").toLowerCase().trim();
   if (!search) return true;
@@ -137,6 +140,14 @@ const defaultGlobalFilterFn: FilterFn<any> = (row, _columnId, filterValue) => {
 
 export interface DataTableProps<TData> {
   /** Column definitions — standard @tanstack/react-table ColumnDef array */
+  // `any` here (not `unknown`) is deliberate: @tanstack/react-table infers
+  // `useReactTable<TData>`'s TData generic from the shape of `columns`, and
+  // `unknown` actively participates in that inference and collapses it to
+  // `unknown` everywhere downstream (breaks `header.column`'s type in the
+  // render below); `any` is inert during inference and leaves TData intact.
+  // This is the same pattern tanstack-table's own docs use for generic
+  // wrapper components.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   columns: ColumnDef<TData, any>[];
   /** The data array to render */
   data: TData[];
@@ -166,6 +177,9 @@ export interface DataTableProps<TData> {
 
   // --- Customization ---
   /** Render a custom filter UI for a specific column */
+  // `any` here is the same deliberate tanstack-table generic-inference escape
+  // hatch as `columns` above — see that comment.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   renderColumnFilter?: (column: any) => React.ReactNode;
   /** Message shown when the table has no rows */
   emptyMessage?: string;

@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client"
-import type { ContributorAffiliationDTO, PublicationMetadataFieldsDTO, ContributorDTO } from "../types"
+import type { ContributorAffiliationDTO, PublicationMetadataFieldsDTO, ContributorDTO, PublishedSchemaCardDTO } from "../types"
 import { PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS } from "../constants/publicationMetadataOptions"
 
 export type PublicationMetadataLike = {
@@ -190,6 +190,15 @@ export function mapContributors(raw: unknown): ContributorDTO[] {
  * legitimately-published row. Logged, not thrown: the public catalog must
  * keep showing the row either way.
  */
+/**
+ * Shared display label for a `PublishedSchemaCardDTO`'s contributors —
+ * used by both `/explore` and the public landing page's "Recent Templates"
+ * preview, so the two never drift on how an unnamed contributor is shown.
+ */
+export function contributorNamesLabel(schema: Pick<PublishedSchemaCardDTO, "contributors">): string {
+  return schema.contributors.map((contributor) => contributor.name || "Unnamed").join(", ")
+}
+
 export function mapContributorsChecked(pid: string, raw: unknown): ContributorDTO[] {
   const mapped = mapContributors(raw)
   if (Array.isArray(raw) && mapped.length !== raw.length) {

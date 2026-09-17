@@ -22,6 +22,7 @@ import {
   PUBLICATION_LICENSE_OPTIONS,
 } from "@/features/forms/constants/publicationMetadataOptions";
 import type { PublishedSchemaCardDTO } from "@/features/forms/types";
+import { contributorNamesLabel } from "@/features/forms/utils/publicationMetadata";
 
 interface ExploreClientProps {
   schemas: PublishedSchemaCardDTO[];
@@ -93,10 +94,6 @@ function FilterCheckboxGroup({
       </div>
     </div>
   );
-}
-
-function contributorNamesLabel(schema: PublishedSchemaCardDTO): string {
-  return schema.contributors.map((contributor) => contributor.name || "Unnamed").join(", ");
 }
 
 function publishedOnLabel(createdAt: Date): string {
