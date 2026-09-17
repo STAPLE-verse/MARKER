@@ -542,16 +542,29 @@ model PublicationMetadata {
   updatedAt DateTime @updatedAt
 }
 
+// STAPLE-owned column (STAPLE's migration history is authoritative for this
+// table). Mirrored here only so MARKER's passive read-side model matches the
+// live shared-database shape. Every MARKER notification create/read/mutate
+// must set/filter this to "MARKER" — see createNotification.ts and
+// features/notifications/queries/*.ts — otherwise STAPLE's own notifications
+// (task assignments, comments, etc., written to this same shared table)
+// leak into MARKER's UI, and vice versa.
+enum NotificationSource {
+  MARKER
+  STAPLE
+}
+
 model Notification {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  recipients   User[]   @relation("UserNotifications")
+  id           Int                @id @default(autoincrement())
+  createdAt    DateTime           @default(now())
+  recipients   User[]             @relation("UserNotifications")
   message      String
-  read         Boolean  @default(false)
-  announcement Boolean  @default(false)
-  projectId    Int?     @map("project_id")
-  project      Project? @relation(fields: [projectId], references: [id])
+  read         Boolean            @default(false)
+  announcement Boolean            @default(false)
+  projectId    Int?               @map("project_id")
+  project      Project?           @relation(fields: [projectId], references: [id])
   routeData    Json? // Flexible JSON field to store dynamic routing data
+  source       NotificationSource @default(STAPLE)
 }
 
 enum WidgetSize {

@@ -23,7 +23,7 @@ describe("getLatestUnreadNotifications", () => {
 
     expect(findManyNotification).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { recipients: { some: { id: 42 } }, read: false },
+        where: { recipients: { some: { id: 42 } }, read: false, source: "MARKER" },
       })
     );
   });

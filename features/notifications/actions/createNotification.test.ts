@@ -34,6 +34,7 @@ describe("createNotification", () => {
         message: 'jane_doe forked your schema "Schema".',
         routeData: { path: "/collection/5" },
         recipients: { connect: [{ id: 1 }, { id: 2 }] },
+        source: "MARKER",
       },
     });
   });

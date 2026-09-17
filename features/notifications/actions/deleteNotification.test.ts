@@ -43,7 +43,7 @@ describe("deleteNotification", () => {
 
     expect(result.ok).toBe(true);
     expect(updateNotification).toHaveBeenCalledWith({
-      where: { id: 5, recipients: { some: { id: USER_ID } } },
+      where: { id: 5, recipients: { some: { id: USER_ID } }, source: "MARKER" },
       data: { recipients: { disconnect: { id: USER_ID } } },
       select: { recipients: { select: { id: true } } },
     });

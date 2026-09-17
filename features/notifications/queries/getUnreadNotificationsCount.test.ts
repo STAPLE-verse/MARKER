@@ -22,7 +22,7 @@ describe("getUnreadNotificationsCount", () => {
     await getUnreadNotificationsCount(42);
 
     expect(countNotification).toHaveBeenCalledWith({
-      where: { recipients: { some: { id: 42 } }, read: false },
+      where: { recipients: { some: { id: 42 } }, read: false, source: "MARKER" },
     });
   });
 

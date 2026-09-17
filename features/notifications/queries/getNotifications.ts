@@ -15,7 +15,7 @@ const NOTIFICATIONS_LIST_LIMIT = 200
  */
 export async function getNotifications(userId: number): Promise<NotificationListItemDTO[]> {
   const rows = await prisma.notification.findMany({
-    where: { recipients: { some: { id: userId } } },
+    where: { recipients: { some: { id: userId } }, source: "MARKER" },
     orderBy: { createdAt: "desc" },
     take: NOTIFICATIONS_LIST_LIMIT,
     select: {

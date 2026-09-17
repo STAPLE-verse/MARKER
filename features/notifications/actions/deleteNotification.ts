@@ -30,7 +30,7 @@ export const deleteNotification = authenticatedAction(deleteNotificationSchema, 
   let remainingRecipients: number
   try {
     const updated = await prisma.notification.update({
-      where: { id: input.notificationId, recipients: { some: { id: userId } } },
+      where: { id: input.notificationId, recipients: { some: { id: userId } }, source: "MARKER" },
       data: { recipients: { disconnect: { id: userId } } },
       select: { recipients: { select: { id: true } } },
     })

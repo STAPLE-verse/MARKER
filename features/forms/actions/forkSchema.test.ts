@@ -155,6 +155,7 @@ describe("forkSchema", () => {
         message: 'jane_doe forked your schema "Cognitive Assessment Template".',
         routeData: { path: "/collection/7" },
         recipients: { connect: [{ id: OTHER_AUTHOR_ID }] },
+        source: "MARKER",
       },
     });
   });

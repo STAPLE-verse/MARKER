@@ -317,6 +317,7 @@ describe("publishSchema identity + template-package validation gate", () => {
         message: 'jane_doe published "Test schema" v1.0.0, forked from your schema.',
         routeData: expect.objectContaining({ path: expect.stringContaining("/schemas/") }),
         recipients: { connect: [{ id: 99 }] },
+        source: "MARKER",
       },
     });
   });
@@ -376,6 +377,7 @@ describe("publishSchema identity + template-package validation gate", () => {
         message: 'jane_doe published a new version of "Test schema" (v1.0.0), which you forked from.',
         routeData: { path: expect.stringContaining("/schemas/") },
         recipients: { connect: [{ id: 50 }, { id: 51 }] },
+        source: "MARKER",
       },
     });
   });

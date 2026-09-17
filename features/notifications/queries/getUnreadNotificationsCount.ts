@@ -9,6 +9,6 @@ import { prisma } from "@/lib/db"
  */
 export async function getUnreadNotificationsCount(userId: number): Promise<number> {
   return prisma.notification.count({
-    where: { recipients: { some: { id: userId } }, read: false },
+    where: { recipients: { some: { id: userId } }, read: false, source: "MARKER" },
   })
 }

@@ -30,7 +30,7 @@ describe("markAllNotificationsRead", () => {
     await markAllNotificationsRead({});
 
     expect(updateManyNotification).toHaveBeenCalledWith({
-      where: { recipients: { some: { id: USER_ID } }, read: false },
+      where: { recipients: { some: { id: USER_ID } }, read: false, source: "MARKER" },
       data: { read: true },
     });
   });

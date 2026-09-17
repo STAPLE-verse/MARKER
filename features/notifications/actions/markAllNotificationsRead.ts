@@ -13,7 +13,7 @@ import { revalidatePath } from "next/cache"
  */
 export const markAllNotificationsRead = authenticatedAction(z.object({}), async ({ userId }) => {
   await prisma.notification.updateMany({
-    where: { recipients: { some: { id: userId } }, read: false },
+    where: { recipients: { some: { id: userId } }, read: false, source: "MARKER" },
     data: { read: true },
   })
 

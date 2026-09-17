@@ -27,6 +27,7 @@ export async function createNotification<K extends NotificationKind>(params: {
       message,
       routeData: routeData as unknown as Prisma.InputJsonValue,
       recipients: { connect: params.recipients.map((id) => ({ id })) },
+      source: "MARKER",
     },
   })
 }

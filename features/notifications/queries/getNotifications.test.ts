@@ -23,7 +23,7 @@ describe("getNotifications", () => {
 
     expect(findManyNotification).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { recipients: { some: { id: 42 } } },
+        where: { recipients: { some: { id: 42 } }, source: "MARKER" },
       })
     );
   });

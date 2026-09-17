@@ -23,7 +23,7 @@ const setNotificationReadSchema = z.object({
  */
 export const setNotificationRead = authenticatedAction(setNotificationReadSchema, async ({ input, userId }) => {
   const result = await prisma.notification.updateMany({
-    where: { id: input.notificationId, recipients: { some: { id: userId } } },
+    where: { id: input.notificationId, recipients: { some: { id: userId } }, source: "MARKER" },
     data: { read: input.read },
   })
 

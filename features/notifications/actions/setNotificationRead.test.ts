@@ -31,7 +31,7 @@ describe("setNotificationRead", () => {
     await setNotificationRead({ notificationId: 5, read: true });
 
     expect(updateManyNotification).toHaveBeenCalledWith({
-      where: { id: 5, recipients: { some: { id: USER_ID } } },
+      where: { id: 5, recipients: { some: { id: USER_ID } }, source: "MARKER" },
       data: { read: true },
     });
   });
