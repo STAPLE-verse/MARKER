@@ -50,6 +50,15 @@ describe("PendingInvitationsCard", () => {
     expect(screen.getByText(/an editor/)).toBeInTheDocument();
   });
 
+  it("links View to the invited form, without triggering accept or decline", () => {
+    render(<PendingInvitationsCard invites={[invite({ formId: 99 })]} />);
+
+    const viewLink = screen.getByText("View").closest("a");
+    expect(viewLink).toHaveAttribute("href", "/collection/99");
+    expect(acceptCollaboratorInvite).not.toHaveBeenCalled();
+    expect(declineCollaboratorInvite).not.toHaveBeenCalled();
+  });
+
   it("accepting removes the row and navigates to the form", async () => {
     acceptCollaboratorInvite.mockResolvedValue({ ok: true, data: { success: true, formId: 42 } });
     render(<PendingInvitationsCard invites={[invite()]} />);

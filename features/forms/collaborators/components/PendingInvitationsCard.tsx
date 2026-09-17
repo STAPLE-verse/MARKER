@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { runAction } from "@/lib/action";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/Button";
@@ -66,6 +67,16 @@ export function PendingInvitationsCard({ invites: initialInvites }: PendingInvit
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
+            {/* Now that a pending invitee can open the form itself (view-only,
+                with its own accept/decline banner — docs/refactor/
+                form-collaboration.md §6 item 2 follow-up), this is a second,
+                lower-commitment entry point: look before deciding, rather
+                than accept/decline blind from just the invite text here. */}
+            <Link href={`/collection/${invite.formId}`}>
+              <Button size="xs" variant="ghost">
+                View
+              </Button>
+            </Link>
             <Button size="xs" variant="ghost" onClick={() => decline(invite.collaboratorId)} disabled={isPending}>
               Decline
             </Button>

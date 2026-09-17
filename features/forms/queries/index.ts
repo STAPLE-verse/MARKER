@@ -8,5 +8,6 @@ export { getLatestVersionForConformanceCheck } from "./getLatestVersionForConfor
 export { getAuthorizedArchivedForm } from "./getAuthorizedArchivedForm"
 export { loadOwnedForm } from "./loadOwnedForm"
 export { getPublishedSchemaByPid } from "./getPublishedSchemaByPid"
+export { getViewerFormAccess } from "./getViewerFormAccess"
 export { getPublishedVersionsForForm } from "./getPublishedVersionsForForm"
 export { searchPublishedSchemas } from "./searchPublishedSchemas"

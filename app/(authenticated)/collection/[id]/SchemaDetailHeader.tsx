@@ -121,6 +121,7 @@ function StapleImportBadge({ sourceVersionNumber, importedAt, modificationStatus
 }
 
 interface ForkedBadgeProps {
+  formId: number;
   forkedFrom: { pid: string; title: string };
 }
 
@@ -138,7 +139,7 @@ interface ForkedBadgeProps {
  * form (which needs a STAPLE session to view), the original `PublishedSchema`
  * page is always public and reachable, so clicking through is meaningful.
  */
-function ForkedBadge({ forkedFrom }: ForkedBadgeProps) {
+function ForkedBadge({ formId, forkedFrom }: ForkedBadgeProps) {
   return (
     // The classes that align this with its badge siblings (shrink-0, the
     // mt-0.5 nudge, the tooltip hooks) live on the Link, not the nested
@@ -154,7 +155,10 @@ function ForkedBadge({ forkedFrom }: ForkedBadgeProps) {
     // the Badge by flexbox geometry instead, matching its siblings exactly
     // regardless of the ambient heading font size.
     <Link
-      href={`/schemas/${forkedFrom.pid}`}
+      // fromForm carries where "back" should return to on the destination
+      // page (see schemas/[pid]/page.tsx) — this form's own id, not the
+      // fork source's, since that's genuinely where the click originated.
+      href={`/schemas/${forkedFrom.pid}?fromForm=${formId}`}
       // Same z-10 reasoning as StapleImportBadge above.
       className="inline-flex items-center shrink-0 mt-0.5 tooltip tooltip-bottom z-10 before:max-w-xs cursor-pointer"
       data-tip={`Forked from ${forkedFrom.title}`}
@@ -222,7 +226,7 @@ export function SchemaDetailHeader({
   ) : null;
   // Mutually exclusive (see the ForkedBadgeProps comment above) — at most
   // one of the two ever renders.
-  const provenanceBadge = stapleBadge ?? (forkedFrom ? <ForkedBadge forkedFrom={forkedFrom} /> : null);
+  const provenanceBadge = stapleBadge ?? (forkedFrom ? <ForkedBadge formId={formId} forkedFrom={forkedFrom} /> : null);
 
   if (archived) {
     // No collaboration controls here: archived shared forms are never
@@ -294,7 +298,7 @@ export function SchemaDetailHeader({
               Previously nested under isViewingLatest, which hid this for any
               published version that wasn't also the latest. */}
           {isPublished && pid && (
-            <Link href={`/schemas/${pid}`}>
+            <Link href={`/schemas/${pid}?fromForm=${formId}`}>
               <Button variant="secondary" size="sm">
                 View Public URL
               </Button>

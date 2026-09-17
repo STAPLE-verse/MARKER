@@ -68,14 +68,13 @@ describe("forkSchema", () => {
     expect(createMarkerForm).not.toHaveBeenCalled();
   });
 
-  it("rejects forking a schema the caller authored themselves, even if the button wouldn't be shown", async () => {
+  it("allows forking a schema the caller authored themselves — a legitimate way to get explicit lineage a plain clone wouldn't have", async () => {
     findUniquePublishedSchema.mockResolvedValue(publishedRow({ authorId: OWNER_ID }));
 
     const result = await forkSchema({ publishedSchemaPid: PID });
 
-    expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.code).toBe("FORBIDDEN");
-    expect(createMarkerForm).not.toHaveBeenCalled();
+    expect(result.ok).toBe(true);
+    expect(createMarkerForm).toHaveBeenCalled();
   });
 
   it("creates a FORKED-origin MarkerForm recording forkedFromPid/forkedAt", async () => {
@@ -172,11 +171,16 @@ describe("forkSchema", () => {
     );
   });
 
-  it("does not notify anyone when the fork is rejected (self-fork or missing schema)", async () => {
+  it("does not notify anyone when the fork is rejected outright (missing schema)", async () => {
     findUniquePublishedSchema.mockResolvedValue(null);
     await forkSchema({ publishedSchemaPid: "ps_missing" });
 
+    expect(createNotificationRow).not.toHaveBeenCalled();
+  });
+
+  it("does not notify yourself when forking your own published schema", async () => {
     findUniquePublishedSchema.mockResolvedValue(publishedRow({ authorId: OWNER_ID }));
+
     await forkSchema({ publishedSchemaPid: PID });
 
     expect(createNotificationRow).not.toHaveBeenCalled();
