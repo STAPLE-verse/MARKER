@@ -4,6 +4,7 @@ import { renderFormCollaboratorInvited } from "./formCollaboratorInvited";
 describe("renderFormCollaboratorInvited", () => {
   it("names the inviter, form, and role", () => {
     const { message } = renderFormCollaboratorInvited({
+      formId: 1,
       inviterUsername: "jane_doe",
       formTitle: "Cognitive Assessment",
       role: "EDITOR",
@@ -14,6 +15,7 @@ describe("renderFormCollaboratorInvited", () => {
 
   it("labels a VIEWER invite distinctly from an EDITOR one", () => {
     const { message } = renderFormCollaboratorInvited({
+      formId: 1,
       inviterUsername: "jane_doe",
       formTitle: "Cognitive Assessment",
       role: "VIEWER",
@@ -22,13 +24,14 @@ describe("renderFormCollaboratorInvited", () => {
     expect(message).toContain("as a viewer");
   });
 
-  it("routes to the dashboard, not a dedicated invite page", () => {
+  it("routes directly to the form, where the accept/decline banner lives", () => {
     const { routeData } = renderFormCollaboratorInvited({
+      formId: 42,
       inviterUsername: "jane_doe",
       formTitle: "Schema",
       role: "EDITOR",
     });
 
-    expect(routeData).toEqual({ path: "/dashboard" });
+    expect(routeData).toEqual({ path: "/collection/42" });
   });
 });

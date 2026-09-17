@@ -15,8 +15,14 @@ export interface FormRoleContext {
 /**
  * `MarkerFormCollaborator.role` never persists `OWNER` as a value (docs/refactor/
  * form-collaboration.md §5) — the owner is always `MarkerForm.ownerId` alone.
- * `collaborators` is expected to already be scoped to this one user's accepted
- * row (at most one, per `@@unique([formId, userId])`).
+ * `collaborators` is expected to already be scoped to this one user's row (at
+ * most one, per `@@unique([formId, userId])`) — purely a lookup, agnostic to
+ * whether that row is accepted. Every *write*-side caller (`assertFormRole`,
+ * `getAuthorizedLatestVersion`, `getAuthorizedArchivedForm`, `cloneFormVersion`)
+ * scopes its own query to `acceptedAt: not null` before calling this, so an
+ * unaccepted invite never resolves to real permission there. `getFormById` is
+ * the one deliberate exception — a *read*-side, display-only role for a still-
+ * pending invitee (see its own comment and `FormDetailDTO.isPendingInvite`).
  */
 export function resolveFormRole(
   form: FormRoleContext,

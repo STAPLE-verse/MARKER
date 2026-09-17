@@ -51,6 +51,7 @@ export const inviteCollaborator = authenticatedAction(inviteCollaboratorSchema, 
     recipients: [input.inviteeUserId],
     kind: "FORM_COLLABORATOR_INVITED",
     data: {
+      formId: input.formId,
       inviterUsername: inviter?.username ?? "Someone",
       formTitle: latestVersion.name || "Untitled Draft",
       role: input.role,

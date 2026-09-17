@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FormDetailDTO, FormVersionDTO } from "@/features/forms/types";
+import { canEditForm } from "@/features/forms/utils/formPermissions";
 import { BackButton } from "@/components/ui/BackButton";
 import { Alert } from "@/components/ui/Alert";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
@@ -14,13 +15,15 @@ import { useRestoreFormVersion } from "@/features/forms/hooks/useRestoreFormVers
 import { VersionHistorySidebar } from "./VersionHistorySidebar";
 import { SchemaDetailHeader } from "./SchemaDetailHeader";
 import { SchemaViewerCard } from "./SchemaViewerCard";
+import { PendingInviteBanner } from "@/features/forms/collaborators/components/PendingInviteBanner";
 import type { CollaborationSummaryDTO } from "@/features/forms/collaborators/queries/getCollaborationSummary";
 
 interface UserSchemaDetailsClientProps {
   form: FormDetailDTO;
   selectedVersion: FormVersionDTO;
   viewerUserId: number;
-  collaboration: CollaborationSummaryDTO;
+  /** `null` for a pending invitee — see page.tsx. */
+  collaboration: CollaborationSummaryDTO | null;
 }
 
 function getVersionLabel(version: FormVersionDTO): string {
@@ -47,7 +50,7 @@ export default function UserSchemaDetailsClient({
   // Editing publication metadata is a content edit like any other — EDITOR
   // gets it, VIEWER gets the same read-only card a historical draft shows
   // (docs/refactor/form-collaboration.md §4.6).
-  const canEdit = form.role === "OWNER" || form.role === "EDITOR";
+  const canEdit = canEditForm(form);
   const isDraftVersion = !form.archived && selectedVersion.status === "DRAFT";
   const isLatestDraft = isDraftVersion && isViewingLatest && canEdit;
   const isReadOnlyDraft = isDraftVersion && !isLatestDraft;
@@ -82,6 +85,10 @@ export default function UserSchemaDetailsClient({
         </Alert>
       )}
 
+      {form.isPendingInvite && form.pendingCollaboratorId != null && (
+        <PendingInviteBanner collaboratorId={form.pendingCollaboratorId} role={form.role} className="mb-6" />
+      )}
+
       <SchemaDetailHeader
         formId={form.id}
         version={selectedVersion}
@@ -91,6 +98,7 @@ export default function UserSchemaDetailsClient({
         stapleImport={form.stapleImport}
         forkedFrom={form.forkedFrom}
         role={form.role}
+        isPendingInvite={form.isPendingInvite}
         viewerUserId={viewerUserId}
         collaboration={collaboration}
         onClone={() => clone(selectedVersion.id)}

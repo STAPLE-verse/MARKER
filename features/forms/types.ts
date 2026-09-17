@@ -219,11 +219,23 @@ export interface FormDetailDTO {
   ownerId: number
   /**
    * The caller's own resolved role (docs/refactor/form-collaboration.md §4.6)
-   * — OWNER via `MarkerForm.ownerId`, EDITOR/VIEWER via an accepted
-   * `MarkerFormCollaborator` row. Drives which controls render for this
-   * viewer; write actions re-check role server-side regardless.
+   * — OWNER via `MarkerForm.ownerId`, EDITOR/VIEWER via a `MarkerFormCollaborator`
+   * row, accepted *or* still-pending (see `isPendingInvite`). Write actions
+   * re-check role from an accepted-only row server-side regardless, so this
+   * alone is never a permission grant — it's what to *display*. Any UI that
+   * uses `role` to gate an edit affordance must also check `!isPendingInvite`;
+   * a pending row's invited role otherwise reads as fully granted.
    */
   role: "OWNER" | "EDITOR" | "VIEWER"
+  /**
+   * True when `role` comes from a `MarkerFormCollaborator` row this viewer
+   * hasn't accepted yet — they can see the form (read-only, regardless of
+   * the invited role) so they can act on the invite from the page itself,
+   * but have none of `role`'s actual permissions until they accept.
+   */
+  isPendingInvite: boolean
+  /** The `MarkerFormCollaborator.id` to pass to accept/decline — set only when `isPendingInvite` is true. */
+  pendingCollaboratorId: number | null
   /** True if any version has a related PublishedSchema (blocks permanent delete). */
   hasPublishedVersion: boolean
   /** Ordered by version descending; index 0 is the latest version. */

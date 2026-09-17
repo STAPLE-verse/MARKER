@@ -10,14 +10,23 @@ import { resolveFormRole } from "./formRole"
  * `/collection/[id]` remains openable from the Archived tab
  * (docs/form-delete-policy.md §4.3).
  *
- * Accepted collaborators (any role) can see the form (docs/refactor/
- * form-collaboration.md §4.3) — but only while it's active. Archived shared
- * forms are never shown to collaborators, not even by direct link (the
- * `archived: false` constraint on the collaborator branch below) — same
- * decision as excluding them from `getUserArchivedForms`, just closing the
- * direct-URL loophole that a list-only exclusion would leave open. The owner
- * branch has no such constraint; owners can always reach their own archived
- * forms.
+ * Both accepted *and* still-pending collaborators (any role) can see the form
+ * (docs/refactor/form-collaboration.md §4.3, §4.7) — but only while it's
+ * active. Archived shared forms are never shown to collaborators, not even by
+ * direct link (the `archived: false` constraint on the collaborator branch
+ * below) — same decision as excluding them from `getUserArchivedForms`, just
+ * closing the direct-URL loophole that a list-only exclusion would leave
+ * open. The owner branch has no such constraint; owners can always reach
+ * their own archived forms.
+ *
+ * Letting a pending invitee load this page at all (rather than 404ing until
+ * they've accepted) is what lets the page itself carry the accept/decline
+ * banner. This is a *read*-side relaxation only — `role` reflects their
+ * invited role but `isPendingInvite` says whether it's actually been granted
+ * yet; every write action resolves role from its own accepted-only query
+ * (`getAuthorizedLatestVersion` et al.), completely independent of this
+ * function, so a pending invitee gets FORBIDDEN there regardless of what this
+ * read-side query returns.
  */
 export async function getFormById(formId: number, userId: number): Promise<FormDetailDTO | null> {
   const form = await prisma.markerForm.findFirst({
@@ -25,18 +34,24 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
       id: formId,
       OR: [
         { ownerId: userId },
-        { archived: false, collaborators: { some: { userId, acceptedAt: { not: null } } } },
+        { archived: false, collaborators: { some: { userId } } },
       ],
     },
+    // Unfiltered by acceptedAt — `@@unique([formId, userId])` means at most
+    // one row here regardless, and this same row is used below both to
+    // resolve the (possibly-pending) role and to detect the pending state.
     include: {
-      collaborators: { where: { userId, acceptedAt: { not: null } } },
+      collaborators: { where: { userId } },
     },
   })
 
   if (!form) return null
 
+  const myCollaboratorRow = form.collaborators[0] ?? null
+  const isPendingInvite = myCollaboratorRow != null && myCollaboratorRow.acceptedAt === null
+
   // Always resolves — the `where` above already guarantees the caller is
-  // either the owner or an accepted collaborator.
+  // either the owner or a collaborator (pending or accepted).
   const role = resolveFormRole(form, userId)!
 
   const versions = await prisma.markerFormVersion.findMany({
@@ -68,6 +83,8 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
     archived: form.archived,
     ownerId: form.ownerId,
     role,
+    isPendingInvite,
+    pendingCollaboratorId: isPendingInvite ? myCollaboratorRow!.id : null,
     hasPublishedVersion: versions.some((v) => v.publishedSchemas.length > 0),
     forkedFrom: forkedFrom ? { pid: forkedFrom.pid, title: forkedFrom.title } : null,
     stapleImport:

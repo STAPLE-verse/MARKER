@@ -14,7 +14,12 @@ export default async function UserSchemaDetailsPage({
 }: UserSchemaDetailsPageProps) {
   const [{ id }, { version: versionParam }] = await Promise.all([params, searchParams]);
   const { userId, form } = await loadOwnedForm(id);
-  const collaboration = await getCollaborationSummary(form.id, form.ownerId);
+  // A still-pending invitee isn't a member yet — don't hand their client
+  // bundle the full collaborator list (privacy: they haven't accepted, so
+  // they shouldn't see who else has access), and there's nothing here for
+  // them to act on anyway (CollaborationHeaderControls isn't rendered for
+  // them; see UserSchemaDetailsClient).
+  const collaboration = form.isPendingInvite ? null : await getCollaborationSummary(form.id, form.ownerId);
 
   const latestVersion = form.versions[0];
   let selectedVersion = latestVersion;

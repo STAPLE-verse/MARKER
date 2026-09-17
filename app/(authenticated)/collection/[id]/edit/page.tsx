@@ -1,6 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { loadOwnedForm } from "@/features/forms/queries";
+import { canEditForm } from "@/features/forms/utils/formPermissions";
 import SchemaEditClient from "./SchemaEditClient";
 
 export default async function SchemaEditPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,7 +13,7 @@ export default async function SchemaEditPage({ params }: { params: Promise<{ id:
   // a VIEWER's read access to the structure stays on the detail page's
   // SchemaViewerCard instead. Hiding the "Edit Structure" link isn't enough
   // on its own; this closes the direct-URL path too.
-  if (form.role === "VIEWER") {
+  if (!canEditForm(form)) {
     redirect(`/collection/${form.id}`);
   }
 

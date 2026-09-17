@@ -12,6 +12,7 @@ import { UpdateFromStapleButton } from "@/features/forms/components/UpdateFromSt
 import { CollaborationHeaderControls } from "@/features/forms/collaborators/components/CollaborationHeaderControls";
 import type { CollaborationSummaryDTO } from "@/features/forms/collaborators/queries/getCollaborationSummary";
 import { FormVersionDTO, StapleImportInfoDTO } from "@/features/forms/types";
+import { canEditForm } from "@/features/forms/utils/formPermissions";
 
 interface SchemaDetailHeaderProps {
   formId: number;
@@ -22,10 +23,18 @@ interface SchemaDetailHeaderProps {
   stapleImport: StapleImportInfoDTO | null;
   /** Mutually exclusive with `stapleImport` — `MarkerForm.origin` is a single enum value. */
   forkedFrom: { pid: string; title: string } | null;
-  /** The caller's own resolved role (docs/refactor/form-collaboration.md §4.6) — drives which actions render. */
+  /**
+   * The caller's own resolved role (docs/refactor/form-collaboration.md §4.6)
+   * — drives which actions render, but only in combination with
+   * `isPendingInvite`: a not-yet-accepted invitee's `role` is their invited
+   * role, not a granted one (see `FormDetailDTO.role`).
+   */
   role: "OWNER" | "EDITOR" | "VIEWER";
+  /** True while the viewer has a still-pending (unaccepted) invite — forces read-only regardless of `role`, and hides the collaborator list entirely (see below). */
+  isPendingInvite: boolean;
   viewerUserId: number;
-  collaboration: CollaborationSummaryDTO;
+  /** `null` for a pending invitee — they aren't a member yet, so the page never fetches the collaborator list for them at all (see page.tsx). */
+  collaboration: CollaborationSummaryDTO | null;
   onClone: () => void;
   isCloning: boolean;
   onRestore: () => void;
@@ -171,6 +180,7 @@ export function SchemaDetailHeader({
   stapleImport,
   forkedFrom,
   role,
+  isPendingInvite,
   viewerUserId,
   collaboration,
   onClone,
@@ -182,7 +192,7 @@ export function SchemaDetailHeader({
   // Restore-as-draft, cloning, and the checkpoint/save flow behind "Edit
   // Structure" are all ordinary content edits — EDITOR gets the same access
   // as OWNER for these (docs/refactor/form-collaboration.md §4.6).
-  const canEdit = role === "OWNER" || role === "EDITOR";
+  const canEdit = canEditForm({ role, isPendingInvite });
   const isPublished = version.status === "PUBLISHED";
   const pid = version.publishedSchema?.pid || null;
   const schemaTitle = version.name || "Untitled Draft";
@@ -333,14 +343,21 @@ export function SchemaDetailHeader({
           only spacing between this and the header above (PageHeader itself
           contributes none, see above); nothing added below this row either —
           the next section's own top spacing handles that, unchanged. */}
-      <div className="pl-4 mt-2">
-        <CollaborationHeaderControls
-          formId={formId}
-          viewerRole={role}
-          viewerUserId={viewerUserId}
-          collaboration={collaboration}
-        />
-      </div>
+      {/* Never rendered for a pending invitee: `collaboration` is `null` for
+          them (see page.tsx), and even if it weren't, they aren't a member
+          yet — showing them the collaborator list or a management modal
+          they can't meaningfully act on doesn't make sense until they've
+          accepted. */}
+      {!isPendingInvite && collaboration && (
+        <div className="pl-4 mt-2">
+          <CollaborationHeaderControls
+            formId={formId}
+            viewerRole={role}
+            viewerUserId={viewerUserId}
+            collaboration={collaboration}
+          />
+        </div>
+      )}
     </>
   );
 }
