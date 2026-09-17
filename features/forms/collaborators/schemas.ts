@@ -41,9 +41,3 @@ export const transferOwnershipSchema = z.object({
   previousOwnerRole: collaboratorRoleSchema,
 })
 export type TransferOwnershipInput = z.infer<typeof transferOwnershipSchema>
-
-export const transferOwnershipAndLeaveSchema = z.object({
-  formId: z.number(),
-  newOwnerUserId: z.number(),
-})
-export type TransferOwnershipAndLeaveInput = z.infer<typeof transferOwnershipAndLeaveSchema>

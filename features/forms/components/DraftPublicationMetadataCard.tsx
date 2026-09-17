@@ -78,7 +78,7 @@ export function DraftPublicationMetadataCard({ formId, version }: DraftPublicati
       {isEditing ? (
         <Form form={form} onSubmit={save} className="gap-6">
           <fieldset disabled={isSaving} className="contents">
-            <PublicationMetadataForm form={form} />
+            <PublicationMetadataForm form={form} formId={formId} />
           </fieldset>
           <CardActions>
             <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSaving}>

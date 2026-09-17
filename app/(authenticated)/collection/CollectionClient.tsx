@@ -29,6 +29,7 @@ interface CollectionClientProps {
 
 const TAB_LABELS: Record<CollectionTab, string> = {
   owned: "Owned",
+  shared: "Shared with me",
   archived: "Archived",
   published: "Published",
 };
@@ -77,14 +78,18 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
       ? "No archived schemas."
       : tab === "published"
         ? "You haven't published any schemas yet."
-        : "You haven't created any schemas yet.";
+        : tab === "shared"
+          ? "No one has shared a form with you yet."
+          : "You haven't created any schemas yet.";
 
   const searchPlaceholder =
     tab === "archived"
       ? "Search archived schemas..."
       : tab === "published"
         ? "Search published schemas..."
-        : "Search my schemas...";
+        : tab === "shared"
+          ? "Search shared schemas..."
+          : "Search my schemas...";
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300">

@@ -92,3 +92,33 @@ describe("getFormById — forkedFrom resolution", () => {
     expect(result?.forkedFrom).toBeNull();
   });
 });
+
+describe("getFormById — role resolution", () => {
+  const COLLABORATOR_ID = 7;
+
+  beforeEach(() => {
+    findFirstMarkerForm.mockReset();
+    findManyMarkerFormVersion.mockReset();
+    findUniquePublishedSchema.mockReset();
+
+    findManyMarkerFormVersion.mockResolvedValue([baseVersion()]);
+  });
+
+  it("resolves OWNER for the form's owner", async () => {
+    findFirstMarkerForm.mockResolvedValue(baseForm({ collaborators: [] }));
+
+    const result = await getFormById(FORM_ID, OWNER_ID);
+
+    expect(result?.role).toBe("OWNER");
+  });
+
+  it("resolves the accepted collaborator's own role, not the owner's", async () => {
+    findFirstMarkerForm.mockResolvedValue(
+      baseForm({ collaborators: [{ role: "EDITOR" }] })
+    );
+
+    const result = await getFormById(FORM_ID, COLLABORATOR_ID);
+
+    expect(result?.role).toBe("EDITOR");
+  });
+});

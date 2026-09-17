@@ -153,7 +153,9 @@ export default function PublishSchemaClient({ formId, version, publishedVersions
           <Card bordered className="flex-1 shadow-sm overflow-visible mb-6">
             <CardBody className="p-6 md:p-10">
               {currentStep === 1 && <Step1FairMetadata />}
-              {currentStep === 2 && <Step2Contributors isProfileIncomplete={currentUser.isProfileIncomplete} />}
+              {currentStep === 2 && (
+                <Step2Contributors isProfileIncomplete={currentUser.isProfileIncomplete} formId={formId} />
+              )}
               {currentStep === 3 && <Step3Review />}
             </CardBody>
           </Card>

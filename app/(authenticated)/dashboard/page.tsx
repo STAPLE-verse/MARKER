@@ -9,16 +9,19 @@ import { getActivityActionLabel, getActivityTargetLabel } from "@/features/dashb
 import { getLatestUnreadNotifications } from "@/features/notifications/queries/getLatestUnreadNotifications";
 import { DashboardNotificationsCard } from "@/features/notifications/components/DashboardNotificationsCard";
 import { getUserProfile } from "@/features/users/queries/getUserProfile";
+import { getMyPendingCollaboratorInvites } from "@/features/forms/collaborators/queries/getMyPendingCollaboratorInvites";
+import { PendingInvitationsCard } from "@/features/forms/collaborators/components/PendingInvitationsCard";
 import { collectionTabHref } from "../collection/collectionTabs";
 
 export default async function DashboardPage() {
   const { session, userId } = await requirePageAuth();
 
-  const [stats, activity, notifications, profile] = await Promise.all([
+  const [stats, activity, notifications, profile, pendingInvites] = await Promise.all([
     getDashboardStats(userId),
     getRecentActivity(userId),
     getLatestUnreadNotifications(userId),
     getUserProfile(userId),
+    getMyPendingCollaboratorInvites(userId),
   ]);
 
   return (
@@ -84,6 +87,15 @@ export default async function DashboardPage() {
                   View all notifications
                 </Link>
               </div>
+            </CardBody>
+          </Card>
+
+          {/* Kept out of the "My Stats" column: a long invite list would
+              stretch that column and push the stats card down with it. */}
+          <Card bordered>
+            <CardBody>
+              <CardTitle className="text-lg font-bold">Pending Invitations</CardTitle>
+              <PendingInvitationsCard invites={pendingInvites} />
             </CardBody>
           </Card>
         </div>

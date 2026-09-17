@@ -35,13 +35,14 @@ export const inviteCollaborator = authenticatedAction(inviteCollaboratorSchema, 
     )
   }
 
-  await prisma.markerFormCollaborator.create({
+  const created = await prisma.markerFormCollaborator.create({
     data: {
       formId: input.formId,
       userId: input.inviteeUserId,
       role: input.role,
       invitedById: userId,
     },
+    select: { id: true, invitedAt: true },
   })
 
   const inviter = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } })
@@ -58,5 +59,7 @@ export const inviteCollaborator = authenticatedAction(inviteCollaboratorSchema, 
 
   revalidatePath(`/collection/${input.formId}`)
 
-  return { success: true }
+  // Returned so the invite-search UI can append the new row to its own
+  // optimistic list without a round trip through `getFormCollaborators`.
+  return { success: true, collaboratorId: created.id, invitedAt: created.invitedAt.toISOString() }
 })

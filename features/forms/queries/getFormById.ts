@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db"
 import { FormDetailDTO } from "../types"
 import { mapContributors, normalizePublicationMetadata, normalizeKeywords } from "../utils/publicationMetadata"
 import { getImportModificationStatus } from "../utils/importHash"
+import { resolveFormRole } from "./formRole"
 
 /**
  * Owner-or-collaborator-scoped form detail. Active forms return non-archived
@@ -27,9 +28,16 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
         { archived: false, collaborators: { some: { userId, acceptedAt: { not: null } } } },
       ],
     },
+    include: {
+      collaborators: { where: { userId, acceptedAt: { not: null } } },
+    },
   })
 
   if (!form) return null
+
+  // Always resolves — the `where` above already guarantees the caller is
+  // either the owner or an accepted collaborator.
+  const role = resolveFormRole(form, userId)!
 
   const versions = await prisma.markerFormVersion.findMany({
     where: {
@@ -58,6 +66,8 @@ export async function getFormById(formId: number, userId: number): Promise<FormD
   return {
     id: form.id,
     archived: form.archived,
+    ownerId: form.ownerId,
+    role,
     hasPublishedVersion: versions.some((v) => v.publishedSchemas.length > 0),
     forkedFrom: forkedFrom ? { pid: forkedFrom.pid, title: forkedFrom.title } : null,
     stapleImport:

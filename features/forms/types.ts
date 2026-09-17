@@ -215,6 +215,15 @@ export interface StapleImportInfoDTO {
 export interface FormDetailDTO {
   id: number
   archived: boolean
+  /** Always `MarkerForm.ownerId`, regardless of the caller's own role. */
+  ownerId: number
+  /**
+   * The caller's own resolved role (docs/refactor/form-collaboration.md §4.6)
+   * — OWNER via `MarkerForm.ownerId`, EDITOR/VIEWER via an accepted
+   * `MarkerFormCollaborator` row. Drives which controls render for this
+   * viewer; write actions re-check role server-side regardless.
+   */
+  role: "OWNER" | "EDITOR" | "VIEWER"
   /** True if any version has a related PublishedSchema (blocks permanent delete). */
   hasPublishedVersion: boolean
   /** Ordered by version descending; index 0 is the latest version. */

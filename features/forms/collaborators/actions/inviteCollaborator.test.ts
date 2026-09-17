@@ -53,7 +53,7 @@ describe("inviteCollaborator", () => {
 
     mockOwnedForm();
     findUniqueMarkerFormCollaborator.mockResolvedValue(null);
-    createMarkerFormCollaborator.mockResolvedValue({});
+    createMarkerFormCollaborator.mockResolvedValue({ id: 500, invitedAt: new Date("2026-09-01T00:00:00.000Z") });
     findUniqueUser.mockImplementation(async ({ where }: { where: { id: number } }) =>
       where.id === INVITEE_ID ? { id: INVITEE_ID, username: "new_collaborator" } : { username: "jane_owner" }
     );
@@ -69,6 +69,7 @@ describe("inviteCollaborator", () => {
       })
     );
     expect(createNotificationRow).toHaveBeenCalledTimes(1);
+    if (result.ok) expect(result.data).toEqual({ success: true, collaboratorId: 500, invitedAt: "2026-09-01T00:00:00.000Z" });
   });
 
   it("rejects a non-owner (FORBIDDEN)", async () => {

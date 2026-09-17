@@ -31,3 +31,20 @@ export interface PendingCollaboratorInviteDTO {
   inviterUsername: string
   invitedAt: Date
 }
+
+/**
+ * A publish-time contributor suggestion (docs/refactor/form-collaboration.md
+ * §4.7) — the owner plus every accepted collaborator (any role), shaped like
+ * the existing owner/creator auto-seed (`createForm.ts` et al.) so the UI can
+ * feed it straight into the same contributor-add flow. `name` is always
+ * present and non-empty; a user with no first/last name on file is filtered
+ * out server-side rather than suggested as a blank entry.
+ */
+export interface ContributorSuggestionDTO {
+  userId: number
+  name: string
+  givenName?: string
+  familyName?: string
+  orcid?: string
+  affiliations: { name: string }[]
+}

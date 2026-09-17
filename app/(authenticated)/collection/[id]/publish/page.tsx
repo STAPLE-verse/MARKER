@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getLatestVersionForConformanceCheck, getPublishedVersionsForForm, loadOwnedForm } from "@/features/forms/queries";
 import { getUserProfile } from "@/features/users/queries/getUserProfile";
 import { assembleDraftPackage, formatDiagnosticsForUser, validateTemplatePackage } from "@/features/forms/utils/templatePackage";
@@ -7,6 +8,13 @@ import { SchemaConformanceBlocked } from "./components/SchemaConformanceBlocked"
 export default async function PublishSchemaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { userId, form } = await loadOwnedForm(id);
+
+  // Publish is OWNER-only (docs/refactor/form-collaboration.md §4.6); the
+  // header already hides this page's entry link for EDITOR/VIEWER, this
+  // closes the direct-URL path.
+  if (form.role !== "OWNER") {
+    redirect(`/collection/${form.id}`);
+  }
 
   const latestVersion = form.versions[0];
 

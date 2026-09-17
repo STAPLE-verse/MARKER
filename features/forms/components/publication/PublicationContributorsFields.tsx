@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   ArrayPath,
   Control,
@@ -8,7 +8,7 @@ import {
   useFieldArray,
   useWatch,
 } from "react-hook-form"
-import { PencilIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline"
+import { PencilIcon, PlusIcon, TrashIcon, UserPlusIcon } from "@heroicons/react/24/outline"
 import { Alert } from "@/components/ui/Alert"
 import { Button } from "@/components/ui/Button"
 import { Checkbox } from "@/components/ui/Checkbox"
@@ -23,6 +23,9 @@ import {
 } from "@/features/forms/utils/publicationMetadata"
 import { strictPublicationContributorSchema } from "@/features/forms/schemas"
 import type { ContributorAffiliationDTO } from "@/features/forms/types"
+import { runAction } from "@/lib/action"
+import { getFormContributorSuggestions } from "@/features/forms/collaborators/actions/getFormContributorSuggestions"
+import type { ContributorSuggestionDTO } from "@/features/forms/collaborators/types"
 
 interface ContributorFormValues {
   name: string
@@ -53,18 +56,23 @@ function toContributorFormValues(field: unknown): ContributorFormValues {
 
 interface WatchedContributor {
   roles?: string[]
+  name?: string
+  orcid?: string | null
 }
 
 interface PublicationContributorsFieldsProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>
   errors: FieldErrors<TFieldValues>
   isProfileIncomplete?: boolean
+  /** Feeds the collaborator contributor-suggestion chips (docs/refactor/form-collaboration.md §4.7); omit to skip fetching suggestions entirely. */
+  formId?: number
 }
 
 export function PublicationContributorsFields<TFieldValues extends FieldValues>({
   control,
   errors,
   isProfileIncomplete,
+  formId,
 }: PublicationContributorsFieldsProps<TFieldValues>) {
   const { fields, append, update, remove } = useFieldArray({
     control,
@@ -79,6 +87,45 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
 
   // null = closed, -1 = adding a new contributor, >= 0 = editing that index.
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+
+  const [suggestions, setSuggestions] = useState<ContributorSuggestionDTO[]>([])
+
+  useEffect(() => {
+    if (formId === undefined) return
+    let cancelled = false
+    runAction(getFormContributorSuggestions({ formId })).then((res) => {
+      if (!cancelled && res.ok) setSuggestions(res.data)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [formId])
+
+  // Excludes anyone already in the (still-unsaved) contributor list, by
+  // ORCID when the suggestion has one, else by exact name — the same check
+  // a person would eyeball manually, automated (docs/refactor/
+  // form-collaboration.md §4.7).
+  const unusedSuggestions = suggestions.filter(
+    (s) =>
+      !watchedContributors.some((c) =>
+        s.orcid ? c.orcid === s.orcid : c.name?.trim().toLowerCase() === s.name.trim().toLowerCase()
+      )
+  )
+
+  const addSuggestion = (suggestion: ContributorSuggestionDTO) => {
+    append({
+      name: suggestion.name,
+      nameType: "Personal",
+      givenName: suggestion.givenName ?? "",
+      familyName: suggestion.familyName ?? "",
+      // Unlike the owner/creator auto-seed, don't default a role like
+      // "Creator" here — editing access doesn't imply a specific
+      // attribution role, so the user picks one via the edit modal.
+      roles: [],
+      orcid: suggestion.orcid ?? "",
+      affiliations: suggestion.affiliations,
+    } as never)
+  }
 
   const editingContributor: ContributorFormValues =
     editingIndex !== null && editingIndex >= 0
@@ -144,6 +191,25 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
               </div>
             )
           })}
+        </div>
+      )}
+
+      {unusedSuggestions.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 justify-center pt-2">
+          <span className="text-xs text-base-content/60">Add from this form&apos;s collaborators:</span>
+          {unusedSuggestions.map((suggestion) => (
+            <Button
+              key={suggestion.userId}
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="border border-dashed border-base-300"
+              onClick={() => addSuggestion(suggestion)}
+            >
+              <UserPlusIcon className="w-4 h-4 mr-1" />
+              {suggestion.name}
+            </Button>
+          ))}
         </div>
       )}
 

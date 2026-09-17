@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { loadOwnedForm } from "@/features/forms/queries";
+import { getCollaborationSummary } from "@/features/forms/collaborators/queries/getCollaborationSummary";
 import UserSchemaDetailsClient from "./UserSchemaDetailsClient";
 
 interface UserSchemaDetailsPageProps {
@@ -12,7 +13,8 @@ export default async function UserSchemaDetailsPage({
   searchParams,
 }: UserSchemaDetailsPageProps) {
   const [{ id }, { version: versionParam }] = await Promise.all([params, searchParams]);
-  const { form } = await loadOwnedForm(id);
+  const { userId, form } = await loadOwnedForm(id);
+  const collaboration = await getCollaborationSummary(form.id, form.ownerId);
 
   const latestVersion = form.versions[0];
   let selectedVersion = latestVersion;
@@ -34,5 +36,12 @@ export default async function UserSchemaDetailsPage({
     selectedVersion = requestedVersion;
   }
 
-  return <UserSchemaDetailsClient form={form} selectedVersion={selectedVersion} />;
+  return (
+    <UserSchemaDetailsClient
+      form={form}
+      selectedVersion={selectedVersion}
+      viewerUserId={userId}
+      collaboration={collaboration}
+    />
+  );
 }
