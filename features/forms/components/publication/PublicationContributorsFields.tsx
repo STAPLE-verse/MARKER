@@ -101,15 +101,21 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
     }
   }, [formId])
 
-  // Excludes anyone already in the (still-unsaved) contributor list, by
-  // ORCID when the suggestion has one, else by exact name — the same check
-  // a person would eyeball manually, automated (docs/refactor/
-  // form-collaboration.md §4.7).
+  // Excludes anyone already in the (still-unsaved) contributor list — the
+  // same check a person would eyeball manually, automated (docs/refactor/
+  // form-collaboration.md §4.7). Name must always match; ORCID is an
+  // additional check when the suggestion has one, never a replacement for
+  // it — matching by ORCID alone would treat any two suggestions that
+  // happen to share an ORCID (e.g. duplicate/placeholder values on test
+  // accounts) as the same person, hiding every one of them the moment any
+  // single one was added.
   const unusedSuggestions = suggestions.filter(
     (s) =>
-      !watchedContributors.some((c) =>
-        s.orcid ? c.orcid === s.orcid : c.name?.trim().toLowerCase() === s.name.trim().toLowerCase()
-      )
+      !watchedContributors.some((c) => {
+        const nameMatches = c.name?.trim().toLowerCase() === s.name.trim().toLowerCase()
+        if (!nameMatches) return false
+        return s.orcid ? c.orcid === s.orcid : true
+      })
   )
 
   const addSuggestion = (suggestion: ContributorSuggestionDTO) => {

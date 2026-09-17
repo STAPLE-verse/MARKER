@@ -8,6 +8,7 @@ const LATEST_VERSION_ID = 30
 const findUniqueMarkerForm = vi.fn()
 const findUniqueMarkerFormVersion = vi.fn()
 const createMarkerFormVersion = vi.fn()
+const findUniquePublicationMetadata = vi.fn()
 const queryRaw = vi.fn()
 
 vi.mock("@/lib/db", () => {
@@ -16,6 +17,9 @@ vi.mock("@/lib/db", () => {
     markerFormVersion: {
       findUnique: (...args: unknown[]) => findUniqueMarkerFormVersion(...args),
       create: (...args: unknown[]) => createMarkerFormVersion(...args),
+    },
+    publicationMetadata: {
+      findUnique: (...args: unknown[]) => findUniquePublicationMetadata(...args),
     },
     $queryRaw: (...args: unknown[]) => queryRaw(...args),
     $transaction: async (cb: (tx: unknown) => unknown) => cb(client),
@@ -36,6 +40,8 @@ describe("restoreFormVersionAsDraft STAPLE provenance", () => {
     findUniqueMarkerForm.mockReset()
     findUniqueMarkerFormVersion.mockReset()
     createMarkerFormVersion.mockReset()
+    findUniquePublicationMetadata.mockReset()
+    findUniquePublicationMetadata.mockResolvedValue(null)
     queryRaw.mockReset()
 
     // Current head (v3) traces to a *later* STAPLE import than the version
@@ -131,5 +137,65 @@ describe("restoreFormVersionAsDraft STAPLE provenance", () => {
     expect(data.importedFromStapleVersionNumber).toBeNull()
     expect(data.importedAt).toBeNull()
     expect(data.originalImportHash).toBeNull()
+  })
+
+  it("carries forward the current head's publication metadata, not the restored version's own", async () => {
+    findUniqueMarkerFormVersion.mockResolvedValue({
+      id: SOURCE_VERSION_ID,
+      formId: FORM_ID,
+      archived: false,
+      status: "DRAFT",
+      name: "v1",
+      schema: {},
+      uiSchema: {},
+      semantics: null,
+      importedFromStapleVersionNumber: null,
+      importedAt: null,
+      originalImportHash: null,
+      // The version being restored had no metadata of its own (or different
+      // metadata) — this must not end up on the restored draft.
+      publicationMetadata: null,
+    })
+    findUniquePublicationMetadata.mockResolvedValue({
+      domain: "Neuroscience",
+      language: "en",
+      license: "CC-BY-4.0",
+      keywords: ["eeg"],
+      contributors: [{ name: "Head Author", roles: ["Author"] }],
+    })
+
+    await restoreFormVersionAsDraft({ formId: FORM_ID, versionId: SOURCE_VERSION_ID })
+
+    expect(findUniquePublicationMetadata).toHaveBeenCalledWith({
+      where: { formVersionId: LATEST_VERSION_ID },
+    })
+    const data = createMarkerFormVersion.mock.calls[0][0].data
+    expect(data.publicationMetadata.create.domain).toBe("Neuroscience")
+    expect(data.publicationMetadata.create.contributors).toEqual([
+      expect.objectContaining({ name: "Head Author", roles: ["Author"] }),
+    ])
+  })
+
+  it("falls back to default publication metadata when the head has none either", async () => {
+    findUniqueMarkerFormVersion.mockResolvedValue({
+      id: SOURCE_VERSION_ID,
+      formId: FORM_ID,
+      archived: false,
+      status: "DRAFT",
+      name: "v1",
+      schema: {},
+      uiSchema: {},
+      semantics: null,
+      importedFromStapleVersionNumber: null,
+      importedAt: null,
+      originalImportHash: null,
+      publicationMetadata: null,
+    })
+    findUniquePublicationMetadata.mockResolvedValue(null)
+
+    await restoreFormVersionAsDraft({ formId: FORM_ID, versionId: SOURCE_VERSION_ID })
+
+    const data = createMarkerFormVersion.mock.calls[0][0].data
+    expect(data.publicationMetadata.create.contributors).toEqual([])
   })
 })

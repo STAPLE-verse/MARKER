@@ -396,7 +396,7 @@ toast.success("Saved");
 ```
 
 Conventions:
-- Every imperative action call goes through a `use*` hook; no action is `await`ed inline in a route component (`createForm`, `archiveForm`, `saveFormVersion`, `createFormCheckpoint`, `publishSchema` each get a hook).
+- Every imperative action call goes through a `use*` hook; no action is `await`ed inline in a route component (`createForm`, `archiveForm`, `saveFormVersion`, `publishSchema` each get a hook).
 - Pending state comes from `useTransition` (§8.7), not hand-rolled `useState(isLoading)`.
 - Success is **always** confirmed (toast or redirect-with-feedback). The publish flow surfaces success on redirect rather than silently relying on the `?published=` param. Form Studio save/checkpoint navigation semantics are specified separately in §8.11.
 - `console.error` is no longer a user-facing strategy; it is only acceptable as server-side logging inside `normalizeActionError`.
@@ -436,7 +436,7 @@ There are two ways to enforce ownership/tenancy on the server, and they are **as
 
 **Which to use:**
 - **Reads / page renders → query-level filtering.** Pages only need "render or `notFound()`", and collapsing every failure avoids leaking resource existence on list/detail surfaces.
-- **Writes / Server Actions → the throw-helper.** Actions return the `ActionResult` envelope and genuinely benefit from coded errors (e.g. `CONFLICT` on an archived/published form). `getAuthorizedLatestVersion` is the **single authorizer for owned-form mutations** — `saveFormVersion`, `createFormCheckpoint`, `archiveForm`, and `publishSchema` all route ownership through it. New write actions should call it rather than re-deriving ownership inline. Its messages are intentionally **action-neutral** ("Cannot modify an archived form", "You do not have permission to modify this form") so every caller can reuse them; action-specific guards (e.g. `publishSchema`'s already-`PUBLISHED` check) stay in the action.
+- **Writes / Server Actions → the throw-helper.** Actions return the `ActionResult` envelope and genuinely benefit from coded errors (e.g. `CONFLICT` on an archived/published form). `getAuthorizedLatestVersion` is the **single authorizer for owned-form mutations** — `saveFormVersion`, `archiveForm`, and `publishSchema` all route ownership through it. New write actions should call it rather than re-deriving ownership inline. Its messages are intentionally **action-neutral** ("Cannot modify an archived form", "You do not have permission to modify this form") so every caller can reuse them; action-specific guards (e.g. `publishSchema`'s already-`PUBLISHED` check) stay in the action.
 
 **Existence-disclosure policy (decided).** When a form exists but is owned by another user, the write-side helper returns **`FORBIDDEN`, not `NOT_FOUND`** — a deliberate, granular choice. Its only callers are authenticated owners operating on their own forms through the UI, so the better error message outweighs the minor trade-off of confirming an id exists to a non-owner. Read-side queries take the opposite stance (collapse to not-found) because list/anonymous surfaces must not disclose existence. This asymmetry is intentional; the decision lives **only** in `getAuthorizedLatestVersion` so it can't drift.
 
@@ -454,7 +454,7 @@ Form editing in MARKER can span long sessions. Users need protection against dat
 
 | Store | Role | Written by | Read by |
 |---|---|---|---|
-| **Database** (`FormVersion.schema` / `uiSchema`) | **Sole source of truth** | Explicit user actions only (`saveFormVersion`, `createFormCheckpoint`, `publishSchema`) | Detail page, publish, clone, edit page load |
+| **Database** (`FormVersion.schema` / `uiSchema`) | **Sole source of truth** | Explicit user actions only (`saveFormVersion`, `publishSchema`) | Detail page, publish, clone, edit page load |
 | **localStorage** (`marker-form-draft-${formId}-${versionId}`) | **Transient recovery buffer** | Debounced autosave (~1.5s after last change) while the editor is dirty | Restore prompt on next edit-session load only |
 
 Nothing downstream of the editor (publish, clone, collection list, detail view) ever reads localStorage. The buffer exists solely so unsaved edits survive a crash or refresh.
@@ -465,7 +465,7 @@ Nothing downstream of the editor (publish, clone, collection list, detail view) 
 2. **localStorage is never a save.** It is a silent crash-recovery cache. The UI must not label a buffer write as "saved."
 3. **The buffer is dirty-only and version-scoped.** Write to localStorage only when the editor differs from the loaded DB baseline. If the editor matches the baseline, delete the buffer entry. The key includes both `formId` and `versionId`; the payload records `baseVersionId` (the DB head the buffer was based on).
 4. **A buffer is restorable only when it matches the current DB head.** On load, offer "Restore draft" only if a buffer exists, differs from the DB baseline, and `baseVersionId === version.id`. Otherwise treat it as stale (discard silently or warn — never apply it onto a different version).
-5. **Any successful DB write clears the buffer** for that form/version (`saveFormVersion`, `createFormCheckpoint`, `publishSchema`).
+5. **Any successful DB write clears the buffer** for that form/version (`saveFormVersion`, `publishSchema`).
 6. **The save-status indicator reflects DB sync only** — not buffer writes. States: `Unsaved changes` (editor ≠ last DB save) → `Saving…` (DB write in flight) → `All changes saved` (editor = DB). The word "locally" does not appear in save-status copy.
 7. **Save Changes does not navigate.** `saveFormVersion` (in-place overwrite of the latest draft) keeps the user in the editor. On success: update the DB baseline ref, clear the buffer, toast confirmation, pill → "All changes saved."
 8. **Done finishes the session.** If the editor is synced with the DB, **Done** navigates immediately to `/collection/[id]`. If dirty, **Done** calls `saveFormVersion` first, then navigates on success. **Done** is always enabled (except while a save is in flight).
@@ -534,7 +534,7 @@ From detail (/collection/[id]):
   Restore (older)     → copy selected historical version → new FormVersion row → open editor
 ```
 
-**Save Changes** is for frequent, low-ceremony persistence during a long session. **Done** is the primary finish action. **+ New version** on the detail page copies the latest head (`createFormVersionFromLatest`), while **Restore as New Draft** copies the selected historical version into a new head without rewriting history. The `createFormCheckpoint` action remains in the codebase for potential future flows but is not exposed in the editor UI.
+**Save Changes** is for frequent, low-ceremony persistence during a long session. **Done** is the primary finish action. **+ New version** on the detail page copies the latest head (`createFormVersionFromLatest`), while **Restore as New Draft** copies the selected historical version into a new head without rewriting history.
 
 Version-history selection is URL state, not component-local state. `/collection/[id]`
 shows the latest version; `/collection/[id]?version=[formVersionId]` shows a

@@ -26,9 +26,6 @@ export const restoreFormVersionAsDraft = authenticatedAction(
 
         const sourceVersion = await tx.markerFormVersion.findUnique({
           where: { id: input.versionId },
-          include: {
-            publicationMetadata: true,
-          },
         });
 
         if (
@@ -39,6 +36,18 @@ export const restoreFormVersionAsDraft = authenticatedAction(
         ) {
           throw new ActionError("NOT_FOUND", "Form version not found");
         }
+
+        // Publication metadata (contributors, license, keywords, ...) is the
+        // user's in-progress publication prep for this *form*, tracked as a
+        // per-version row only because a published snapshot needs one — it's
+        // not part of the historical content being time-traveled. Carry it
+        // forward from the current head being replaced, not from the old
+        // `sourceVersion` being restored: restoring old schema/uiSchema
+        // content shouldn't silently discard metadata work done since that
+        // old version was current.
+        const headMetadata = await tx.publicationMetadata.findUnique({
+          where: { formVersionId: latestVersion.id },
+        });
 
         return tx.markerFormVersion.create({
           data: {
@@ -65,7 +74,7 @@ export const restoreFormVersionAsDraft = authenticatedAction(
             isDirectStapleImport: false,
             publicationMetadata: {
               create: copyPublicationMetadataFields(
-                sourceVersion.publicationMetadata ?? DEFAULT_PUBLICATION_METADATA
+                headMetadata ?? DEFAULT_PUBLICATION_METADATA
               ),
             },
           },

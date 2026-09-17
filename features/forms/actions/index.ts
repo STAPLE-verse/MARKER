@@ -1,6 +1,5 @@
 export { createForm } from "./createForm"
 export { saveFormVersion } from "./saveFormVersion"
-export { createFormCheckpoint } from "./createFormCheckpoint"
 export { createFormVersionFromLatest } from "./createFormVersionFromLatest"
 export { restoreFormVersionAsDraft } from "./restoreFormVersionAsDraft"
 export { cloneFormVersion } from "./cloneFormVersion"

@@ -143,4 +143,23 @@ describe("collaborator contributor suggestions", () => {
     // The chip itself is gone now that its suggestion is already in the list.
     expect(screen.queryByRole("button", { name: /Jane Owner/ })).not.toBeInTheDocument();
   });
+
+  it("does not hide other suggestions that happen to share an ORCID with the one just added", async () => {
+    getFormContributorSuggestions.mockResolvedValue({
+      ok: true,
+      data: [
+        { userId: 1, name: "Alice A", givenName: "Alice", familyName: "A", orcid: "0000-0000-0000-0001", affiliations: [] },
+        { userId: 2, name: "Bob B", givenName: "Bob", familyName: "B", orcid: "0000-0000-0000-0001", affiliations: [] },
+      ],
+    });
+    render(<Harness formId={42} />);
+
+    expect(await screen.findByRole("button", { name: /Alice A/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Bob B/ })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Alice A/ }));
+
+    expect(screen.queryByRole("button", { name: /Alice A/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Bob B/ })).toBeInTheDocument();
+  });
 });
