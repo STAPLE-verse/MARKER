@@ -25,7 +25,7 @@ export default async function Home() {
         <div className="space-y-6 text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-4">
             <SparklesIcon className="w-4 h-4" />
-            v0.1.0-alpha
+            v1.0.0
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary pb-4">
             MARKER
