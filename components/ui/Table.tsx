@@ -234,7 +234,7 @@ function DataTable<TData>({
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    ...(manualPagination ? {} : { getPaginationRowModel: getPaginationRowModel() }),
+    ...(enablePagination && !manualPagination ? { getPaginationRowModel: getPaginationRowModel() } : {}),
     manualPagination,
     pageCount: manualPagination ? controlledPageCount : undefined,
     state: {
@@ -342,7 +342,7 @@ function DataTable<TData>({
       </Table>
 
       {/* Pagination */}
-      {enablePagination && table.getRowModel().rows.length > 0 && pageCount > 1 && (
+      {enablePagination && table.getRowModel().rows.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 pt-2">
           <div className="join">
             <button

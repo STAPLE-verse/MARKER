@@ -69,6 +69,7 @@ export function StapleImportTable({ forms }: StapleImportTableProps) {
         columns={columns}
         data={forms}
         enableGlobalSearch
+        enablePagination
         globalSearchPlaceholder="Search STAPLE forms..."
         emptyMessage="No importable STAPLE forms yet."
       />
