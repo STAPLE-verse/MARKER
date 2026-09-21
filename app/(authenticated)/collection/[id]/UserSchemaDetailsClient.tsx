@@ -62,6 +62,7 @@ export default function UserSchemaDetailsClient({
           {form.archived ? "Back to Archive" : "Back to Collection"}
         </BackButton>
       }
+      sidebarOpen={isHistoryOpen}
       sidebar={
         <VersionHistorySidebar
           isHistoryOpen={isHistoryOpen}

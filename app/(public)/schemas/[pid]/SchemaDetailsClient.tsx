@@ -44,6 +44,7 @@ export default function SchemaDetailsClient({
           <BackButton href="/explore">Back to Explore</BackButton>
         )
       }
+      sidebarOpen={isHistoryOpen}
       sidebar={
         hasHistory ? (
           <PublishedVersionsSidebar
