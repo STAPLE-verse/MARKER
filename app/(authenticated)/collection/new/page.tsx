@@ -7,7 +7,6 @@ export default function AddSchemaPage() {
     <SchemaFlowLayout
       backHref="/collection"
       backLabel="Back to Collection"
-      backButtonPlacement="page-corner"
       title="Add schema"
       description="Choose how you want to add a metadata schema to your collection."
     >

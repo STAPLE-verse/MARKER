@@ -28,11 +28,14 @@ const PageHeader = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttributes<HT
 }>(({ title, description, children, className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6", className)}
+    className={cn("flex flex-col sm:flex-row sm:flex-wrap sm:items-start justify-between gap-4 mb-6", className)}
     {...props}
   >
-    <div className="flex-1 min-w-0">
-      <h1 className="text-3xl font-bold leading-tight">{title}</h1>
+    {/* No `min-w-0`: the title keeps its min-content width so the actions wrap
+        below it once the column gets narrow (e.g. next to an open sidebar),
+        instead of the heading sliding underneath them. */}
+    <div className="flex-1">
+      <h1 className="text-3xl font-bold leading-tight break-words">{title}</h1>
       {description && (
         <p className="text-base-content/60 mt-2">{description}</p>
       )}

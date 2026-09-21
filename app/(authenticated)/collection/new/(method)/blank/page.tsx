@@ -6,7 +6,6 @@ export default function CreateBlankDraftPage() {
     <SchemaFlowLayout
       backHref="/collection/new"
       backLabel="Back to add schema"
-      backButtonPlacement="page-corner"
       title="Create blank draft"
       description="Start a new MARKER schema and open it in the form builder."
     >

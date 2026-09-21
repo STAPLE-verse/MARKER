@@ -31,8 +31,11 @@ export function CollapsibleHistorySidebar({
 }: CollapsibleHistorySidebarProps) {
   return (
     <Sidebar
-      className={`absolute right-0 top-0 bottom-0 z-20 border-l border-base-300 shadow-2xl overflow-hidden transition-all duration-300 ${
-        isOpen ? "w-80 lg:w-96" : "w-16 min-w-[4rem] lg:w-16 shadow-none"
+      // In flow (not an overlay) so opening it shrinks the content column
+      // instead of covering it; `max-w-[45%]` keeps it from swallowing a
+      // narrow viewport, where the content matters more than the rail.
+      className={`relative z-20 shrink-0 border-l border-base-300 shadow-2xl overflow-hidden transition-all duration-300 ${
+        isOpen ? "w-80 lg:w-96 max-w-[45%]" : "w-16 min-w-[4rem] lg:w-16 shadow-none"
       }`}
     >
       <SidebarHeader className={`bg-base-200/50 flex ${isOpen ? "justify-between p-4" : "justify-center p-2"}`}>
