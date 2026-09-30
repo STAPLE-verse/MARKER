@@ -60,7 +60,7 @@ export function TagsInput({
     <div className="form-control w-full">
       {label && (
         <label className="label pb-2">
-          <span className="label-text font-medium">{label}</span>
+          <span className="label-text text-xl text-base-content">{label}</span>
         </label>
       )}
 

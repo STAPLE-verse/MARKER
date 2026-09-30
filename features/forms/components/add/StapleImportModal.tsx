@@ -83,7 +83,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
       <div className="space-y-6 mt-4">
         <div className="form-control w-full">
           <label className="label pb-2">
-            <span className="label-text font-medium inline-flex items-center gap-1.5">
+            <span className="label-text text-xl text-base-content inline-flex items-center gap-1.5">
               STAPLE version
               <InfoTooltip text="This creates an independent snapshot in MARKER — it does not stay in sync with STAPLE." />
             </span>

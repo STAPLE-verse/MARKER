@@ -18,7 +18,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
     <div className="form-control w-full mt-6">
       {label && (
         <label className="label pb-2">
-          <span className="label-text font-medium">{label}</span>
+          <span className="label-text text-xl text-base-content">{label}</span>
         </label>
       )}
       <textarea
