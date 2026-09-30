@@ -52,7 +52,7 @@ export function PendingInvitationsCard({ invites: initialInvites }: PendingInvit
   };
 
   if (invites.length === 0) {
-    return <p className="py-8 text-center text-base-content/90">No pending invitations.</p>;
+    return <p className="py-8 text-center text-lg text-base-content/90">No pending invitations.</p>;
   }
 
   return (
@@ -60,7 +60,7 @@ export function PendingInvitationsCard({ invites: initialInvites }: PendingInvit
       {invites.map((invite) => (
         <div key={invite.collaboratorId} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-base">
+            <p className="text-lg">
               <span className="font-semibold text-primary">{invite.inviterUsername}</span> invited you to
               collaborate on <span className="font-medium">&quot;{invite.formTitle}&quot;</span> as{" "}
               {ROLE_LABEL[invite.role]}.

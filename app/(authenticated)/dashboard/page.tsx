@@ -44,10 +44,10 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           <Card bordered>
             <CardBody>
-              <CardTitle className="text-xl font-bold">Recent Activities</CardTitle>
+              <CardTitle className="text-2xl font-bold">Recent Activities</CardTitle>
               {activity.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-base-content/90 mb-4">
+                  <p className="text-lg text-base-content/90 mb-4">
                     Nothing here yet — create your first schema to get started.
                   </p>
                   <Link href="/collection/new">
@@ -65,10 +65,10 @@ export default async function DashboardPage() {
                       className="py-4 flex justify-between items-center first:pt-0 last:pb-0 hover:bg-base-200/50 -mx-2 px-2 rounded transition-colors"
                     >
                       <div>
-                        <span className="font-semibold text-primary">{getActivityActionLabel(item)}</span>
-                        <span className="text-base-content/90"> - {getActivityTargetLabel(item)}</span>
+                        <span className="text-lg font-semibold text-primary">{getActivityActionLabel(item)}</span>
+                        <span className="text-lg text-base-content/90"> - {getActivityTargetLabel(item)}</span>
                       </div>
-                      <span className="text-base text-base-content/90 shrink-0 ml-4">
+                      <span className="text-lg text-base-content/90 shrink-0 ml-4">
                         {formatRelativeTime(item.timestamp)}
                       </span>
                     </Link>
@@ -80,11 +80,13 @@ export default async function DashboardPage() {
 
           <Card bordered>
             <CardBody>
-              <CardTitle className="text-xl font-bold">Notifications</CardTitle>
+              <CardTitle className="text-2xl font-bold">Notifications</CardTitle>
               <DashboardNotificationsCard notifications={notifications} />
               <div className="text-right mt-2">
-                <Link href="/notifications" className="text-base font-medium text-primary hover:underline">
-                  View all notifications
+                <Link href="/notifications">
+                  <Button variant="primary" size="md">
+                    View all notifications
+                  </Button>
                 </Link>
               </div>
             </CardBody>
@@ -94,7 +96,7 @@ export default async function DashboardPage() {
               stretch that column and push the stats card down with it. */}
           <Card bordered>
             <CardBody>
-              <CardTitle className="text-lg font-bold">Pending Invitations</CardTitle>
+              <CardTitle className="text-2xl font-bold">Pending Invitations</CardTitle>
               <PendingInvitationsCard invites={pendingInvites} />
             </CardBody>
           </Card>
@@ -103,22 +105,22 @@ export default async function DashboardPage() {
         <div className="space-y-6">
           <Card bordered className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
             <CardBody>
-              <CardTitle className="text-lg font-bold">My Stats</CardTitle>
+              <CardTitle className="text-2xl font-bold">My Stats</CardTitle>
               <div className="stats stats-vertical bg-transparent w-full">
                 <Link href="/collection" className="stat px-0 hover:opacity-80 transition-opacity">
-                  <div className="stat-title text-base text-base-content/90">Published Schemas</div>
-                  <div className="stat-value text-primary text-3xl font-extrabold">{stats.publishedCount}</div>
+                  <div className="stat-title text-lg text-base-content/90">Published Schemas</div>
+                  <div className="stat-value text-primary text-4xl font-extrabold">{stats.publishedCount}</div>
                 </Link>
                 <Link href="/collection" className="stat px-0 hover:opacity-80 transition-opacity">
-                  <div className="stat-title text-base text-base-content/90">Draft Templates</div>
-                  <div className="stat-value text-secondary text-3xl font-extrabold">{stats.draftCount}</div>
+                  <div className="stat-title text-lg text-base-content/90">Draft Templates</div>
+                  <div className="stat-value text-secondary text-4xl font-extrabold">{stats.draftCount}</div>
                 </Link>
                 <Link
                   href={collectionTabHref("archived")}
                   className="stat px-0 hover:opacity-80 transition-opacity"
                 >
-                  <div className="stat-title text-base text-base-content/90">Archived</div>
-                  <div className="stat-value text-accent text-3xl font-extrabold">{stats.archivedCount}</div>
+                  <div className="stat-title text-lg text-base-content/90">Archived</div>
+                  <div className="stat-value text-accent text-4xl font-extrabold">{stats.archivedCount}</div>
                 </Link>
               </div>
             </CardBody>
