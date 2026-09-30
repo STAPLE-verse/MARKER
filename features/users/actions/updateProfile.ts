@@ -4,6 +4,8 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
+import { createEditProfileMsg } from "@/lib/emails";
+import { sendEmail } from "@/lib/mailer";
 import { ActionError } from "@/utils/action-result";
 import { authenticatedAction } from "@/utils/safe-action";
 import { updateProfileSchema } from "../schemas";
@@ -35,6 +37,11 @@ export const updateProfile = authenticatedAction(updateProfileSchema, async ({ i
     throw new z.ZodError(issues);
   }
 
+  // Read before the write: if the email itself is being changed, the notice
+  // below must also reach the old address, the only one a hijacker can't
+  // have pointed at themselves.
+  const previous = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+
   try {
     const updated = await prisma.user.update({
       where: { id: userId },
@@ -63,6 +70,11 @@ export const updateProfile = authenticatedAction(updateProfileSchema, async ({ i
     });
 
     revalidatePath("/profile");
+
+    const recipients = [...new Set([previous?.email, updated.email].filter((email): email is string => !!email))];
+    if (recipients.length > 0) {
+      await sendEmail(createEditProfileMsg({ to: recipients }));
+    }
 
     return updated;
   } catch (error) {

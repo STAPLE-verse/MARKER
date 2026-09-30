@@ -30,6 +30,12 @@ vi.mock("@/utils/auth", () => ({
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
+const sendEmail = vi.fn();
+
+vi.mock("@/lib/mailer", () => ({
+  sendEmail: (...args: unknown[]) => sendEmail(...args),
+}));
+
 import { inviteCollaborator } from "./inviteCollaborator";
 
 function mockOwnedForm(overrides: Record<string, unknown> = {}) {
@@ -55,8 +61,40 @@ describe("inviteCollaborator", () => {
     findUniqueMarkerFormCollaborator.mockResolvedValue(null);
     createMarkerFormCollaborator.mockResolvedValue({ id: 500, invitedAt: new Date("2026-09-01T00:00:00.000Z") });
     findUniqueUser.mockImplementation(async ({ where }: { where: { id: number } }) =>
-      where.id === INVITEE_ID ? { id: INVITEE_ID, username: "new_collaborator" } : { username: "jane_owner" }
+      where.id === INVITEE_ID
+        ? { id: INVITEE_ID, username: "new_collaborator", email: "new@example.com" }
+        : { username: "jane_owner" }
     );
+    sendEmail.mockReset();
+    sendEmail.mockResolvedValue({ success: true });
+  });
+
+  it("emails the invitee with the inviter, schema title, and a link to the schema", async () => {
+    await inviteCollaborator({ formId: FORM_ID, inviteeUserId: INVITEE_ID, role: "EDITOR" });
+
+    expect(sendEmail).toHaveBeenCalledTimes(1);
+    const msg = sendEmail.mock.calls[0][0];
+    expect(msg.to).toBe("new@example.com");
+    expect(msg.subject).toBe("MARKER Schema Invitation");
+    expect(msg.html).toContain("jane_owner");
+    expect(msg.html).toContain("Cognitive Assessment");
+    expect(msg.html).toContain(`/collection/${FORM_ID}`);
+  });
+
+  it("still creates the invite when the email can't be sent", async () => {
+    sendEmail.mockResolvedValue({ success: false, error: "down" });
+
+    const result = await inviteCollaborator({ formId: FORM_ID, inviteeUserId: INVITEE_ID, role: "EDITOR" });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("sends no email when the invite is rejected", async () => {
+    findUniqueMarkerFormCollaborator.mockResolvedValue({ acceptedAt: null });
+
+    await inviteCollaborator({ formId: FORM_ID, inviteeUserId: INVITEE_ID, role: "EDITOR" });
+
+    expect(sendEmail).not.toHaveBeenCalled();
   });
 
   it("creates a pending collaborator row and notifies the invitee", async () => {

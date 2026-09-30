@@ -1,6 +1,8 @@
 "use server"
 
 import { prisma } from "@/lib/db"
+import { createCollaboratorInviteMsg } from "@/lib/emails"
+import { sendEmail } from "@/lib/mailer"
 import { revalidatePath } from "next/cache"
 import { authenticatedAction } from "@/utils/safe-action"
 import { ActionError } from "@/utils/action-result"
@@ -17,7 +19,7 @@ export const inviteCollaborator = authenticatedAction(inviteCollaboratorSchema, 
 
   const invitee = await prisma.user.findUnique({
     where: { id: input.inviteeUserId },
-    select: { id: true, username: true },
+    select: { id: true, username: true, email: true },
   })
   if (!invitee) {
     throw new ActionError("NOT_FOUND", "User not found")
@@ -47,16 +49,31 @@ export const inviteCollaborator = authenticatedAction(inviteCollaboratorSchema, 
 
   const inviter = await prisma.user.findUnique({ where: { id: userId }, select: { username: true } })
 
+  const inviterUsername = inviter?.username ?? "Someone"
+  const formTitle = latestVersion.name || "Untitled Draft"
+
   await createNotification({
     recipients: [input.inviteeUserId],
     kind: "FORM_COLLABORATOR_INVITED",
     data: {
       formId: input.formId,
-      inviterUsername: inviter?.username ?? "Someone",
-      formTitle: latestVersion.name || "Untitled Draft",
+      inviterUsername,
+      formTitle,
       role: input.role,
     },
   })
+
+  if (invitee.email) {
+    await sendEmail(
+      createCollaboratorInviteMsg({
+        to: invitee.email,
+        inviterUsername,
+        formId: input.formId,
+        formTitle,
+        role: input.role,
+      })
+    )
+  }
 
   revalidatePath(`/collection/${input.formId}`)
 

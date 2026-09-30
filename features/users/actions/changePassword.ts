@@ -1,6 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { createEditPasswordMsg } from "@/lib/emails";
+import { sendEmail } from "@/lib/mailer";
 import { PasswordVerifyResult, SecurePassword } from "@/lib/hash";
 import { ActionError } from "@/utils/action-result";
 import { authenticatedAction } from "@/utils/safe-action";
@@ -13,7 +15,7 @@ import { changePasswordSchema } from "../schemas";
 export const changePassword = authenticatedAction(changePasswordSchema, async ({ input, userId }) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { hashedPassword: true },
+    select: { hashedPassword: true, email: true },
   });
 
   if (!user?.hashedPassword) {
@@ -30,6 +32,10 @@ export const changePassword = authenticatedAction(changePasswordSchema, async ({
     where: { id: userId },
     data: { hashedPassword },
   });
+
+  if (user.email) {
+    await sendEmail(createEditPasswordMsg({ to: user.email }));
+  }
 
   return { success: true };
 });

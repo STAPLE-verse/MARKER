@@ -33,6 +33,12 @@ vi.mock("@/lib/hash", () => ({
   },
 }));
 
+const sendEmail = vi.fn();
+
+vi.mock("@/lib/mailer", () => ({
+  sendEmail: (...args: unknown[]) => sendEmail(...args),
+}));
+
 import { changePassword } from "./changePassword";
 
 describe("changePassword", () => {
@@ -42,8 +48,38 @@ describe("changePassword", () => {
     hash.mockClear();
     verify.mockReset();
 
-    findUniqueUser.mockResolvedValue({ hashedPassword: "current-hash" });
+    sendEmail.mockReset();
+
+    findUniqueUser.mockResolvedValue({ hashedPassword: "current-hash", email: "ada@example.com" });
     updateUser.mockResolvedValue({});
+    sendEmail.mockResolvedValue({ success: true });
+  });
+
+  it("emails a password-change notice once the new password is saved", async () => {
+    verify.mockResolvedValue("VALID");
+
+    await changePassword({
+      currentPassword: "correct-password",
+      newPassword: "new-password-123",
+      confirmPassword: "new-password-123",
+    });
+
+    expect(sendEmail).toHaveBeenCalledTimes(1);
+    expect(sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "ada@example.com", subject: "MARKER Password Change" })
+    );
+  });
+
+  it("sends no notice when the current password is wrong", async () => {
+    verify.mockResolvedValue("INVALID");
+
+    await changePassword({
+      currentPassword: "wrong-password",
+      newPassword: "new-password-123",
+      confirmPassword: "new-password-123",
+    });
+
+    expect(sendEmail).not.toHaveBeenCalled();
   });
 
   it("rejects when the current password does not verify", async () => {

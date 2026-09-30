@@ -4,15 +4,22 @@ import { Prisma } from "@prisma/client";
 const USER_ID = 1;
 
 const findFirstUser = vi.fn();
+const findUniqueUser = vi.fn();
 const updateUser = vi.fn();
+const sendEmail = vi.fn();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
     user: {
       findFirst: (...args: unknown[]) => findFirstUser(...args),
+      findUnique: (...args: unknown[]) => findUniqueUser(...args),
       update: (...args: unknown[]) => updateUser(...args),
     },
   },
+}));
+
+vi.mock("@/lib/mailer", () => ({
+  sendEmail: (...args: unknown[]) => sendEmail(...args),
 }));
 
 vi.mock("@/utils/auth", () => ({
@@ -38,10 +45,47 @@ const VALID_INPUT = {
 describe("updateProfile", () => {
   beforeEach(() => {
     findFirstUser.mockReset();
+    findUniqueUser.mockReset();
     updateUser.mockReset();
+    sendEmail.mockReset();
     // No conflicting user by default.
     findFirstUser.mockResolvedValue(null);
+    findUniqueUser.mockResolvedValue({ email: VALID_INPUT.email });
     updateUser.mockResolvedValue(VALID_INPUT);
+    sendEmail.mockResolvedValue({ success: true });
+  });
+
+  it("emails a profile-change notice to the account's address", async () => {
+    await updateProfile(VALID_INPUT);
+
+    expect(sendEmail).toHaveBeenCalledTimes(1);
+    expect(sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: ["ada@example.com"], subject: "MARKER Profile Change" })
+    );
+  });
+
+  it("also notifies the old address when the email itself changes", async () => {
+    findUniqueUser.mockResolvedValue({ email: "old@example.com" });
+
+    await updateProfile(VALID_INPUT);
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: ["old@example.com", "ada@example.com"] })
+    );
+  });
+
+  it("still succeeds when the notice can't be sent", async () => {
+    sendEmail.mockResolvedValue({ success: false, error: "down" });
+
+    const res = await updateProfile(VALID_INPUT);
+
+    expect(res.ok).toBe(true);
+  });
+
+  it("sends no notice when the update is rejected", async () => {
+    await updateProfile({ ...VALID_INPUT, orcid: "not-an-orcid" });
+
+    expect(sendEmail).not.toHaveBeenCalled();
   });
 
   it("writes the trimmed/normalized fields and reports success", async () => {
