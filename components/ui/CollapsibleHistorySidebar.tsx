@@ -35,8 +35,12 @@ export function CollapsibleHistorySidebar({
       // instead of covering it; `max-w-[45%]` keeps it from swallowing a
       // narrow viewport, where the content matters more than the rail.
       className={`relative z-20 shrink-0 border-l border-base-300 shadow-2xl overflow-hidden transition-all duration-300 ${
-        isOpen ? "w-80 lg:w-96 max-w-[45%]" : "w-16 min-w-[4rem] lg:w-16 shadow-none"
+        isOpen ? "w-80 lg:w-96 max-w-[45%]" : "w-16 min-w-[4rem] lg:w-16 shadow-none cursor-pointer hover:bg-base-300"
       }`}
+      // While collapsed the whole rail opens the history, not just the clock
+      // button — the button stays as the keyboard / screen-reader control.
+      onClick={isOpen ? undefined : () => setIsOpen(true)}
+      title={isOpen ? undefined : "Open Version History"}
     >
       <SidebarHeader className={`bg-base-200/50 flex ${isOpen ? "justify-between p-4" : "justify-center p-2"}`}>
         {isOpen && (
