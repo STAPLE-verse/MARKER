@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import { Button } from './Button';
 import { ArrowLeftIcon } from '@heroicons/react/20/solid';
 
 interface BackButtonProps {
@@ -14,29 +13,44 @@ interface BackButtonProps {
   disabled?: boolean;
 }
 
+// A text link rather than a `btn`: daisyUI buttons have a fixed height, so a
+// label long enough to wrap in a narrow column spilled outside the button's
+// box. Plain text wraps freely; hovering or focusing highlights the text itself.
+const LINK_CLASS =
+  "inline-flex items-center gap-1.5 text-lg font-semibold text-base-content " +
+  "hover:text-primary hover:underline focus-visible:text-primary focus-visible:underline " +
+  "underline-offset-4 transition-colors";
+
 /**
  * BackButton — shared top-left navigation escape hatch.
- * 
- * Ensures consistent padding and styling for "Back" or "Cancel" actions
- * that sit outside the main centered layout container.
+ *
+ * Ensures consistent styling for "Back" or "Cancel" actions that sit outside
+ * the main centered layout container.
  */
 export function BackButton({ href, onClick, children, disabled }: BackButtonProps) {
   const content = (
-    <Button 
-      variant="ghost" 
-      onClick={onClick} 
-      disabled={disabled} 
-      size="md" 
-      className="text-base-content/90 hover:text-base-content -ml-2"
-    >
-      <ArrowLeftIcon className="w-4 h-4 mr-1.5" />
-      {children}
-    </Button>
+    <>
+      <ArrowLeftIcon className="w-5 h-5 shrink-0" aria-hidden="true" />
+      <span>{children}</span>
+    </>
   );
 
+  if (href && !disabled) {
+    return (
+      <Link href={href} onClick={onClick} className={LINK_CLASS}>
+        {content}
+      </Link>
+    );
+  }
+
   return (
-    <>
-      {href ? <Link href={href}>{content}</Link> : content}
-    </>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`${LINK_CLASS} cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline`}
+    >
+      {content}
+    </button>
   );
 }

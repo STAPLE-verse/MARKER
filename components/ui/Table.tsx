@@ -18,6 +18,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { cn } from '@/lib/utils';
+import { stapleFieldClass } from "@/components/ui/fieldStyles";
 
 // =============================================================================
 // VISUAL PRIMITIVES
@@ -287,7 +288,7 @@ function DataTable<TData>({
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder={globalSearchPlaceholder}
             aria-label="Search table data"
-            className="input input-bordered input-md text-lg w-full max-w-xs bg-base-200"
+            className={cn("input input-md text-lg w-full max-w-xs", stapleFieldClass("input"))}
           />
         </div>
       )}
@@ -386,7 +387,7 @@ function DataTable<TData>({
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => table.setPageSize(Number(e.target.value))}
-            className="select select-bordered select-md text-base"
+            className={cn("select select-md text-base", stapleFieldClass("select"))}
           >
             {pageSizeOptions.map((size) => (
               <option key={size} value={size}>

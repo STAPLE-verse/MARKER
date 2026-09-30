@@ -10,6 +10,7 @@ import { useImportFromStaple } from "@/features/forms/hooks/useImportFromStaple"
 import { useStapleVersionPreview } from "@/features/forms/hooks/useStapleVersionPreview";
 import type { StapleImportFormDTO } from "@/features/forms/imports/queries/getStapleImportOptions";
 import { toast } from "@/lib/toast";
+import { stapleFieldClass } from "@/components/ui/fieldStyles";
 
 interface StapleImportModalProps {
   form: StapleImportFormDTO;
@@ -89,7 +90,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
             </span>
           </label>
           <select
-            className="select select-bordered w-full text-base"
+            className={`select w-full text-base ${stapleFieldClass("select")}`}
             value={versionId}
             onChange={(e) => setVersionId(Number(e.target.value))}
           >
@@ -126,7 +127,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
 
         {showTargetSelect && (
           <select
-            className="select select-bordered w-full text-base"
+            className={`select w-full text-base ${stapleFieldClass("select")}`}
             value={targetId}
             onChange={(e) => setTargetId(Number(e.target.value))}
           >

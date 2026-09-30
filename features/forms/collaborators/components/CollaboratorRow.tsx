@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ROLE_BADGE_VARIANT } from "../roleColors";
 import type { CollaboratorDTO, CollaboratorRole } from "../types";
+import { stapleFieldClass } from "@/components/ui/fieldStyles";
 
 interface CollaboratorRowProps {
   collaborator: CollaboratorDTO;
@@ -95,7 +96,7 @@ export function CollaboratorRow({
             </Badge>
           ) : isOwnerViewer ? (
             <select
-              className="select select-bordered select-md"
+              className={`select select-md text-base ${stapleFieldClass("select")}`}
               value={confirmingTransfer ? "OWNER" : collaborator.role}
               onChange={(e) => handleRoleSelect(e.target.value)}
               disabled={isPending || confirmingTransfer}

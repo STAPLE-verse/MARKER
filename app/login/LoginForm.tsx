@@ -8,15 +8,11 @@ import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
-import { STAPLE_INPUT_CLASS } from "@/components/ui/fieldStyles";
 import { STAPLE_URL, STAPLE_FORGOT_PASSWORD_URL, stapleSignupUrl } from "@/lib/staple";
 import Link from "next/link";
 import { login } from "@/features/auth/actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-/** Fields sit on a `base-300` card here, so they take the page color as their fill. */
-const FIELD_CLASS = `${STAPLE_INPUT_CLASS} bg-base-100`;
 
 interface LoginFormProps {
   /** Sanitized same-origin redirect target (see utils/redirect.ts), or null for the default post-login landing page. */
@@ -87,14 +83,12 @@ export default function LoginForm({ next, justRegistered = false }: LoginFormPro
                 label="Email:"
                 type="email"
                 placeholder="Email"
-                className={FIELD_CLASS}
                 {...register("email")}
                 error={errors.email?.message}
               />
               <PasswordInput
                 label="Password:"
                 placeholder="Password"
-                className={FIELD_CLASS}
                 {...register("password")}
                 error={errors.password?.message}
               />

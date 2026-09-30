@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { stapleFieldClass } from './fieldStyles';
 
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
   label?: React.ReactNode;
@@ -24,8 +25,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
       <textarea
         ref={ref}
         className={cn(
-          "textarea textarea-bordered w-full text-base",
-          error && "textarea-error",
+          "textarea w-full text-base",
+          stapleFieldClass("textarea", !!error),
           className
         )}
         {...props}

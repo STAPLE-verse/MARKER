@@ -2,6 +2,7 @@
 
 import React, { useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { stapleFieldClass } from "./fieldStyles";
 import type { SelectOption } from "./Select";
 
 interface SearchableSelectProps {
@@ -127,7 +128,7 @@ export function SearchableSelect({
             setQuery(null);
             onBlur?.();
           }}
-          className={cn("input w-full text-base", error && "input-error", className)}
+          className={cn("input w-full text-base", stapleFieldClass("input", !!error), className)}
         />
         {open && (
           <ul

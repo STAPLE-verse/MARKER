@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { stapleFieldClass } from './fieldStyles';
 
 export type SelectOption = {
   value: string;
@@ -42,7 +43,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
         ref={ref}
         className={cn(
           "select w-full text-base",
-          error && "select-error",
+          stapleFieldClass("select", !!error),
           className
         )}
         {...(isControlled ? {} : { defaultValue: "" })}

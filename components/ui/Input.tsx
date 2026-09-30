@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { stapleFieldClass } from './fieldStyles';
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: React.ReactNode;
@@ -29,7 +30,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
           ref={ref}
           className={cn(
             "input w-full text-base",
-            error && "input-error",
+            stapleFieldClass("input", !!error),
             endAdornment && "pr-10",
             className
           )}

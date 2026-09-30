@@ -3,6 +3,7 @@
 import React, { useId, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { cn } from "@/lib/utils";
+import { stapleFieldClass } from "./fieldStyles";
 
 export interface MultiValueSuggestion {
   value: string;
@@ -20,7 +21,7 @@ interface MultiValueFilterProps {
   suggestions: MultiValueSuggestion[];
   /** Let people add text that isn't a suggestion, matched as "contains". */
   allowFreeText?: boolean;
-  /** Extra classes for the text box (e.g. the shared field style and a background). */
+  /** Extra classes for the text box (e.g. a different background). */
   inputClassName?: string;
 }
 
@@ -125,7 +126,7 @@ export function MultiValueFilter({
           onKeyDown={onKeyDown}
           onBlur={() => setQuery("")}
           placeholder={placeholder}
-          className={cn("input input-md text-base w-full", inputClassName)}
+          className={cn("input input-md text-base w-full", stapleFieldClass("input"), inputClassName)}
         />
         {open && (
           <ul

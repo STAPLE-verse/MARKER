@@ -1,5 +1,6 @@
 import React from "react";
 import { Control, Controller, FieldErrors, FieldValues, Path } from "react-hook-form";
+import { stapleFieldClass } from "@/components/ui/fieldStyles";
 
 interface VersionInputProps<TFieldValues extends FieldValues> {
   name: Path<TFieldValues>;
@@ -31,7 +32,7 @@ export function VersionInput<TFieldValues extends FieldValues>({
               <span className="text-xl font-bold text-base-content/90">v</span>
               <input
                 type="text"
-                className={`input input-bordered w-full font-mono text-lg bg-base-100 ${errorMessage ? "input-error" : ""}`}
+                className={`input w-full font-mono text-lg ${stapleFieldClass("input", !!errorMessage)}`}
                 value={typeof value === "string" ? value : ""}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder="1.0.0"

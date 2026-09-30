@@ -18,3 +18,17 @@ export const STAPLE_INPUT_CLASS = `input-primary ${STAPLE_FIELD_BASE}`;
 
 /** For `select` elements (pair with daisyUI's `select`). */
 export const STAPLE_SELECT_CLASS = `select-primary ${STAPLE_FIELD_BASE}`;
+
+/** For `textarea` elements (pair with daisyUI's `textarea`). */
+export const STAPLE_TEXTAREA_CLASS = `textarea-primary ${STAPLE_FIELD_BASE}`;
+
+/**
+ * The default look for the shared field components (`Input`, `Select`,
+ * `Textarea`, …): the STAPLE style on the page color, which is right for the
+ * usual case of a field inside a card. The border turns to the error color
+ * instead of primary when the field has an error. Callers can still pass a
+ * different background through `className`.
+ */
+export function stapleFieldClass(kind: "input" | "select" | "textarea", hasError = false): string {
+  return `${kind}-${hasError ? "error" : "primary"} ${STAPLE_FIELD_BASE} bg-base-100`;
+}

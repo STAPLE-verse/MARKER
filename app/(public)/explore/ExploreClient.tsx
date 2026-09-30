@@ -353,7 +353,6 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
                 onChange={(keyword) => update({ keyword })}
                 suggestions={keywordCounts}
                 allowFreeText
-                inputClassName={CARD_INPUT_CLASS}
               />
             </FilterField>
             <FilterField label="Contributors">
@@ -364,7 +363,6 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
                 onChange={(contributor) => update({ contributor })}
                 suggestions={contributorCounts}
                 allowFreeText
-                inputClassName={CARD_INPUT_CLASS}
               />
             </FilterField>
             <FilterField label="Published from">
