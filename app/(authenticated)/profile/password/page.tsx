@@ -27,7 +27,7 @@ export default function ChangePasswordPage() {
   const { save, isSaving, formError } = useChangePassword(form);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-xl animate-in fade-in duration-300">
+    <div className="w-full lg:w-4/5 mx-auto px-4 py-8 animate-in fade-in duration-300">
       <PageHeader
         title="Change Password"
         description="Secure your account by updating your password credentials."

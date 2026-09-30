@@ -23,14 +23,14 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl animate-in fade-in duration-300">
+    <div className="w-full lg:w-4/5 mx-auto px-4 py-8 animate-in fade-in duration-300">
       <PageHeader
         title="My Profile"
         description="View your account information and linked academic credentials."
       >
         <div className="flex gap-2">
           <Link href="/profile/password">
-            <Button variant="primary" size="md">
+            <Button variant="secondary" size="md">
               Change Password
             </Button>
           </Link>

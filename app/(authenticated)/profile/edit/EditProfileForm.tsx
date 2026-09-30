@@ -69,7 +69,7 @@ export default function EditProfileForm({ initialValues }: EditProfileFormProps)
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl animate-in fade-in duration-300">
+    <div className="w-full lg:w-4/5 mx-auto px-4 py-8 animate-in fade-in duration-300">
       <PageHeader
         title="Edit Profile"
         description="Update your personal details and academic credentials."

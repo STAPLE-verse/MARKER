@@ -31,7 +31,7 @@ describe("createNotification", () => {
 
     expect(createNotificationRow).toHaveBeenCalledWith({
       data: {
-        message: 'jane_doe forked your schema "Schema".',
+        message: 'jane_doe made a copy of your schema "Schema".',
         routeData: { path: "/collection/5" },
         recipients: { connect: [{ id: 1 }, { id: 2 }] },
         source: "MARKER",
