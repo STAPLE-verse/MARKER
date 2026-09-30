@@ -285,7 +285,7 @@ export function SchemaDetailHeader({
               </Link>
               {isOwner && (
                 <Link href={`/collection/${formId}/publish`}>
-                  <Button variant="primary" size="md">
+                  <Button variant="secondary" size="md">
                     Publish Schema
                   </Button>
                 </Link>
@@ -319,7 +319,7 @@ export function SchemaDetailHeader({
                   onClick={onClone}
                   disabled={isCloning}
                 >
-                  {isCloning ? "Cloning..." : "Clone"}
+                  {isCloning ? "Making a copy..." : "Make a copy"}
                 </Button>
               </DropdownItem>
               {isViewingLatest && stapleImport && isOwner && (

@@ -30,7 +30,7 @@ export const cloneFormVersion = authenticatedAction(cloneFormVersionSchema, asyn
   // MarkerForm) — so this can't route through `getAuthorizedLatestVersion`
   // as-is, but reuses the same role-resolution primitive it does
   // (docs/refactor/form-collaboration.md §4.2).
-  assertFormRole(version.form, userId, "EDITOR", "You do not have permission to clone this form");
+  assertFormRole(version.form, userId, "EDITOR", "You do not have permission to make a copy of this form");
 
   const newName = `Copy of ${version.name || "Untitled Form"}`;
 

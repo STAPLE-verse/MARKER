@@ -23,7 +23,7 @@ export function useCloneForm() {
         toast.error(res.error);
         return;
       }
-      toast.success("Form cloned");
+      toast.success("Copy created");
       router.push(`/collection/${res.data}`);
     });
   };

@@ -92,7 +92,7 @@ export function TextListInput({
             </Button>
           </div>
         ))}
-        <Button type="button" variant="ghost" size="md" onClick={() => onChange([...value, ""])}>
+        <Button type="button" variant="primary" size="md" onClick={() => onChange([...value, ""])}>
           <PlusIcon className="w-4 h-4 mr-1" />
           {addButtonLabel}
         </Button>
