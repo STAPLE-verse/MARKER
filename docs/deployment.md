@@ -44,3 +44,22 @@ MARKER is a standard Next.js App Router project and can be deployed to Vercel, A
 4. `npm start` (Start the Node.js server)
 
 *Note: Since MARKER has no database migrations to run and relies entirely on shared UI packages and STAPLE's DB, its deployment pipeline is exceptionally fast and stateless.*
+
+## 5. Email
+
+MARKER sends email through Resend, the same provider and account as STAPLE. Set `RESEND_API_KEY` to STAPLE's key; without it MARKER runs normally but sends no email.
+
+### Scheduled notification emails
+
+Like STAPLE's `cron/cronJobDailyMailer.mjs` and `cronJobWeeklyMailer.mjs`, MARKER emails people a daily or weekly roundup of their MARKER notifications. Who gets which one comes from the email frequency on their **STAPLE profile** (`User.emailProjectActivityFrequency`: never, daily, or weekly); MARKER has no setting of its own.
+
+The roundup does not run by itself. Set `CRON_SECRET`, then have a scheduler call the endpoint once a day and once a week. With crontab on the server, as STAPLE does:
+
+```cron
+# every day at 08:00
+0 8 * * * curl -fsS -H "Authorization: Bearer $CRON_SECRET" "https://<marker-host>/api/cron/notification-digest?frequency=daily"
+# every Monday at 08:00
+0 8 * * 1 curl -fsS -H "Authorization: Bearer $CRON_SECRET" "https://<marker-host>/api/cron/notification-digest?frequency=weekly"
+```
+
+The daily call covers the last 24 hours and the weekly call the last 7 days, so each should run exactly that often. The response reports how many emails were sent and how many failed.
