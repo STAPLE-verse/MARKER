@@ -76,7 +76,7 @@ export function CollaboratorManagementModal({
             />
           ))}
           {collaborators.length === 0 && (
-            <li className="p-4 text-base text-base-content/60">No collaborators yet.</li>
+            <li className="p-4 text-base text-base-content/90">No collaborators yet.</li>
           )}
         </ul>
 
@@ -86,7 +86,7 @@ export function CollaboratorManagementModal({
             (picked from that row's own role dropdown above) — with none yet,
             there's no row to pick from, so leaving isn't possible either. */}
         {isOwnerViewer && !hasAcceptedCollaborator && (
-          <p className="text-base text-base-content/60">
+          <p className="text-base text-base-content/90">
             Invite a collaborator and have them accept before you can transfer ownership or leave this form.
           </p>
         )}

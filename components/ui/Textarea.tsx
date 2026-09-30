@@ -34,7 +34,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
         <label className="label pt-2">
           <span className={cn(
             "label-text-alt",
-            error ? "text-error" : "text-base-content/70"
+            error ? "text-error" : "text-base-content/90"
           )}>
             {error || helperText}
           </span>

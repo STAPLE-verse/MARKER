@@ -77,11 +77,11 @@ export default function SchemaDetailsClient({
         <Card bordered>
           <CardBody>
             <CardTitle className="text-xl">Description</CardTitle>
-            <p className="text-base-content/85 leading-relaxed">
+            <p className="text-base-content/90 leading-relaxed">
               {schema.description || "No description provided."}
             </p>
             {schema.relatedPublicationDoi && (
-              <p className="text-base text-base-content/60 mt-2">
+              <p className="text-base text-base-content/90 mt-2">
                 Related publication:{" "}
                 <a
                   href={`https://doi.org/${schema.relatedPublicationDoi}`}
@@ -94,7 +94,7 @@ export default function SchemaDetailsClient({
               </p>
             )}
             {schema.forkedFrom && (
-              <p className="text-base text-base-content/60 mt-2">
+              <p className="text-base text-base-content/90 mt-2">
                 Forked from{" "}
                 <Link href={`/schemas/${schema.forkedFrom.pid}`} className="link link-primary">
                   {schema.forkedFrom.title}

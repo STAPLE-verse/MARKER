@@ -147,7 +147,7 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
       )}
 
       {fields.length === 0 ? (
-        <p className="text-base text-base-content/60 text-center py-4">No contributors added yet.</p>
+        <p className="text-base text-base-content/90 text-center py-4">No contributors added yet.</p>
       ) : (
         <div className="flex flex-col gap-3">
           {fields.map((field, index) => {
@@ -202,7 +202,7 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
 
       {unusedSuggestions.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 justify-center pt-2">
-          <span className="text-base text-base-content/60">Add from this form&apos;s collaborators:</span>
+          <span className="text-base text-base-content/90">Add from this form&apos;s collaborators:</span>
           {unusedSuggestions.map((suggestion) => (
             <Button
               key={suggestion.userId}

@@ -133,7 +133,7 @@ function VersionBadge({ schema }: { schema: PublishedSchemaCardDTO }) {
           <DropdownItem key={version.pid}>
             <Link href={`/schemas/${version.pid}`} className="flex items-center justify-between gap-2">
               <span className={version.pid === schema.pid ? "font-semibold" : ""}>v{version.version}</span>
-              <span className="text-base text-base-content/50 whitespace-nowrap">
+              <span className="text-base text-base-content/90 whitespace-nowrap">
                 {publishedOnLabel(version.createdAt)}
               </span>
             </Link>
@@ -314,7 +314,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
           />
 
           {visible.length === 0 && (
-            <p className="text-center text-base-content/60 py-12">
+            <p className="text-center text-base-content/90 py-12">
               No public schemas found. Try adjusting your search or filters.
             </p>
           )}
@@ -337,13 +337,13 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
                         {domainLabel(schema.domain)}
                       </Badge>
                     </div>
-                    <p className="text-base text-base-content/70 mt-0">
+                    <p className="text-base text-base-content/90 mt-0">
                       {contributorNamesLabel(schema)}
                     </p>
                   </div>
 
                   {schema.description && (
-                    <p className="text-base-content/85 line-clamp-3 mt-2">{schema.description}</p>
+                    <p className="text-base-content/90 line-clamp-3 mt-2">{schema.description}</p>
                   )}
 
                   {schema.keywords.length > 0 && (
@@ -351,7 +351,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
                       {schema.keywords.map((keyword) => (
                         <span
                           key={keyword}
-                          className="badge badge-outline badge-md text-base border-base-content/20 text-base-content/60"
+                          className="badge badge-outline badge-md text-base border-base-content/20 text-base-content/90"
                         >
                           {keyword}
                         </span>
@@ -359,7 +359,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
                     </div>
                   )}
 
-                  <p className="text-base text-base-content/50">
+                  <p className="text-base text-base-content/90">
                     {licenseLabel(schema.license)} · Published {publishedOnLabel(schema.createdAt)}
                   </p>
                 </CardBody>

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 function tabItemClassName(active: boolean, className?: string) {
   return cn(
     "tab tab-lg font-semibold transition-all",
-    active ? "tab-active text-primary" : "text-base-content/60 hover:text-base-content/80",
+    active ? "tab-active text-primary" : "text-base-content/90 hover:text-base-content",
     className
   );
 }

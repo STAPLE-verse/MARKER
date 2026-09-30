@@ -24,7 +24,7 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
             onClick={() => setVisible((v) => !v)}
             aria-label={visible ? "Hide password" : "Show password"}
             aria-pressed={visible}
-            className="flex items-center justify-center text-base-content/60 hover:text-base-content"
+            className="flex items-center justify-center text-base-content/90 hover:text-base-content"
           >
             {visible ? (
               <EyeSlashIcon className="w-5 h-5" aria-hidden="true" />

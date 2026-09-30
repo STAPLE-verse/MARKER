@@ -33,7 +33,7 @@ export default function AuthenticatedError({
       </div>
 
       <h1 className="text-2xl font-bold mb-2">Something went wrong</h1>
-      <p className="text-base-content/70 mb-6">
+      <p className="text-base-content/90 mb-6">
         We couldn&apos;t load this page. This is usually temporary &mdash; please try again.
       </p>
 

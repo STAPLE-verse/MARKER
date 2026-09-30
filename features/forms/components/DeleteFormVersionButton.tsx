@@ -55,7 +55,7 @@ export function DeleteFormVersionButton({
       disabledReason={disabledReason}
       modalTitle="Delete Draft Version"
       modalBody={
-        <p className="text-base-content/85">
+        <p className="text-base-content/90">
           Are you sure you want to delete{" "}
           <span className="font-bold text-primary">{versionLabel}</span>
           {displayName !== versionLabel && (

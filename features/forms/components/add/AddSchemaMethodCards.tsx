@@ -49,14 +49,14 @@ function MethodCard({ method }: { method: AddSchemaMethod }) {
               "rounded-xl p-3",
               isAvailable
                 ? "bg-primary/10 text-primary"
-                : "bg-base-300 text-base-content/50",
+                : "bg-base-300 text-base-content/90",
             )}
           >
             <MethodIcon id={method.id} />
           </div>
           {isAvailable ? (
             <ArrowRightIcon
-              className="h-5 w-5 text-base-content/40 transition-transform group-hover:translate-x-1 group-hover:text-primary"
+              className="h-5 w-5 text-base-content/90 transition-transform group-hover:translate-x-1 group-hover:text-primary"
               aria-hidden="true"
             />
           ) : (
@@ -65,7 +65,7 @@ function MethodCard({ method }: { method: AddSchemaMethod }) {
         </div>
         <div>
           <CardTitle className="text-xl">{method.title}</CardTitle>
-          <p className="mt-2 text-base leading-relaxed text-base-content/60">
+          <p className="mt-2 text-base leading-relaxed text-base-content/90">
             {method.description}
           </p>
         </div>

@@ -28,7 +28,7 @@ export function VersionInput<TFieldValues extends FieldValues>({
             </label>
 
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-base-content/50">v</span>
+              <span className="text-xl font-bold text-base-content/90">v</span>
               <input
                 type="text"
                 className={`input input-bordered w-full font-mono text-lg bg-base-100 ${errorMessage ? "input-error" : ""}`}

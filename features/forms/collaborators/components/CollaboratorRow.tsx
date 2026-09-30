@@ -63,7 +63,7 @@ export function CollaboratorRow({
         <Avatar email={collaborator.avatarEmail} fallback={collaborator.username[0]} size={36} />
         <div className="min-w-0 flex-1">
           <div className="font-medium truncate">{collaborator.username}</div>
-          {collaborator.name && <div className="text-base text-base-content/60 truncate">{collaborator.name}</div>}
+          {collaborator.name && <div className="text-base text-base-content/90 truncate">{collaborator.name}</div>}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {/* Action button first, badge/select last — keeps the badge flush

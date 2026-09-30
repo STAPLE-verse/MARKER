@@ -27,7 +27,7 @@ export function BackButton({ href, onClick, children, disabled }: BackButtonProp
       onClick={onClick} 
       disabled={disabled} 
       size="md" 
-      className="text-base-content/60 hover:text-base-content -ml-2"
+      className="text-base-content/90 hover:text-base-content -ml-2"
     >
       <ArrowLeftIcon className="w-4 h-4 mr-1.5" />
       {children}

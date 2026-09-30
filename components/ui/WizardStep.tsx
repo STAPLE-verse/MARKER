@@ -17,7 +17,7 @@ export function WizardStep({ title, description, children, className, ...props }
     <div className={cn("space-y-8 animate-in fade-in slide-in-from-right-4 duration-300", className)} {...props}>
       <div>
         <h2 className="text-2xl font-bold">{title}</h2>
-        <p className="text-base-content/70 mt-1">{description}</p>
+        <p className="text-base-content/90 mt-1">{description}</p>
       </div>
       {children}
     </div>

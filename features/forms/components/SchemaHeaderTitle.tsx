@@ -29,7 +29,7 @@ export function SchemaHeaderTitle({ version, prefix, name, extraBadges }: Schema
       <span className="truncate" title={tooltip}>
         {prefix ? (
           <>
-            <span className="text-base-content/50 font-normal">{prefix}:</span> {displayName}
+            <span className="text-base-content/90 font-normal">{prefix}:</span> {displayName}
           </>
         ) : (
           displayName

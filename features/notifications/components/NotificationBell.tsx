@@ -105,7 +105,7 @@ export function NotificationBell({ initialUnreadCount, initialLatest }: Notifica
       </DropdownTrigger>
       <DropdownContent className="w-80 mt-4 right-0 origin-top-right">
         {latest.length === 0 ? (
-          <DropdownItem className="text-base text-base-content/60 px-2 py-2">No new notifications.</DropdownItem>
+          <DropdownItem className="text-base text-base-content/90 px-2 py-2">No new notifications.</DropdownItem>
         ) : (
           latest.map((notification) => (
             <DropdownItem key={notification.id}>

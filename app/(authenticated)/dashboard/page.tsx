@@ -47,7 +47,7 @@ export default async function DashboardPage() {
               <CardTitle className="text-xl font-bold">Recent Activities</CardTitle>
               {activity.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-base-content/70 mb-4">
+                  <p className="text-base-content/90 mb-4">
                     Nothing here yet — create your first schema to get started.
                   </p>
                   <Link href="/collection/new">
@@ -66,9 +66,9 @@ export default async function DashboardPage() {
                     >
                       <div>
                         <span className="font-semibold text-primary">{getActivityActionLabel(item)}</span>
-                        <span className="text-base-content/80"> - {getActivityTargetLabel(item)}</span>
+                        <span className="text-base-content/90"> - {getActivityTargetLabel(item)}</span>
                       </div>
-                      <span className="text-base text-base-content/50 shrink-0 ml-4">
+                      <span className="text-base text-base-content/90 shrink-0 ml-4">
                         {formatRelativeTime(item.timestamp)}
                       </span>
                     </Link>
@@ -106,18 +106,18 @@ export default async function DashboardPage() {
               <CardTitle className="text-lg font-bold">My Stats</CardTitle>
               <div className="stats stats-vertical bg-transparent w-full">
                 <Link href="/collection" className="stat px-0 hover:opacity-80 transition-opacity">
-                  <div className="stat-title text-base text-base-content/70">Published Schemas</div>
+                  <div className="stat-title text-base text-base-content/90">Published Schemas</div>
                   <div className="stat-value text-primary text-3xl font-extrabold">{stats.publishedCount}</div>
                 </Link>
                 <Link href="/collection" className="stat px-0 hover:opacity-80 transition-opacity">
-                  <div className="stat-title text-base text-base-content/70">Draft Templates</div>
+                  <div className="stat-title text-base text-base-content/90">Draft Templates</div>
                   <div className="stat-value text-secondary text-3xl font-extrabold">{stats.draftCount}</div>
                 </Link>
                 <Link
                   href={collectionTabHref("archived")}
                   className="stat px-0 hover:opacity-80 transition-opacity"
                 >
-                  <div className="stat-title text-base text-base-content/70">Archived</div>
+                  <div className="stat-title text-base text-base-content/90">Archived</div>
                   <div className="stat-value text-accent text-3xl font-extrabold">{stats.archivedCount}</div>
                 </Link>
               </div>

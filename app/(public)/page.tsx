@@ -30,7 +30,7 @@ export default async function Home() {
           <h1 className="text-5xl font-extrabold tracking-tight lg:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary pb-4">
             MARKER
           </h1>
-          <p className="text-xl text-base-content/80 font-light leading-relaxed">
+          <p className="text-xl text-base-content/90 font-light leading-relaxed">
             The open ecosystem for creating, discovering, and integrating standardized 
             metadata schemas into your research workflows.
           </p>
@@ -48,14 +48,14 @@ export default async function Home() {
           </div>
 
           {recentSchemas.length === 0 ? (
-            <div className="bg-base-100 shadow-xl border border-base-200 rounded-2xl py-16 text-center text-base-content/60">
+            <div className="bg-base-100 shadow-xl border border-base-200 rounded-2xl py-16 text-center text-base-content/90">
               No templates have been published yet.
             </div>
           ) : (
             <div className="overflow-x-auto bg-base-100 shadow-xl border border-base-200 rounded-2xl">
               <table className="table table-zebra w-full text-left text-base">
                 <thead>
-                  <tr className="bg-base-200/50 text-base-content/70">
+                  <tr className="bg-base-200/50 text-base-content/90">
                     <th className="font-semibold text-base w-1/2 py-4">Title</th>
                     <th className="font-semibold text-base">Version</th>
                     <th className="font-semibold text-base">Author</th>
@@ -68,7 +68,7 @@ export default async function Home() {
                     <tr key={schema.pid} className="hover:bg-base-200/30 transition-colors">
                       <td className="py-4">
                         <div className="font-bold text-base-content">{schema.title}</div>
-                        <div className="text-base text-base-content/60 truncate max-w-sm mt-1">
+                        <div className="text-base text-base-content/90 truncate max-w-sm mt-1">
                           {schema.description}
                         </div>
                       </td>
@@ -77,7 +77,7 @@ export default async function Home() {
                           v{schema.version}
                         </span>
                       </td>
-                      <td className="text-base-content/80">{contributorNamesLabel(schema)}</td>
+                      <td className="text-base-content/90">{contributorNamesLabel(schema)}</td>
                       <td>
                         <span className="badge badge-accent badge-md text-base">{schema.license}</span>
                       </td>

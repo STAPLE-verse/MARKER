@@ -60,7 +60,7 @@ export default function NotificationsClient({ notifications: initialNotification
       header: "Notification",
       cell: ({ row }) => {
         const label = (
-          <span className={row.original.read ? "text-base-content/50" : "font-medium text-base-content"}>
+          <span className={row.original.read ? "text-base-content/90" : "font-medium text-base-content"}>
             {row.original.message}
           </span>
         );
@@ -120,7 +120,7 @@ export default function NotificationsClient({ notifications: initialNotification
               triggerAriaLabel="Delete notification"
               modalTitle="Delete Notification"
               modalBody={
-                <p className="text-base-content/85">
+                <p className="text-base-content/90">
                   This notification will be permanently deleted. This action cannot be undone.
                 </p>
               }

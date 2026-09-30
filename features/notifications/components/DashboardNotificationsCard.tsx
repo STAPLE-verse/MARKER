@@ -32,7 +32,7 @@ export function DashboardNotificationsCard({ notifications: initialNotifications
   };
 
   if (notifications.length === 0) {
-    return <p className="py-8 text-center text-base-content/70">You&apos;re all caught up.</p>;
+    return <p className="py-8 text-center text-base-content/90">You&apos;re all caught up.</p>;
   }
 
   return (
@@ -44,8 +44,8 @@ export function DashboardNotificationsCard({ notifications: initialNotifications
           onClick={() => handleOpen(notification.id)}
           className="py-4 flex justify-between items-center first:pt-0 last:pb-0 hover:bg-base-200/50 -mx-2 px-2 rounded transition-colors"
         >
-          <span className="text-base-content/80">{notification.message}</span>
-          <span className="text-base text-base-content/50 shrink-0 ml-4">
+          <span className="text-base-content/90">{notification.message}</span>
+          <span className="text-base text-base-content/90 shrink-0 ml-4">
             {formatRelativeTime(notification.createdAt)}
           </span>
         </Link>

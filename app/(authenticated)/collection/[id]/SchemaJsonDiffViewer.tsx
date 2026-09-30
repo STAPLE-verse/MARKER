@@ -53,7 +53,7 @@ export default function SchemaJsonDiffViewer({
           keepCurrentOriginalModel
           keepCurrentModifiedModel
           theme="vs-dark"
-          loading={<div className="p-4 text-base text-base-content/60">Loading editor...</div>}
+          loading={<div className="p-4 text-base text-base-content/90">Loading editor...</div>}
           onMount={handleMount}
           options={{
             automaticLayout: true,

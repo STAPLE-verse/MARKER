@@ -56,7 +56,7 @@ export function PublishedVersionsSidebar({
                 </Badge>
               )}
             </div>
-            <div className="mt-1 text-base text-base-content/50">
+            <div className="mt-1 text-base text-base-content/90">
               {new Date(version.createdAt).toLocaleDateString(undefined, {
                 year: "numeric",
                 month: "long",

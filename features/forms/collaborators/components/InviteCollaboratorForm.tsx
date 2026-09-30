@@ -131,9 +131,9 @@ export function InviteCollaboratorForm({ formId, onInvite, isPending }: InviteCo
         />
         {isOpen && query.trim().length >= MIN_QUERY_LENGTH && (
           <ul className="list bg-base-100 rounded-box shadow-md mt-1 w-full max-h-64 overflow-y-auto border border-base-300">
-            {isSearching && <li className="p-4 text-base text-base-content/60">Searching…</li>}
+            {isSearching && <li className="p-4 text-base text-base-content/90">Searching…</li>}
             {!isSearching && results.length === 0 && (
-              <li className="p-4 text-base text-base-content/60">No matching users.</li>
+              <li className="p-4 text-base text-base-content/90">No matching users.</li>
             )}
             {!isSearching &&
               results.map((user) => (
@@ -145,7 +145,7 @@ export function InviteCollaboratorForm({ formId, onInvite, isPending }: InviteCo
                   <Avatar email={user.avatarEmail} fallback={user.username[0]} size={32} />
                   <div>
                     <div className="font-medium">{user.username}</div>
-                    {user.name && <div className="text-base text-base-content/60">{user.name}</div>}
+                    {user.name && <div className="text-base text-base-content/90">{user.name}</div>}
                   </div>
                 </li>
               ))}

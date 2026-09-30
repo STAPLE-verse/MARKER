@@ -139,7 +139,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
           </select>
         )}
 
-        {isLoadingPreview && <div className="text-base text-base-content/50">Loading preview…</div>}
+        {isLoadingPreview && <div className="text-base text-base-content/90">Loading preview…</div>}
         {preview && <SchemaTabsCard schema={preview.schema} uiSchema={preview.uiSchema} />}
       </div>
 
@@ -161,7 +161,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
         onClose={() => setConfirmOverwriteOpen(false)}
         title="Overwrite local changes?"
         body={
-          <p className="text-base-content/85">
+          <p className="text-base-content/90">
             <span className="font-bold text-primary">{selectedTarget?.latestName}</span> has
             changes made in MARKER since the last import. Importing now will replace them with
             the STAPLE version.

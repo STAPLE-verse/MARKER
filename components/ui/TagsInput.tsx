@@ -90,7 +90,7 @@ export function TagsInput({
 
       {description && !error && (
         <label className="label pt-2">
-          <span className="label-text-alt text-base-content/70">{description}</span>
+          <span className="label-text-alt text-base-content/90">{description}</span>
         </label>
       )}
 

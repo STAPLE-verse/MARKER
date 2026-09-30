@@ -9,7 +9,7 @@ import { TabTrigger, Tabs } from "@/components/ui/Tabs";
 const SchemaJsonDiffViewer = dynamic(() => import("./SchemaJsonDiffViewer"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full min-h-[420px] items-center justify-center rounded-lg border border-base-300 bg-base-200 text-base text-base-content/60">
+    <div className="flex h-full min-h-[420px] items-center justify-center rounded-lg border border-base-300 bg-base-200 text-base text-base-content/90">
       Loading comparison...
     </div>
   ),
@@ -65,7 +65,7 @@ export function SchemaDiffDialog({
       <div className="flex flex-col gap-4 border-b border-base-300 px-6 py-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h3 className="text-lg font-bold">Compare to Latest</h3>
-          <p className="text-base text-base-content/60">
+          <p className="text-base text-base-content/90">
             {currentVersionLabel} compared with {latestVersionLabel}
           </p>
         </div>

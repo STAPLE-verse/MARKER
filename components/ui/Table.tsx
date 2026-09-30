@@ -82,7 +82,7 @@ const TableEmpty = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HT
 }>(
   ({ colSpan, message = "No data found", className, ...props }, ref) => (
     <tr ref={ref} className={className} {...props}>
-      <td colSpan={colSpan} className="text-center p-8 text-base-content/50">
+      <td colSpan={colSpan} className="text-center p-8 text-base-content/90">
         {message}
       </td>
     </tr>

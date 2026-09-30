@@ -112,10 +112,10 @@ export function VersionHistorySidebar({
                 )}
               </div>
               <div className="mt-1 flex items-end justify-between gap-2">
-                <div className="min-w-0 truncate text-base text-base-content/70">
+                <div className="min-w-0 truncate text-base text-base-content/90">
                   {v.name || "Untitled Draft"}
                 </div>
-                <div className="shrink-0 whitespace-nowrap text-base text-base-content/50">
+                <div className="shrink-0 whitespace-nowrap text-base text-base-content/90">
                   {new Date(v.createdAt).toLocaleDateString()}
                 </div>
               </div>

@@ -59,7 +59,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
         <label className="label">
           <span className={cn(
             "label-text-alt",
-            error ? "text-error" : "text-base-content/70"
+            error ? "text-error" : "text-base-content/90"
           )}>
             {error || helperText}
           </span>

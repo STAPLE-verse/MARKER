@@ -32,12 +32,12 @@ export default function GlobalError({
           </div>
 
           <h1 className="text-2xl font-bold mb-2">Something went wrong</h1>
-          <p className="text-base-content/70 mb-6">
+          <p className="text-base-content/90 mb-6">
             A critical error occurred and the app couldn&apos;t recover. Please try again.
           </p>
 
           {error.digest && (
-            <p className="font-mono text-base text-base-content/50 break-all mb-6">
+            <p className="font-mono text-base text-base-content/90 break-all mb-6">
               Reference: {error.digest}
             </p>
           )}

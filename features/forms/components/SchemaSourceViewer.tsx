@@ -11,7 +11,7 @@ export function SchemaSourceViewer({ schema, uiSchema }: SchemaSourceViewerProps
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <h3 className="font-semibold text-base text-base-content/70 ml-1">Data Schema</h3>
+        <h3 className="font-semibold text-base text-base-content/90 ml-1">Data Schema</h3>
         <div className="bg-base-300 p-4 rounded-lg overflow-x-auto border border-base-200 h-[500px]">
           <pre className="text-base font-mono text-secondary-content">
             {JSON.stringify(schema, null, 2)}
@@ -19,7 +19,7 @@ export function SchemaSourceViewer({ schema, uiSchema }: SchemaSourceViewerProps
         </div>
       </div>
       <div className="space-y-2">
-        <h3 className="font-semibold text-base text-base-content/70 ml-1">UI Schema</h3>
+        <h3 className="font-semibold text-base text-base-content/90 ml-1">UI Schema</h3>
         <div className="bg-base-300 p-4 rounded-lg overflow-x-auto border border-base-200 h-[500px]">
           <pre className="text-base font-mono text-secondary-content">
             {JSON.stringify(uiSchema, null, 2)}

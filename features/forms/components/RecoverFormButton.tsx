@@ -41,7 +41,7 @@ export function RecoverFormButton({
       triggerSize={size}
       modalTitle="Recover Schema"
       modalBody={
-        <p className="text-base-content/85">
+        <p className="text-base-content/90">
           Are you sure you want to recover{" "}
           <span className="font-bold text-primary">{schemaTitle}</span>? It will be moved back to
           your active collection.

@@ -11,12 +11,12 @@ export default function AuthenticatedNotFound() {
   return (
     <div className="container mx-auto px-4 py-16 max-w-2xl flex flex-col items-center text-center animate-in fade-in duration-300">
       <div className="rounded-full bg-base-content/5 p-4 mb-6">
-        <MagnifyingGlassIcon className="h-10 w-10 text-base-content/60" strokeWidth={1.5} />
+        <MagnifyingGlassIcon className="h-10 w-10 text-base-content/90" strokeWidth={1.5} />
       </div>
 
       <p className="text-5xl font-bold text-primary mb-2">404</p>
       <h1 className="text-2xl font-bold mb-2">Schema not found</h1>
-      <p className="text-base-content/70 mb-6">
+      <p className="text-base-content/90 mb-6">
         This schema doesn&apos;t exist, has been deleted, or isn&apos;t part of your collection.
       </p>
 

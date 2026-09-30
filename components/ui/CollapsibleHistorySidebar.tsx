@@ -67,7 +67,7 @@ export function CollapsibleHistorySidebar({
       ) : (
         <div className="flex-1 bg-base-200/30 flex flex-col items-center pt-4">
           <div
-            className="text-vertical writing-mode-vertical-rl rotate-180 text-base font-semibold tracking-widest text-base-content/40 uppercase"
+            className="text-vertical writing-mode-vertical-rl rotate-180 text-base font-semibold tracking-widest text-base-content/90 uppercase"
             style={{ writingMode: "vertical-rl" }}
           >
             History

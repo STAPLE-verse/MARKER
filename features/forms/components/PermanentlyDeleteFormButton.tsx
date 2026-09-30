@@ -42,7 +42,7 @@ export function PermanentlyDeleteFormButton({
       triggerClassName="text-error hover:bg-error/15"
       modalTitle="Permanently Delete Schema"
       modalBody={
-        <p className="text-base-content/85">
+        <p className="text-base-content/90">
           Are you sure you want to permanently delete{" "}
           <span className="font-bold text-primary">{schemaTitle}</span>? This removes the schema
           and all its versions with no way to recover.

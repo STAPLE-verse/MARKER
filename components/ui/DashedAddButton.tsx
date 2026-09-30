@@ -24,7 +24,7 @@ export const DashedAddButton = React.forwardRef<HTMLButtonElement, DashedAddButt
         )}
         {...props}
       >
-        <PlusIcon className="h-6 w-6 text-base-content/50 group-hover:text-primary transition-colors group-disabled:group-hover:text-base-content/50" />
+        <PlusIcon className="h-6 w-6 text-base-content/90 group-hover:text-primary transition-colors group-disabled:group-hover:text-base-content/90" />
       </button>
     );
   }

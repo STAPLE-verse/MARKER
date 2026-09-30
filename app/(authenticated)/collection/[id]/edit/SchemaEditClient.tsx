@@ -254,7 +254,7 @@ function EditPageContent(props: EditPageContentProps) {
               <div className="text-base font-medium">
                 We found unsaved changes in your browser from a previous session.
                 {props.draftToRestore.timestamp && (
-                  <span className="opacity-75 block sm:inline sm:ml-1 font-normal">
+                  <span className="opacity-90 block sm:inline sm:ml-1 font-normal">
                     (Last edited: {new Date(props.draftToRestore.timestamp).toLocaleString()})
                   </span>
                 )}

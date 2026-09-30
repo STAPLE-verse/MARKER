@@ -37,7 +37,7 @@ const PageHeader = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttributes<HT
     <div className="flex-1">
       <h1 className="text-3xl font-bold leading-tight break-words">{title}</h1>
       {description && (
-        <p className="text-base-content/60 mt-2">{description}</p>
+        <p className="text-base-content/90 mt-2">{description}</p>
       )}
     </div>
     {children && (

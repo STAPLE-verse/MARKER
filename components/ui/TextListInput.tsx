@@ -53,7 +53,7 @@ export function TextListInput({
       <div className="space-y-2">
         {value.map((item, index) => (
           <div key={index} className="flex items-center gap-2">
-            <span className="text-base text-base-content/50 w-5 shrink-0 text-right">{index + 1}.</span>
+            <span className="text-base text-base-content/90 w-5 shrink-0 text-right">{index + 1}.</span>
             <Input
               placeholder={placeholder}
               value={item}

@@ -52,7 +52,7 @@ export function ArchiveFormButton({
       disabled={disabled}
       modalTitle="Archive Schema"
       modalBody={
-        <p className="text-base-content/85">
+        <p className="text-base-content/90">
           Are you sure you want to archive{" "}
           <span className="font-bold text-primary">{schemaTitle}</span>? It will move to your
           archive and you can recover it later.

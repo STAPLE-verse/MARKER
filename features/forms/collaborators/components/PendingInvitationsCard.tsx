@@ -52,7 +52,7 @@ export function PendingInvitationsCard({ invites: initialInvites }: PendingInvit
   };
 
   if (invites.length === 0) {
-    return <p className="py-8 text-center text-base-content/70">No pending invitations.</p>;
+    return <p className="py-8 text-center text-base-content/90">No pending invitations.</p>;
   }
 
   return (
