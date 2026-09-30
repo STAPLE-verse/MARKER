@@ -46,16 +46,18 @@ export default async function DashboardPage() {
             <CardBody>
               <CardTitle className="text-2xl font-bold">Recent Activities</CardTitle>
               {activity.length === 0 ? (
-                <div className="py-8 text-center">
-                  <p className="text-lg text-base-content/90 mb-4">
+                <>
+                  <p className="py-8 text-center text-lg text-base-content/90">
                     Nothing here yet — create your first schema to get started.
                   </p>
-                  <Link href="/collection/new">
-                    <Button variant="primary" size="md">
-                      Add schema
-                    </Button>
-                  </Link>
-                </div>
+                  <div className="text-right mt-2">
+                    <Link href="/collection/new">
+                      <Button variant="primary" size="md">
+                        Add schema
+                      </Button>
+                    </Link>
+                  </div>
+                </>
               ) : (
                 <div className="divide-y divide-base-300">
                   {activity.map((item, index) => (
