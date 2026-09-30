@@ -7,6 +7,7 @@ import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
+import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
 import { login } from "@/features/auth/actions";
 import { useRouter } from "next/navigation";
@@ -46,6 +47,9 @@ export default function LoginForm({ next }: LoginFormProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-100 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md animate-in slide-in-from-bottom-4 fade-in duration-500">
+        <Link href="/" className="flex justify-center mb-8">
+          <Logo className="h-28" />
+        </Link>
         <Card bordered className="border-primary/20">
           <CardBody>
             <CardTitle>Welcome back</CardTitle>

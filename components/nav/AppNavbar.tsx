@@ -1,5 +1,6 @@
 import { Navbar, NavbarStart, NavbarEnd } from "@/components/ui/Navbar";
 import { Avatar } from "@/components/ui/Avatar";
+import { Logo } from "@/components/ui/Logo";
 import {
   Dropdown,
   DropdownTrigger,
@@ -47,6 +48,7 @@ export default async function AppNavbar() {
           href={isLoggedIn ? "/dashboard" : "/"}
           className="btn btn-ghost text-xl font-bold tracking-tight"
         >
+          <Logo variant="mark" className="h-7" aria-hidden />
           MARKER
         </Link>
       </NavbarStart>
