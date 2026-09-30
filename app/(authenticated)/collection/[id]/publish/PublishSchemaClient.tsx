@@ -6,7 +6,6 @@ import { Path, useForm } from "react-hook-form";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { BackButton } from "@/components/ui/BackButton";
 import { Form } from "@/components/ui/Form";
 import { Stepper } from "@/components/ui/Stepper";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -116,11 +115,6 @@ export default function PublishSchemaClient({ formId, version, publishedVersions
 
   return (
     <FormPageLayout
-      backButton={
-        <BackButton href={`/collection/${formId}`}>
-          Cancel Publishing
-        </BackButton>
-      }
     >
         <PageHeader
           title={<SchemaHeaderTitle version={version} prefix="Publishing" />}

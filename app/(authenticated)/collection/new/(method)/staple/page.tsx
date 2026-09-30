@@ -9,8 +9,6 @@ export default async function StapleImportPage() {
 
   return (
     <SchemaFlowLayout
-      backHref="/collection/new"
-      backLabel="Back to add schema"
       title="Import from STAPLE"
       description="Copy one version of a STAPLE form you own into MARKER. This creates an independent snapshot — it does not stay in sync with STAPLE."
     >

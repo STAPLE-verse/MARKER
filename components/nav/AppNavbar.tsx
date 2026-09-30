@@ -44,8 +44,10 @@ export default async function AppNavbar() {
       ])
     : [0, [], null];
 
+  // border-base-content/70: at least 3:1 against the page in every theme
+  // (WCAG 1.4.11); base-300 on base-100 was barely visible.
   return (
-    <Navbar className="border-b border-base-300 sticky top-0 z-50 bg-base-100">
+    <Navbar className="border-b border-base-content/70 sticky top-0 z-50 bg-base-100">
       <NavbarStart className="gap-8 pl-4 min-w-0">
         <Link href={homeHref} className="shrink-0">
           <Logo variant="mark" className="h-7" />

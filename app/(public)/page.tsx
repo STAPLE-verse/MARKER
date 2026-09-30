@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { searchPublishedSchemas } from "@/features/forms/queries";
 import { contributorNamesLabel } from "@/features/forms/utils/publicationMetadata";
+import { markdownToPlainText } from "@/lib/markdown";
 
 const RECENT_TEMPLATES_LIMIT = 3;
 
@@ -69,7 +70,7 @@ export default async function Home() {
                       <td className="py-4 text-lg">
                         <div className="font-bold text-base-content">{schema.title}</div>
                         <div className="text-lg text-base-content/90 truncate max-w-sm mt-1">
-                          {schema.description}
+                          {markdownToPlainText(schema.description)}
                         </div>
                       </td>
                       <td>

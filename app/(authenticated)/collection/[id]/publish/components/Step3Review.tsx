@@ -43,6 +43,7 @@ export function Step3Review() {
         }
         placeholder="Describe what this template is for, who it's designed for, and how researchers might reuse it..."
         className="h-32"
+        markdown
         error={errors.description?.message}
         {...register("description")}
       />
@@ -51,6 +52,7 @@ export function Step3Review() {
         label="Release Notes (Optional)"
         placeholder="Describe what is new or changed in this schema version to help researchers understand the update..."
         className="h-32"
+        markdown
         error={errors.releaseNotes?.message}
         {...register("releaseNotes")}
       />

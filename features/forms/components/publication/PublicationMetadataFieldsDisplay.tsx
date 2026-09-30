@@ -7,6 +7,7 @@ import {
 } from "@/features/forms/constants/publicationMetadataOptions"
 import { ContributorSummaryFields } from "@/features/forms/components/publication/ContributorSummaryFields"
 import type { PublicationMetadataFieldsDTO } from "@/features/forms/types"
+import { Markdown } from "@/components/ui/Markdown";
 
 interface PublicationMetadataFieldsDisplayProps {
   metadata: PublicationMetadataFieldsDTO | null
@@ -88,9 +89,9 @@ export function PublicationMetadataFieldsDisplay({
       {showReleaseNotes && (
         <div className="md:col-span-3 mt-2">
           <FieldSection label="Release Notes">
-            <p className="text-base text-base-content/90 bg-base-200/50 p-3 rounded-lg border border-base-200 whitespace-pre-wrap">
-              {releaseNotes?.trim() || "Not specified"}
-            </p>
+            <div className="text-base text-base-content/90 bg-base-200/50 p-3 rounded-lg border border-base-200">
+              {releaseNotes?.trim() ? <Markdown>{releaseNotes.trim()}</Markdown> : "Not specified"}
+            </div>
           </FieldSection>
         </div>
       )}

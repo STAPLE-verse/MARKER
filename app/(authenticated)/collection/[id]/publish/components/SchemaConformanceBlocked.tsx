@@ -4,7 +4,6 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
-import { BackButton } from "@/components/ui/BackButton";
 
 interface SchemaConformanceBlockedProps {
   formId: number;
@@ -21,9 +20,6 @@ interface SchemaConformanceBlockedProps {
 export function SchemaConformanceBlocked({ formId, message }: SchemaConformanceBlockedProps) {
   return (
     <FormPageLayout
-      backButton={
-        <BackButton href={`/collection/${formId}`}>Back to Collection</BackButton>
-      }
     >
       <PageHeader title="Can't publish yet" />
 

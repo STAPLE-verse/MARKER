@@ -6,12 +6,12 @@ import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { BackButton } from "@/components/ui/BackButton";
 import { PublicationMetadataCard } from "@/features/forms/components/PublicationMetadataCard";
 import { SchemaTabsCard } from "@/features/forms/components/SchemaTabsCard";
 import { PublicPublishedSchemaDTO } from "@/features/forms/types";
 import { PublishedVersionsSidebar } from "./PublishedVersionsSidebar";
 import { ForkSchemaButton } from "./ForkSchemaButton";
+import { Markdown } from "@/components/ui/Markdown";
 
 interface SchemaDetailsClientProps {
   schema: PublicPublishedSchemaDTO;
@@ -37,13 +37,6 @@ export default function SchemaDetailsClient({
 
   return (
     <FormPageLayout
-      backButton={
-        backFormId != null ? (
-          <BackButton href={`/collection/${backFormId}`}>Back to Schema</BackButton>
-        ) : (
-          <BackButton href="/explore">Back to Explore</BackButton>
-        )
-      }
       sidebarOpen={isHistoryOpen}
       sidebar={
         hasHistory ? (
@@ -77,9 +70,11 @@ export default function SchemaDetailsClient({
         <Card bordered>
           <CardBody>
             <CardTitle className="text-xl">Description</CardTitle>
-            <p className="text-base-content/90 leading-relaxed">
-              {schema.description || "No description provided."}
-            </p>
+            {schema.description ? (
+              <Markdown className="text-base-content/90">{schema.description}</Markdown>
+            ) : (
+              <p className="text-base-content/90 leading-relaxed">No description provided.</p>
+            )}
             {schema.relatedPublicationDoi && (
               <p className="text-base text-base-content/90 mt-2">
                 Related publication:{" "}

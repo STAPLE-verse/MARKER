@@ -4,8 +4,6 @@ import { SchemaFlowLayout } from "@/features/forms/components/add/SchemaFlowLayo
 export default function CreateBlankDraftPage() {
   return (
     <SchemaFlowLayout
-      backHref="/collection/new"
-      backLabel="Back to add schema"
       title="Create blank draft"
       description="Start a new MARKER schema and open it in the form builder."
     >

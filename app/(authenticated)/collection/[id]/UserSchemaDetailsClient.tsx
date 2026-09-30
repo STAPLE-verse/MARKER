@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { FormDetailDTO, FormVersionDTO } from "@/features/forms/types";
 import { canEditForm } from "@/features/forms/utils/formPermissions";
-import { BackButton } from "@/components/ui/BackButton";
 import { Alert } from "@/components/ui/Alert";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { DraftPublicationMetadataCard } from "@/features/forms/components/DraftPublicationMetadataCard";
@@ -57,11 +56,6 @@ export default function UserSchemaDetailsClient({
 
   return (
     <FormPageLayout
-      backButton={
-        <BackButton href={form.archived ? "/collection?tab=archived" : "/collection"}>
-          {form.archived ? "Back to Archive" : "Back to Collection"}
-        </BackButton>
-      }
       sidebarOpen={isHistoryOpen}
       sidebar={
         <VersionHistorySidebar

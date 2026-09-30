@@ -12,6 +12,7 @@ import { MultiValueFilter } from "@/components/ui/MultiValueFilter";
 import type { SelectOption } from "@/components/ui/Select";
 import { STAPLE_INPUT_CLASS, STAPLE_SELECT_CLASS } from "@/components/ui/fieldStyles";
 import { cn } from "@/lib/utils";
+import { markdownToPlainText } from "@/lib/markdown";
 import {
   domainLabel,
   labelForSelectValue,
@@ -468,7 +469,7 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
               </div>
 
               {schema.description && (
-                <p className="text-base-content/90 line-clamp-3 mt-2">{schema.description}</p>
+                <p className="text-base-content/90 line-clamp-3 mt-2">{markdownToPlainText(schema.description)}</p>
               )}
 
               {schema.keywords.length > 0 && (

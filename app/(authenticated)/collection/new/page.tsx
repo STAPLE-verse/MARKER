@@ -5,8 +5,6 @@ import { SchemaFlowLayout } from "@/features/forms/components/add/SchemaFlowLayo
 export default function AddSchemaPage() {
   return (
     <SchemaFlowLayout
-      backHref="/collection"
-      backLabel="Back to Collection"
       title="Add schema"
       description="Choose how you want to add a metadata schema to your collection."
     >

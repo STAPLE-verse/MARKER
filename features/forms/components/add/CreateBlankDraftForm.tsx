@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardTitle } from "@/components/ui/Card";
 import { Form } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { useCreateForm } from "@/features/forms/hooks/useCreateForm";
 import {
   createFormSchema,
@@ -32,14 +33,15 @@ export function CreateBlankDraftForm() {
         <CardTitle className="text-xl">Schema information</CardTitle>
         <Form form={form} onSubmit={create} className="mt-2 space-y-4">
           <Input
-            label="Draft Name"
+            label="Schema Name:"
             placeholder="e.g. Cognitive Assessment Form"
             error={errors.title?.message}
             {...register("title")}
           />
-          <Input
-            label="Description (Optional)"
+          <Textarea
+            label="Description (Optional):"
             placeholder="Internal notes for this draft..."
+            rows={4}
             error={errors.description?.message}
             {...register("description")}
           />

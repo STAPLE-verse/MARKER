@@ -197,7 +197,7 @@ function EditPageContent(props: EditPageContentProps) {
     <FormPageLayout
       backButton={
         <BackButton onClick={handleBack} disabled={props.isSaving}>
-          Back to Schema
+          Back
         </BackButton>
       }
     >
