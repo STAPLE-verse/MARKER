@@ -64,17 +64,40 @@ export function PublicationFairMetadataFields<TFieldValues extends FieldValues>(
           />
         )}
       />
-      <Select
-        label={
-          <span className="inline-flex items-center gap-1.5">
-            License
-            <InfoTooltip text="The terms under which others may reuse this template. An open license is required for STAPLE-verse publication, in line with the FAIR principles. It cannot be changed for a version once published." />
-          </span>
-        }
-        options={PUBLICATION_LICENSE_OPTIONS}
-        error={errors.license?.message as string | undefined}
-        {...register("license" as Path<TFieldValues>)}
-      />
+      <div className="flex flex-col gap-1.5">
+        <Select
+          label={
+            <span className="inline-flex items-center gap-1.5">
+              License
+              <InfoTooltip text="The terms under which others may reuse this template. An open license is required for STAPLE-verse publication, in line with the FAIR principles. It cannot be changed for a version once published." />
+            </span>
+          }
+          options={PUBLICATION_LICENSE_OPTIONS}
+          error={errors.license?.message as string | undefined}
+          {...register("license" as Path<TFieldValues>)}
+        />
+        <p className="text-base text-base-content/90">
+          Not sure which to pick? Compare the{" "}
+          <a
+            href="https://creativecommons.org/share-your-work/cclicenses/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline"
+          >
+            Creative Commons licenses
+          </a>{" "}
+          or the{" "}
+          <a
+            href="https://choosealicense.com/licenses/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline"
+          >
+            software licenses
+          </a>{" "}
+          (MIT, Apache, GPL).
+        </p>
+      </div>
       <KeywordsInput
         name={"keywords" as Path<TFieldValues>}
         control={control}
