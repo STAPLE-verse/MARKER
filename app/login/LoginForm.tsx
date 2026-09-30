@@ -8,23 +8,15 @@ import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
+import { STAPLE_INPUT_CLASS } from "@/components/ui/fieldStyles";
 import { STAPLE_URL, STAPLE_FORGOT_PASSWORD_URL, stapleSignupUrl } from "@/lib/staple";
 import Link from "next/link";
 import { login } from "@/features/auth/actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-/**
- * STAPLE's login field look: primary-colored typed text (placeholders stay
- * the normal text color) and 2px border on a filled
- * box (`base-100` here, not STAPLE's `base-300`, since the fields sit on a
- * `base-300` card), switching to a thick secondary ring while focused. The focus color is
- * set through daisyUI's own `--input-color`, which drives both its border and
- * its focus outline.
- */
-const FIELD_CLASS =
-  "input-primary border-2 bg-base-100 text-primary placeholder:text-base-content! rounded-[3px] " +
-  "focus:[--input-color:var(--color-secondary)]! focus:outline-[3px]! focus:outline-offset-0!";
+/** Fields sit on a `base-300` card here, so they take the page color as their fill. */
+const FIELD_CLASS = `${STAPLE_INPUT_CLASS} bg-base-100`;
 
 interface LoginFormProps {
   /** Sanitized same-origin redirect target (see utils/redirect.ts), or null for the default post-login landing page. */

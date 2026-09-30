@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/Button";
 import { Dropdown, DropdownContent, DropdownItem, DropdownTrigger } from "@/components/ui/Dropdown";
 import { MultiValueFilter } from "@/components/ui/MultiValueFilter";
 import type { SelectOption } from "@/components/ui/Select";
+import { STAPLE_INPUT_CLASS, STAPLE_SELECT_CLASS } from "@/components/ui/fieldStyles";
+import { cn } from "@/lib/utils";
 import {
   domainLabel,
   labelForSelectValue,
@@ -88,46 +90,53 @@ function facetOptions(
 
 const CHIP_CLASS = "badge badge-lg h-auto min-h-7 py-1 whitespace-normal text-left cursor-pointer transition-colors";
 
-/** One labelled row of the filter panel. */
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+/** Fields inside the filter card: the shared STAPLE look on the page color, since the card itself is `base-300`. */
+const CARD_INPUT_CLASS = `${STAPLE_INPUT_CLASS} bg-base-100`;
+const CARD_SELECT_CLASS = `${STAPLE_SELECT_CLASS} bg-base-100`;
+
+/** One labelled cell of the filter grid — label above the field, same label style as every other form. */
+function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-      <span className="text-lg font-semibold sm:w-32 shrink-0 sm:pt-0.5">{label}</span>
-      <div className="flex flex-wrap items-center gap-2 min-w-0">{children}</div>
+    <div className="flex flex-col gap-1.5 min-w-0">
+      <span className="text-xl">{label}</span>
+      {children}
     </div>
   );
 }
 
-/** Toggle chips for one facet — nothing selected means "no filter on this dimension", not "match nothing". */
-function FacetChips({
+/**
+ * One facet as a dropdown: "All", then every option with how many schemas
+ * carry it. Picking one filters to that value; "All" clears the facet.
+ */
+function FacetSelect({
   label,
+  allLabel,
   options,
   selected,
-  onToggle,
+  onChange,
 }: {
   label: string;
+  allLabel: string;
   options: FacetOption[];
   selected: string[];
-  onToggle: (value: string) => void;
+  onChange: (values: string[]) => void;
 }) {
   return (
-    <FilterRow label={label}>
-      {options.map((option) => {
-        const isSelected = selected.includes(option.value);
-        return (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={isSelected}
-            onClick={() => onToggle(option.value)}
-            className={`${CHIP_CLASS} ${isSelected ? "badge-primary" : "badge-outline hover:bg-base-300"}`}
-          >
-            {option.label}
-            <span className={isSelected ? "font-semibold" : "text-base-content/90"}>{option.count}</span>
-          </button>
-        );
-      })}
-    </FilterRow>
+    <FilterField label={label}>
+      <select
+        aria-label={label}
+        value={selected[0] ?? ""}
+        onChange={(event) => onChange(event.target.value ? [event.target.value] : [])}
+        className={cn("select select-md text-base w-full", CARD_SELECT_CLASS)}
+      >
+        <option value="">{allLabel}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label} ({option.count})
+          </option>
+        ))}
+      </select>
+    </FilterField>
   );
 }
 
@@ -277,7 +286,7 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
         onChange={(event) => update({ q: event.target.value })}
         placeholder="Search titles, descriptions, contributors, keywords..."
         aria-label="Search public schemas"
-        className="input input-lg w-full"
+        className={cn("input input-lg w-full bg-base-300", STAPLE_INPUT_CLASS)}
       />
 
       {keywordCounts.length > 0 && (
@@ -317,34 +326,38 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
         </summary>
 
         <Card bordered className="mt-3">
-          <CardBody className="gap-5">
-            <FacetChips
+          <CardBody className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <FacetSelect
               label="Domain"
+              allLabel="All domains"
               options={domainOptions}
               selected={filters.domain}
-              onToggle={(value) => toggle("domain", value)}
+              onChange={(domain) => update({ domain })}
             />
-            <FacetChips
+            <FacetSelect
               label="License"
+              allLabel="All licenses"
               options={licenseOptions}
               selected={filters.license}
-              onToggle={(value) => toggle("license", value)}
+              onChange={(license) => update({ license })}
             />
-            <FacetChips
+            <FacetSelect
               label="Language"
+              allLabel="All languages"
               options={languageOptions}
               selected={filters.language}
-              onToggle={(value) => toggle("language", value)}
+              onChange={(language) => update({ language })}
             />
             {showSourceFilter && (
-              <FacetChips
+              <FacetSelect
                 label="Source"
+                allLabel="All sources"
                 options={sourceOptions}
                 selected={filters.source}
-                onToggle={(value) => toggle("source", value)}
+                onChange={(source) => update({ source })}
               />
             )}
-            <FilterRow label="Keywords">
+            <FilterField label="Keywords">
               <MultiValueFilter
                 label="Filter by keyword"
                 placeholder="Type a keyword…"
@@ -352,9 +365,10 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
                 onChange={(keyword) => update({ keyword })}
                 suggestions={keywordCounts}
                 allowFreeText
+                inputClassName={CARD_INPUT_CLASS}
               />
-            </FilterRow>
-            <FilterRow label="Contributors">
+            </FilterField>
+            <FilterField label="Contributors">
               <MultiValueFilter
                 label="Filter by contributor"
                 placeholder="Type a name…"
@@ -362,27 +376,29 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
                 onChange={(contributor) => update({ contributor })}
                 suggestions={contributorCounts}
                 allowFreeText
+                inputClassName={CARD_INPUT_CLASS}
               />
-            </FilterRow>
-            <FilterRow label="Published">
+            </FilterField>
+            <FilterField label="Published from">
               <input
                 type="date"
                 aria-label="Published on or after"
                 value={filters.after}
                 max={filters.before || undefined}
                 onChange={(event) => update({ after: event.target.value })}
-                className="input input-md text-base w-44 bg-base-100"
+                className={cn("input input-md text-base w-full", CARD_INPUT_CLASS)}
               />
-              <span className="text-base">to</span>
+            </FilterField>
+            <FilterField label="Published to">
               <input
                 type="date"
                 aria-label="Published on or before"
                 value={filters.before}
                 min={filters.after || undefined}
                 onChange={(event) => update({ before: event.target.value })}
-                className="input input-md text-base w-44 bg-base-100"
+                className={cn("input input-md text-base w-full", CARD_INPUT_CLASS)}
               />
-            </FilterRow>
+            </FilterField>
           </CardBody>
         </Card>
       </details>
@@ -414,7 +430,7 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
           <select
             value={filters.sort}
             onChange={(event) => update({ sort: event.target.value as ExploreSort })}
-            className="select select-md text-base w-auto"
+            className={cn("select select-md text-base w-auto bg-base-300", STAPLE_SELECT_CLASS)}
           >
             {EXPLORE_SORT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>

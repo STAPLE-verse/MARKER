@@ -2,6 +2,7 @@
 
 import React, { useId, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/20/solid";
+import { cn } from "@/lib/utils";
 
 export interface MultiValueSuggestion {
   value: string;
@@ -19,6 +20,8 @@ interface MultiValueFilterProps {
   suggestions: MultiValueSuggestion[];
   /** Let people add text that isn't a suggestion, matched as "contains". */
   allowFreeText?: boolean;
+  /** Extra classes for the text box (e.g. the shared field style and a background). */
+  inputClassName?: string;
 }
 
 const MAX_SUGGESTIONS = 8;
@@ -37,6 +40,7 @@ export function MultiValueFilter({
   onChange,
   suggestions,
   allowFreeText = false,
+  inputClassName,
 }: MultiValueFilterProps) {
   const listId = useId();
   const [query, setQuery] = useState("");
@@ -86,7 +90,9 @@ export function MultiValueFilter({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col gap-2 w-full">
+      {values.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
       {values.map((value) => (
         <span key={value} className="badge badge-primary badge-lg gap-1">
           {value}
@@ -100,6 +106,8 @@ export function MultiValueFilter({
           </button>
         </span>
       ))}
+        </div>
+      )}
       <div className="relative">
         <input
           type="text"
@@ -117,14 +125,14 @@ export function MultiValueFilter({
           onKeyDown={onKeyDown}
           onBlur={() => setQuery("")}
           placeholder={placeholder}
-          className="input input-md text-base w-64 bg-base-100"
+          className={cn("input input-md text-base w-full", inputClassName)}
         />
         {open && (
           <ul
             id={listId}
             role="listbox"
             aria-label={label}
-            className="absolute z-30 mt-1 w-80 max-h-72 overflow-y-auto bg-base-100 border border-base-content/20 rounded-lg shadow-lg"
+            className="absolute z-30 mt-1 w-full max-h-72 overflow-y-auto bg-base-100 border border-base-content/20 rounded-lg shadow-lg"
           >
             {options.length === 0 && <li className="px-3 py-2 text-base text-base-content/90">No matches.</li>}
             {options.map((option, index) => (
