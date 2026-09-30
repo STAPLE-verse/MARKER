@@ -151,7 +151,7 @@ export default function EditProfileForm({ initialValues }: EditProfileFormProps)
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="ghost" type="button" onClick={handleCancel}>
+              <Button variant="secondary" type="button" onClick={handleCancel}>
                 Cancel
               </Button>
               <Button variant="primary" type="submit" disabled={isSubmitting}>

@@ -29,12 +29,14 @@ import {
   countValues,
   exploreFiltersToParams,
   filterExploreSchemas,
+  parseExploreQueryString,
   type ExploreFilters,
   type ExploreMultiKey,
   type ExploreSort,
   type ValueCount,
 } from "@/features/forms/utils/exploreFilters";
 import { contributorNamesLabel } from "@/features/forms/utils/publicationMetadata";
+import { SavedSearches } from "./SavedSearches";
 
 interface ExploreClientProps {
   schemas: PublishedSchemaCardDTO[];
@@ -406,18 +408,27 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
       {activeChips.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 mt-4">
           {activeChips.map((chip) => (
-            <span key={chip.key} className="badge badge-lg h-auto min-h-7 py-1 whitespace-normal gap-1">
+            <span
+              key={chip.key}
+              className="badge badge-lg h-auto min-h-7 py-1 whitespace-normal gap-1 bg-base-300 border border-base-content/10"
+            >
               {chip.label}
               <button type="button" onClick={chip.onRemove} aria-label={`Remove filter: ${chip.label}`} className="cursor-pointer">
                 <XMarkIcon className="h-4 w-4" aria-hidden="true" />
               </button>
             </span>
           ))}
-          <Button variant="ghost" size="md" onClick={clearAllFilters}>
+          <Button variant="secondary" size="md" onClick={clearAllFilters}>
             Clear all
           </Button>
         </div>
       )}
+
+      <SavedSearches
+        currentQuery={queryString}
+        suggestedName={filters.q.trim() || activeChips[0]?.label || ""}
+        onApply={(query) => setFilters(parseExploreQueryString(query))}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-3 mt-6 mb-4">
         <p className="text-lg" role="status">

@@ -69,7 +69,7 @@ export function SchemaDiffDialog({
             {currentVersionLabel} compared with {latestVersionLabel}
           </p>
         </div>
-        <Button variant="ghost" size="md" onClick={onClose}>
+        <Button variant="secondary" size="md" onClick={onClose}>
           Close
         </Button>
       </div>

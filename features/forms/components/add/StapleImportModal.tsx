@@ -144,7 +144,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
       </div>
 
       <ModalActions>
-        <Button variant="ghost" onClick={onClose} disabled={isImporting}>
+        <Button variant="secondary" onClick={onClose} disabled={isImporting}>
           Cancel
         </Button>
         <Button

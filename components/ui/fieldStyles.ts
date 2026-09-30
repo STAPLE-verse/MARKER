@@ -1,7 +1,7 @@
 /**
- * STAPLE's field look, shared so every page's boxes match: primary-colored
- * typed text (placeholders stay the normal text color) and a 2px primary
- * border, switching to a thick secondary ring while focused. The focus color
+ * STAPLE's field look, shared so every page's boxes match: a 2px primary
+ * border, switching to a thick secondary ring while focused. Text inside —
+ * typed, selected or placeholder — is the normal text color, not primary. The focus color
  * goes through daisyUI's own `--input-color`, which drives both its border
  * and its focus outline.
  *
@@ -10,7 +10,7 @@
  * `base-300`, so the same fill would make the box disappear).
  */
 const STAPLE_FIELD_BASE =
-  "border-2 text-primary placeholder:text-base-content! rounded-[3px] " +
+  "border-2 text-base-content placeholder:text-base-content! rounded-[3px] " +
   "focus:[--input-color:var(--color-secondary)]! focus:outline-[3px]! focus:outline-offset-0!";
 
 /** For `input` elements (pair with daisyUI's `input`). */

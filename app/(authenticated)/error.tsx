@@ -45,7 +45,7 @@ export default function AuthenticatedError({
 
       <div className="flex flex-wrap justify-center gap-2">
         <Link href="/collection">
-          <Button variant="ghost">Back to Collection</Button>
+          <Button variant="secondary">Back to Collection</Button>
         </Link>
         <Button variant="primary" onClick={() => unstable_retry()}>
           Try again

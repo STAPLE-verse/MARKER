@@ -89,7 +89,7 @@ export function PendingInvitationsCard({ invites: initialInvites }: PendingInvit
                     View
                   </Button>
                 </Link>
-                <Button size="md" variant="ghost" onClick={() => decline(invite.collaboratorId)} disabled={isPending}>
+                <Button size="md" variant="secondary" onClick={() => decline(invite.collaboratorId)} disabled={isPending}>
                   Decline
                 </Button>
                 <Button size="md" onClick={() => accept(invite.collaboratorId, invite.formId)} disabled={isPending}>

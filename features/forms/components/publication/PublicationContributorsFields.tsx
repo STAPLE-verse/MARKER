@@ -440,7 +440,7 @@ function ContributorEditorModal({
       </div>
 
       <ModalActions>
-        <Button type="button" variant="ghost" onClick={onClose}>
+        <Button type="button" variant="secondary" onClick={onClose}>
           Cancel
         </Button>
         <Button type="button" variant="primary" onClick={handleSave}>

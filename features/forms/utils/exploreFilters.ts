@@ -83,6 +83,15 @@ export function parseExploreFilters(params: RawParams): ExploreFilters {
   }
 }
 
+/** Same as `parseExploreFilters`, from a query string (e.g. a saved search) rather than a page's `searchParams`. */
+export function parseExploreQueryString(query: string): ExploreFilters {
+  const raw: Record<string, string[]> = {}
+  new URLSearchParams(query).forEach((value, key) => {
+    raw[key] = [...(raw[key] ?? []), value]
+  })
+  return parseExploreFilters(raw)
+}
+
 /** The inverse of `parseExploreFilters` — defaults are left out so a plain `/explore` stays plain. */
 export function exploreFiltersToParams(filters: ExploreFilters): URLSearchParams {
   const params = new URLSearchParams()

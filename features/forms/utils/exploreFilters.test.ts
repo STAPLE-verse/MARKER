@@ -7,6 +7,7 @@ import {
   exploreFiltersToParams,
   filterExploreSchemas,
   parseExploreFilters,
+  parseExploreQueryString,
 } from "./exploreFilters"
 
 function schema(overrides: Partial<PublishedSchemaCardDTO> = {}): PublishedSchemaCardDTO {
@@ -101,6 +102,12 @@ describe("parseExploreFilters / exploreFiltersToParams", () => {
     params.forEach((value, key) => (raw[key] = [...(raw[key] ?? []), value]))
 
     expect(parseExploreFilters(raw)).toEqual(filters)
+  })
+
+  it("reads a saved query string back into the same filters", () => {
+    const filters = { ...EMPTY_EXPLORE_FILTERS, q: "memory span", keyword: ["a b", "c"], license: ["CC0-1.0"] }
+
+    expect(parseExploreQueryString(exploreFiltersToParams(filters).toString())).toEqual(filters)
   })
 
   it("leaves defaults out of the URL", () => {

@@ -81,7 +81,7 @@ export function DraftPublicationMetadataCard({ formId, version }: DraftPublicati
             <PublicationMetadataForm form={form} formId={formId} />
           </fieldset>
           <CardActions>
-            <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSaving}>
+            <Button type="button" variant="secondary" onClick={handleCancel} disabled={isSaving}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" disabled={isSaving}>

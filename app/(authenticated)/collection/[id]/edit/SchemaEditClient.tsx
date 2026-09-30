@@ -260,7 +260,7 @@ function EditPageContent(props: EditPageContentProps) {
                 )}
               </div>
               <div className="flex gap-2 shrink-0">
-                <Button size="md" variant="ghost" onClick={props.discardDraft}>
+                <Button size="md" variant="secondary" onClick={props.discardDraft}>
                   Discard
                 </Button>
                 <Button size="md" variant="primary" onClick={props.restoreDraft}>

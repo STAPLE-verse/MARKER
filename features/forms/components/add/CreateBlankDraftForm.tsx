@@ -45,7 +45,7 @@ export function CreateBlankDraftForm() {
           />
           <div className="flex justify-end gap-2 pt-4">
             <Button
-              variant="ghost"
+              variant="secondary"
               type="button"
               onClick={() => router.push("/collection")}
               disabled={isCreating}

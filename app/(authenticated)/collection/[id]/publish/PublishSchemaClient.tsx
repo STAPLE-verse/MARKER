@@ -163,7 +163,7 @@ export default function PublishSchemaClient({ formId, version, publishedVersions
           {/* Wizard Navigation Footer */}
           <div className={`flex items-center mb-8 ${currentStep === 1 ? "justify-end" : "justify-between"}`}>
             {currentStep > 1 && (
-              <Button variant="ghost" onClick={handlePrev} disabled={isPublishing || isSavingMetadata} type="button">
+              <Button variant="secondary" onClick={handlePrev} disabled={isPublishing || isSavingMetadata} type="button">
                 ← Back
               </Button>
             )}

@@ -64,7 +64,7 @@ export default function ChangePasswordPage() {
             />
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="ghost" type="button" onClick={() => router.push("/profile")}>
+              <Button variant="secondary" type="button" onClick={() => router.push("/profile")}>
                 Cancel
               </Button>
               <Button variant="primary" type="submit" disabled={isSaving}>

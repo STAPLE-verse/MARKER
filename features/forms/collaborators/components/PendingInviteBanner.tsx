@@ -64,7 +64,7 @@ export function PendingInviteBanner({ role, collaboratorId, className }: Pending
           editable until you accept.
         </p>
         <div className="flex gap-2 shrink-0">
-          <Button size="md" variant="ghost" onClick={decline} disabled={isPending}>
+          <Button size="md" variant="secondary" onClick={decline} disabled={isPending}>
             Decline
           </Button>
           <Button size="md" onClick={accept} disabled={isPending}>

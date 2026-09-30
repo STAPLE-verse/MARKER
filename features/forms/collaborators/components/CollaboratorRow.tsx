@@ -119,7 +119,7 @@ export function CollaboratorRow({
             the owner? You&apos;ll be demoted to Editor.
           </p>
           <div className="flex items-center gap-2 shrink-0">
-            <Button size="md" variant="ghost" onClick={() => setConfirmingTransfer(false)} disabled={isPending}>
+            <Button size="md" variant="secondary" onClick={() => setConfirmingTransfer(false)} disabled={isPending}>
               Cancel
             </Button>
             <Button

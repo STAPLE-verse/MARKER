@@ -43,7 +43,7 @@ export function ConfirmDialog({
     <Modal open={open} onClose={() => !isPending && onClose()} title={title}>
       <div className="py-4">{body}</div>
       <ModalActions>
-        <Button variant="ghost" onClick={onClose} disabled={isPending}>
+        <Button variant="secondary" onClick={onClose} disabled={isPending}>
           Cancel
         </Button>
         <Button
