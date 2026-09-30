@@ -3,7 +3,7 @@ import SecurePasswordLib from "secure-password";
 // Same package, same pinned version, and the same hash()/verify() call
 // shape STAPLE's Blitz auth uses (@blitzjs/auth/secure-password, which
 // wraps this exact library) — MARKER and STAPLE share one `User` table, and
-// the signup page promises a STAPLE account works here without re-signing
+// the login page promises a STAPLE account works here without re-signing
 // up, so a password hash written by either app must verify in both. Do not
 // swap this for a different library/encoding without updating both apps.
 const securePassword = new SecurePasswordLib();

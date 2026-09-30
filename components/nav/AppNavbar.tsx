@@ -2,6 +2,7 @@ import { Navbar, NavbarStart, NavbarEnd } from "@/components/ui/Navbar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Logo } from "@/components/ui/Logo";
 import { Breadcrumbs } from "./Breadcrumbs";
+import { stapleSignupUrl } from "@/lib/staple";
 import {
   Dropdown,
   DropdownTrigger,
@@ -99,9 +100,13 @@ export default async function AppNavbar() {
             <Link href="/login" className="btn btn-ghost btn-md text-base">
               Login
             </Link>
-            <Link href="/signup" className="btn btn-primary btn-md text-base">
-              Sign Up
-            </Link>
+            {/* tooltip-left: the button sits at the right edge of the
+                viewport, where a centered tooltip would be clipped. */}
+            <div className="tooltip tooltip-left" data-tip="Takes you to STAPLE to create your account">
+              <a href={stapleSignupUrl()} className="btn btn-primary btn-md text-base">
+                Sign Up
+              </a>
+            </div>
           </>
         )}
       </NavbarEnd>

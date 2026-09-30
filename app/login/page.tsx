@@ -4,9 +4,9 @@ import LoginForm from "./LoginForm";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; registered?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, registered } = await searchParams;
 
-  return <LoginForm next={sanitizeNextPath(next)} />;
+  return <LoginForm next={sanitizeNextPath(next)} justRegistered={registered === "1"} />;
 }

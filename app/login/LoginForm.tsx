@@ -8,12 +8,11 @@ import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
+import { STAPLE_URL, STAPLE_FORGOT_PASSWORD_URL, stapleSignupUrl } from "@/lib/staple";
 import Link from "next/link";
 import { login } from "@/features/auth/actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-const STAPLE_URL = "https://app.staplescience.com";
 
 /**
  * STAPLE's login field look: primary-colored typed text (placeholders stay
@@ -30,9 +29,11 @@ const FIELD_CLASS =
 interface LoginFormProps {
   /** Sanitized same-origin redirect target (see utils/redirect.ts), or null for the default post-login landing page. */
   next: string | null;
+  /** True when the visitor has just created their account on STAPLE and been sent back here to log in. */
+  justRegistered?: boolean;
 }
 
-export default function LoginForm({ next }: LoginFormProps) {
+export default function LoginForm({ next, justRegistered = false }: LoginFormProps) {
   const router = useRouter();
   const [rootError, setRootError] = useState<string | null>(null);
 
@@ -55,8 +56,6 @@ export default function LoginForm({ next }: LoginFormProps) {
       router.refresh();
     }
   };
-
-  const signupHref = next ? `/signup?next=${encodeURIComponent(next)}` : "/signup";
 
   return (
     <main className="min-h-screen flex flex-col justify-center p-4">
@@ -81,6 +80,11 @@ export default function LoginForm({ next }: LoginFormProps) {
               </a>
               , you can log in directly here.
             </p>
+            {justRegistered && !rootError && (
+              <div role="status" className="alert alert-success mb-4 text-base font-medium">
+                <span>Your account is ready. Log in below to get started.</span>
+              </div>
+            )}
             {rootError && (
               <div className="alert alert-error mb-4 text-base font-medium">
                 <span>{rootError}</span>
@@ -116,17 +120,21 @@ export default function LoginForm({ next }: LoginFormProps) {
         <div className="flex flex-row justify-center gap-2">
           {/* MARKER has no password-reset flow of its own — accounts are
               STAPLE's, so the reset happens there. */}
-          <a
-            href={`${STAPLE_URL}/auth/forgot-password`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-warning btn-md text-base"
-          >
-            Forgot Password
-          </a>
-          <Link href={signupHref} className="btn btn-info btn-md text-base">
-            Register
-          </Link>
+          <div className="tooltip" data-tip="Opens STAPLE in a new tab to reset your password">
+            <a
+              href={STAPLE_FORGOT_PASSWORD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-warning btn-md text-base"
+            >
+              Forgot Password
+            </a>
+          </div>
+          <div className="tooltip" data-tip="Takes you to STAPLE to create your account, then back here">
+            <a href={stapleSignupUrl(next)} className="btn btn-info btn-md text-base">
+              Register
+            </a>
+          </div>
         </div>
       </div>
     </main>
