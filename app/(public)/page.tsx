@@ -84,7 +84,7 @@ export default async function Home() {
                       </td>
                       <td className="text-right">
                         <Link href={`/schemas/${schema.pid}`}>
-                          <Button variant="ghost" size="md" className="hover:text-primary">
+                          <Button variant="primary" size="md">
                             View
                           </Button>
                         </Link>
@@ -99,7 +99,7 @@ export default async function Home() {
           {/* Call to action */}
           <div className="flex justify-center pt-8">
             <Link href="/explore">
-              <Button variant="primary" outline size="lg" className="gap-2 rounded-full px-8">
+              <Button variant="primary" size="lg" className="gap-2 rounded-full px-8">
                 Explore The Full Catalog <ArrowRightIcon className="w-5 h-5" />
               </Button>
             </Link>

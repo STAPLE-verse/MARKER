@@ -30,7 +30,7 @@ export default async function ProfilePage() {
       >
         <div className="flex gap-2">
           <Link href="/profile/password">
-            <Button variant="primary" outline size="md">
+            <Button variant="primary" size="md">
               Change Password
             </Button>
           </Link>

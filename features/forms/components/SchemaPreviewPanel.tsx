@@ -12,10 +12,10 @@ interface SchemaPreviewPanelProps {
  */
 export function SchemaPreviewPanel({ schema, uiSchema }: SchemaPreviewPanelProps) {
   return (
-    <div className="border border-base-200 rounded-lg p-6 bg-base-50">
-      <FormStudioProvider initialSchema={schema} initialUiSchema={uiSchema}>
-        <FormPreview />
-      </FormStudioProvider>
-    </div>
+    // No frame of its own: the builder's Live Preview tab shows the form
+    // directly on the panel, and this should look the same.
+    <FormStudioProvider initialSchema={schema} initialUiSchema={uiSchema}>
+      <FormPreview />
+    </FormStudioProvider>
   );
 }

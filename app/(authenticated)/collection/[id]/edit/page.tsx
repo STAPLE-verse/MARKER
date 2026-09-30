@@ -11,7 +11,7 @@ export default async function SchemaEditPage({ params }: { params: Promise<{ id:
   // The builder UI (@staple-verse/form-studio's FormStudioUI) has no
   // read-only mode of its own (docs/refactor/form-collaboration.md §4.6) —
   // a VIEWER's read access to the structure stays on the detail page's
-  // SchemaViewerCard instead. Hiding the "Edit Structure" link isn't enough
+  // SchemaViewerCard instead. Hiding the "Edit Schema" link isn't enough
   // on its own; this closes the direct-URL path too.
   if (!canEditForm(form)) {
     redirect(`/collection/${form.id}`);

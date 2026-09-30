@@ -189,7 +189,6 @@ function EditPageContent(props: EditPageContentProps) {
                 <Button
                   size="md"
                   variant="secondary"
-                  outline
                   onClick={handleSaveClick}
                   disabled={saveDisabled}
                   className={saveDisabled ? "pointer-events-none" : undefined}

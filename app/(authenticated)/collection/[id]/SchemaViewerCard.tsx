@@ -45,8 +45,8 @@ export function SchemaViewerCard({
   return (
     <>
       <Card bordered className="overflow-hidden">
-        <CardBody className="p-0">
-          <div className="border-b border-base-200 px-4 pt-4 bg-base-200 flex justify-between items-end">
+        <CardBody className="p-0 gap-0">
+          <div className="border-b border-base-content/10 px-4 pt-4 bg-base-200 flex justify-between items-end">
             <Tabs>
               <TabTrigger
                 active={activeTab === "schema"}
@@ -64,12 +64,7 @@ export function SchemaViewerCard({
 
             {!isViewingLatest && activeTab === "schema" && (
               <div className="pb-2">
-                <Button
-                  variant="ghost"
-                  size="md"
-                  className="text-primary h-8 min-h-8 px-3"
-                  onClick={openCompare}
-                >
+                <Button variant="primary" size="md" onClick={openCompare}>
                   Compare to Latest
                 </Button>
               </div>

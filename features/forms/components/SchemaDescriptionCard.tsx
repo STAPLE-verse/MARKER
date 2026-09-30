@@ -1,4 +1,5 @@
 import { CollapsibleCard } from "@/components/ui/CollapsibleCard";
+import { Markdown } from "@/components/ui/Markdown";
 import { extractSchemaDescription } from "@/utils/schema";
 
 interface SchemaDescriptionCardProps {
@@ -24,9 +25,11 @@ export function SchemaDescriptionCard({ schema }: SchemaDescriptionCardProps) {
       titleClassName="px-8 pt-8 pb-4"
       contentClassName="px-8 pt-0 pb-8"
     >
-      <p className="text-base-content/90 leading-relaxed">
-        {description || "No description provided."}
-      </p>
+      {description ? (
+        <Markdown className="text-base-content/90">{description}</Markdown>
+      ) : (
+        <p className="text-base-content/90 leading-relaxed">No description provided.</p>
+      )}
     </CollapsibleCard>
   );
 }

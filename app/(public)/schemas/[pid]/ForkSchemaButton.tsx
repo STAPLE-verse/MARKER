@@ -36,18 +36,18 @@ export function ForkSchemaButton({ pid, isLoggedIn, viewerFormId, viewerVersionI
     <>
       {hasDraftAccess && (
         <Link href={`/collection/${viewerFormId}?version=${viewerVersionId}`}>
-          <Button variant="secondary" outline size="md">
+          <Button variant="secondary" size="md">
             View Your Draft
           </Button>
         </Link>
       )}
       {isLoggedIn ? (
-        <Button variant="primary" outline size="md" disabled={isForking} onClick={() => doFork(pid)}>
+        <Button variant="primary" size="md" disabled={isForking} onClick={() => doFork(pid)}>
           {isForking ? "Forking…" : "Fork This Schema"}
         </Button>
       ) : (
         <Link href={`/login?next=${encodeURIComponent(`/schemas/${pid}`)}`}>
-          <Button variant="primary" outline size="md">
+          <Button variant="primary" size="md">
             Fork This Schema
           </Button>
         </Link>

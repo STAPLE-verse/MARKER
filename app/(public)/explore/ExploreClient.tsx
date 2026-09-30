@@ -495,7 +495,7 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
 
       {visibleCount < filtered.length && (
         <div className="flex justify-center mt-6">
-          <Button variant="secondary" outline onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
+          <Button variant="secondary" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
             Load more
           </Button>
         </div>

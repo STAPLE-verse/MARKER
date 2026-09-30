@@ -23,8 +23,8 @@ export function SchemaTabsCard({ schema, uiSchema }: SchemaTabsCardProps) {
 
   return (
     <Card bordered className="overflow-hidden">
-      <CardBody className="p-0">
-        <div className="border-b border-base-200 px-4 pt-4 bg-base-200">
+      <CardBody className="p-0 gap-0">
+        <div className="border-b border-base-content/10 px-4 pt-4 bg-base-200">
           <Tabs>
             <TabTrigger active={activeTab === "schema"} onClick={() => setActiveTab("schema")}>
               JSON Source

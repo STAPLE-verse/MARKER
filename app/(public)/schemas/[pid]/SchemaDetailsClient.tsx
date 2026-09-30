@@ -30,7 +30,7 @@ export default function SchemaDetailsClient({
   viewerVersionId,
   backFormId,
 }: SchemaDetailsClientProps) {
-  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   // A family with only one published version has nothing to show a history
   // for — skip the sidebar entirely rather than render an empty affordance.
   const hasHistory = schema.versions.length > 1;
@@ -59,7 +59,7 @@ export default function SchemaDetailsClient({
           viewerVersionId={viewerVersionId}
         />
         <a href={`/api/schemas/${schema.pid}/package`} download={`${schema.pid}.json`}>
-          <Button variant="primary" outline size="md">
+          <Button variant="primary" size="md">
             Export JSON
           </Button>
         </a>

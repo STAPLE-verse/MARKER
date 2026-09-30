@@ -108,7 +108,7 @@ export function SavedSearches({ currentQuery, suggestedName, onApply }: SavedSea
       <div className="flex flex-wrap items-center gap-2">
         {searches.length > 0 && (
           <Dropdown>
-            <DropdownTrigger className="btn btn-md text-base btn-outline" aria-label="Saved searches">
+            <DropdownTrigger className="btn btn-md text-base btn-secondary" aria-label="Saved searches">
               <BookmarkIcon className="h-5 w-5" aria-hidden="true" />
               Saved searches ({searches.length})
             </DropdownTrigger>
@@ -144,7 +144,6 @@ export function SavedSearches({ currentQuery, suggestedName, onApply }: SavedSea
         {!isNaming && (
           <Button
             variant="primary"
-            outline
             size="md"
             onClick={startNaming}
             disabled={currentQuery === "" || alreadySaved}

@@ -140,7 +140,7 @@ export default function NotificationsClient({ notifications: initialNotification
     <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300">
       <PageHeader title="Notifications" description="Stay updated on activity related to your schemas.">
         {notifications.some((n) => !n.read) && (
-          <Button variant="primary" outline size="md" onClick={markAllAsRead}>
+          <Button variant="primary" size="md" onClick={markAllAsRead}>
             Mark all as read
           </Button>
         )}

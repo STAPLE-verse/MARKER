@@ -93,7 +93,7 @@ export function DraftPublicationMetadataCard({ formId, version }: DraftPublicati
         <>
           <PublicationMetadataFieldsDisplay metadata={committedMetadata} />
           <CardActions>
-            <Button type="button" variant="primary" outline onClick={() => setIsEditing(true)}>
+            <Button type="button" variant="primary" onClick={() => setIsEditing(true)}>
               Edit metadata
             </Button>
           </CardActions>

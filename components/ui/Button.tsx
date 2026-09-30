@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'link';
   size?: 'lg' | 'md' | 'sm' | 'xs';
-  outline?: boolean;
   wide?: boolean;
 };
 
@@ -12,7 +11,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   children, 
   variant = 'primary', 
   size = 'md', 
-  outline = false,
   wide = false,
   className, 
   ...props 
@@ -39,7 +37,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
         "btn transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]",
         variantClasses,
         sizeClasses,
-        outline && "btn-outline",
         wide && "btn-wide",
         className
       )}

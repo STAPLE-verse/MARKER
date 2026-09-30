@@ -279,8 +279,8 @@ export function SchemaDetailHeader({
           {isViewingLatest && !isPublished && canEdit && (
             <>
               <Link href={`/collection/${formId}/edit`}>
-                <Button variant="primary" outline size="md">
-                  Edit Structure
+                <Button variant="primary" size="md">
+                  Edit Schema
                 </Button>
               </Link>
               {isOwner && (

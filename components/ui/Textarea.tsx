@@ -56,7 +56,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
             <button
               type="button"
               aria-pressed={mode === "edit"}
-              className={cn("btn btn-md text-base join-item", mode === "edit" ? "btn-primary" : "btn-outline")}
+              className={cn("btn btn-md text-base join-item", mode === "edit" ? "btn-primary" : "")}
               onClick={() => setMode("edit")}
             >
               Edit
@@ -64,7 +64,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(({
             <button
               type="button"
               aria-pressed={mode === "preview"}
-              className={cn("btn btn-md text-base join-item", mode === "preview" ? "btn-primary" : "btn-outline")}
+              className={cn("btn btn-md text-base join-item", mode === "preview" ? "btn-primary" : "")}
               onClick={showPreview}
             >
               Preview

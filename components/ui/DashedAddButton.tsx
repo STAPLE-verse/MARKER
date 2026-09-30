@@ -18,8 +18,8 @@ export const DashedAddButton = React.forwardRef<HTMLButtonElement, DashedAddButt
         title={title}
         disabled={disabled}
         className={cn(
-          "group w-full py-2 flex justify-center cursor-pointer border-2 border-dashed border-base-300 hover:border-primary hover:bg-primary/5 rounded-lg transition-all",
-          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-base-300 disabled:hover:bg-transparent",
+          "group w-full py-2 flex justify-center cursor-pointer border-2 border-dashed border-base-content/40 bg-base-300 hover:border-primary hover:bg-primary/5 rounded-lg transition-all",
+          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-base-content/40 disabled:hover:bg-base-300",
           className
         )}
         {...props}

@@ -65,7 +65,7 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
       header: "Actions",
       cell: ({ row }) => (
         <Link href={row.original.href}>
-          <Button variant="ghost" size="md">
+          <Button variant="primary" size="md">
             View
           </Button>
         </Link>

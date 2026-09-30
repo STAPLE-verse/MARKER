@@ -220,7 +220,7 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
       )}
 
       <div className="flex justify-center pt-2">
-        <Button type="button" variant="secondary" outline size="md" onClick={() => setEditingIndex(-1)}>
+        <Button type="button" variant="secondary" size="md" onClick={() => setEditingIndex(-1)}>
           <PlusIcon className="w-4 h-4 mr-1" />
           Add Contributor
         </Button>
@@ -431,7 +431,7 @@ function ContributorEditorModal({
                 }
               }}
             />
-            <Button type="button" variant="secondary" outline onClick={addCustomRole}>
+            <Button type="button" variant="secondary" onClick={addCustomRole}>
               Add
             </Button>
           </div>

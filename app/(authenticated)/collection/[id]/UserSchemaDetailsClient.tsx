@@ -43,7 +43,7 @@ export default function UserSchemaDetailsClient({
   const { createVersion, isCreating } = useCreateFormVersion(form.id);
   const { restoreVersion, isRestoring } = useRestoreFormVersion(form.id);
 
-  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const publishedSchema = selectedVersion.publishedSchema;
   // Editing publication metadata is a content edit like any other — EDITOR
@@ -104,16 +104,6 @@ export default function UserSchemaDetailsClient({
       <div className="space-y-6 mt-8">
         <SchemaDescriptionCard schema={selectedVersion.schema} />
 
-        <SchemaViewerCard
-          schema={selectedVersion.schema}
-          uiSchema={selectedVersion.uiSchema}
-          latestSchema={latestVersion.schema}
-          latestUiSchema={latestVersion.uiSchema}
-          isViewingLatest={isViewingLatest}
-          currentVersionLabel={getVersionLabel(selectedVersion)}
-          latestVersionLabel={getVersionLabel(latestVersion)}
-        />
-
         {publishedSchema && (
           <PublicationMetadataCard
             metadata={publishedSchema}
@@ -126,6 +116,16 @@ export default function UserSchemaDetailsClient({
         {isReadOnlyDraft && (
           <PublicationMetadataCard metadata={selectedVersion.publicationMetadata} />
         )}
+
+        <SchemaViewerCard
+          schema={selectedVersion.schema}
+          uiSchema={selectedVersion.uiSchema}
+          latestSchema={latestVersion.schema}
+          latestUiSchema={latestVersion.uiSchema}
+          isViewingLatest={isViewingLatest}
+          currentVersionLabel={getVersionLabel(selectedVersion)}
+          latestVersionLabel={getVersionLabel(latestVersion)}
+        />
       </div>
     </FormPageLayout>
   );
