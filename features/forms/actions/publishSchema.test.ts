@@ -314,7 +314,7 @@ describe("publishSchema identity + template-package validation gate", () => {
     });
     expect(createNotificationRow).toHaveBeenCalledWith({
       data: {
-        message: 'jane_doe published "Test schema" v1.0.0, forked from your schema.',
+        message: 'jane_doe published "Test schema" v1.0.0, a copy of your schema.',
         routeData: expect.objectContaining({ path: expect.stringContaining("/schemas/") }),
         recipients: { connect: [{ id: 99 }] },
         source: "MARKER",
@@ -374,7 +374,7 @@ describe("publishSchema identity + template-package validation gate", () => {
     });
     expect(createNotificationRow).toHaveBeenCalledWith({
       data: {
-        message: 'jane_doe published a new version of "Test schema" (v1.0.0), which you forked from.',
+        message: 'jane_doe published a new version of "Test schema" (v1.0.0), which you made a copy of.',
         routeData: { path: expect.stringContaining("/schemas/") },
         recipients: { connect: [{ id: 50 }, { id: 51 }] },
         source: "MARKER",
@@ -404,8 +404,8 @@ describe("publishSchema identity + template-package validation gate", () => {
 
     expect(createNotificationRow).toHaveBeenCalledTimes(2);
     const kinds = createNotificationRow.mock.calls.map((call) => call[0].data.message);
-    expect(kinds.some((m: string) => m.includes("forked from your schema"))).toBe(true);
-    expect(kinds.some((m: string) => m.includes("which you forked from"))).toBe(true);
+    expect(kinds.some((m: string) => m.includes("a copy of your schema"))).toBe(true);
+    expect(kinds.some((m: string) => m.includes("which you made a copy of"))).toBe(true);
   });
 
   it("still retries on a genuine pid collision, not just any P2002", async () => {

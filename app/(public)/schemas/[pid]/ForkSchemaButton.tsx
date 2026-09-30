@@ -12,7 +12,7 @@ interface ForkSchemaButtonProps {
 }
 
 /**
- * "View Your Draft" and "Fork This Schema" are independent now, not mutually
+ * "View Your Draft" and "Copy This Schema" (a fork) are independent now, not mutually
  * exclusive states — forking your own published schema is a legitimate
  * choice even with full draft access: cloning the draft (the existing
  * "Clone" action on `/collection/[id]`) makes an independent copy too, but
@@ -43,12 +43,12 @@ export function ForkSchemaButton({ pid, isLoggedIn, viewerFormId, viewerVersionI
       )}
       {isLoggedIn ? (
         <Button variant="primary" size="md" disabled={isForking} onClick={() => doFork(pid)}>
-          {isForking ? "Forking…" : "Fork This Schema"}
+          {isForking ? "Copying…" : "Copy This Schema"}
         </Button>
       ) : (
         <Link href={`/login?next=${encodeURIComponent(`/schemas/${pid}`)}`}>
           <Button variant="primary" size="md">
-            Fork This Schema
+            Copy This Schema
           </Button>
         </Link>
       )}

@@ -14,7 +14,7 @@ export function renderForkedSchemaUpdated(
   data: ForkedSchemaUpdatedPayload
 ): { message: string; routeData: NotificationRouteData } {
   return {
-    message: `${data.publisherUsername} published a new version of "${data.originalTitle}" (v${data.version}), which you forked from.`,
+    message: `${data.publisherUsername} published a new version of "${data.originalTitle}" (v${data.version}), which you made a copy of.`,
     routeData: { path: `/schemas/${data.originalPid}` },
   }
 }

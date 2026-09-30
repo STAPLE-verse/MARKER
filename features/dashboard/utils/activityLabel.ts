@@ -3,7 +3,7 @@ import { ActivityItemDTO } from "../types"
 const ACTION_LABELS: Record<ActivityItemDTO["type"], string> = {
   CREATED: "Created draft",
   IMPORTED_STAPLE: "Imported from STAPLE",
-  FORKED: "Forked schema",
+  FORKED: "Copied schema",
   PUBLISHED: "Published schema",
 }
 

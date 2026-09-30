@@ -152,7 +152,7 @@ describe("forkSchema", () => {
 
     expect(createNotificationRow).toHaveBeenCalledWith({
       data: {
-        message: 'jane_doe forked your schema "Cognitive Assessment Template".',
+        message: 'jane_doe made a copy of your schema "Cognitive Assessment Template".',
         routeData: { path: "/collection/7" },
         recipients: { connect: [{ id: OTHER_AUTHOR_ID }] },
         source: "MARKER",

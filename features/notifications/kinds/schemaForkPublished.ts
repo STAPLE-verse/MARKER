@@ -14,7 +14,7 @@ export function renderSchemaForkPublished(
   data: SchemaForkPublishedPayload
 ): { message: string; routeData: NotificationRouteData } {
   return {
-    message: `${data.publisherUsername} published "${data.forkedTitle}" v${data.version}, forked from your schema.`,
+    message: `${data.publisherUsername} published "${data.forkedTitle}" v${data.version}, a copy of your schema.`,
     routeData: { path: `/schemas/${data.forkedPid}` },
   }
 }

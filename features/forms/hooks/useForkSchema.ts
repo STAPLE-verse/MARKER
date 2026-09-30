@@ -21,7 +21,7 @@ export function useForkSchema() {
         toast.error(res.error);
         return;
       }
-      toast.success("Schema forked to your collection.");
+      toast.success("Schema copied to your collection.");
       router.push(`/collection/${res.data}`);
       router.refresh();
     });

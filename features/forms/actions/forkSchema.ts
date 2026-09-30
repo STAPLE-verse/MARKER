@@ -28,7 +28,7 @@ function resolveForkedContent(published: {
   packageSnapshot: { packageJson: unknown } | null
 }): { schema: Record<string, unknown>; uiSchema: Record<string, unknown>; semantics: unknown } {
   if (!published.packageSnapshot) {
-    throw new ActionError("NOT_FOUND", "This published schema has no package snapshot and cannot be forked.")
+    throw new ActionError("NOT_FOUND", "This published schema has no package snapshot and cannot be copied.")
   }
   const pkg = published.packageSnapshot.packageJson as unknown as MarkerTemplatePackage
   return {

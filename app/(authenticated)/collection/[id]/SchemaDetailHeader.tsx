@@ -161,10 +161,10 @@ function ForkedBadge({ formId, forkedFrom }: ForkedBadgeProps) {
       href={`/schemas/${forkedFrom.pid}?fromForm=${formId}`}
       // Same z-10 reasoning as StapleImportBadge above.
       className="inline-flex items-center shrink-0 mt-0.5 tooltip tooltip-bottom z-10 before:max-w-xs cursor-pointer"
-      data-tip={`Forked from ${forkedFrom.title}`}
+      data-tip={`Copied from ${forkedFrom.title}`}
     >
       <Badge variant="secondary" outline>
-        Forked
+        Copied
       </Badge>
     </Link>
   );

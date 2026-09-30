@@ -18,7 +18,7 @@ export function renderSchemaForked(
   data: SchemaForkedPayload
 ): { message: string; routeData: NotificationRouteData } {
   return {
-    message: `${data.forkedByUsername} forked your schema "${data.originalTitle}".`,
+    message: `${data.forkedByUsername} made a copy of your schema "${data.originalTitle}".`,
     routeData: {
       path: data.originalFormId != null ? `/collection/${data.originalFormId}` : `/schemas/${data.originalPid}`,
     },

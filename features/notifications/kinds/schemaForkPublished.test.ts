@@ -11,7 +11,7 @@ describe("renderSchemaForkPublished", () => {
     });
 
     expect(message).toBe(
-      'jane_doe published "Copy of Cognitive Assessment Template" v1.0.0, forked from your schema.'
+      'jane_doe published "Copy of Cognitive Assessment Template" v1.0.0, a copy of your schema.'
     );
   });
 

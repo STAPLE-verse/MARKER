@@ -10,7 +10,7 @@ describe("renderSchemaForked", () => {
       originalPid: "ps_abc123",
     });
 
-    expect(message).toBe('jane_doe forked your schema "Cognitive Assessment Template".');
+    expect(message).toBe('jane_doe made a copy of your schema "Cognitive Assessment Template".');
   });
 
   it("routes to the original author's own draft when the form still exists", () => {

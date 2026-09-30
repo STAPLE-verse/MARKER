@@ -11,7 +11,7 @@ describe("renderForkedSchemaUpdated", () => {
     });
 
     expect(message).toBe(
-      'jane_doe published a new version of "Cognitive Assessment Template" (v1.1.0), which you forked from.'
+      'jane_doe published a new version of "Cognitive Assessment Template" (v1.1.0), which you made a copy of.'
     );
   });
 

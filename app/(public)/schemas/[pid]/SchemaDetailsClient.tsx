@@ -59,7 +59,7 @@ export default function SchemaDetailsClient({
           viewerVersionId={viewerVersionId}
         />
         <a href={`/api/schemas/${schema.pid}/package`} download={`${schema.pid}.json`}>
-          <Button variant="primary" size="md">
+          <Button variant="accent" size="md">
             Export JSON
           </Button>
         </a>
