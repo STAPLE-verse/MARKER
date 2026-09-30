@@ -93,10 +93,10 @@ export function NotificationBell({ initialUnreadCount, initialLatest }: Notifica
 
   return (
     <Dropdown position="end">
-      <DropdownTrigger className="btn btn-ghost btn-sm">
+      <DropdownTrigger className="btn btn-ghost btn-md">
         <div className={unreadCount > 0 ? "indicator" : ""}>
           {unreadCount > 0 && (
-            <Badge size="xs" variant="primary" className="indicator-item indicator-top indicator-end">
+            <Badge size="md" variant="primary" className="indicator-item indicator-top indicator-end">
               {unreadCount}
             </Badge>
           )}
@@ -105,14 +105,14 @@ export function NotificationBell({ initialUnreadCount, initialLatest }: Notifica
       </DropdownTrigger>
       <DropdownContent className="w-80 mt-4 right-0 origin-top-right">
         {latest.length === 0 ? (
-          <DropdownItem className="text-sm text-base-content/60 px-2 py-2">No new notifications.</DropdownItem>
+          <DropdownItem className="text-base text-base-content/60 px-2 py-2">No new notifications.</DropdownItem>
         ) : (
           latest.map((notification) => (
             <DropdownItem key={notification.id}>
               <Link
                 href={notification.routeData?.path ?? "/notifications"}
                 onClick={() => handleOpenNotification(notification)}
-                className="whitespace-normal text-sm"
+                className="whitespace-normal text-base"
               >
                 {notification.message}
               </Link>
@@ -120,7 +120,7 @@ export function NotificationBell({ initialUnreadCount, initialLatest }: Notifica
           ))
         )}
         <DropdownItem className="border-t border-base-200 mt-1 pt-1">
-          <Link href="/notifications" className="text-sm font-medium">
+          <Link href="/notifications" className="text-base font-medium">
             View all notifications
           </Link>
         </DropdownItem>

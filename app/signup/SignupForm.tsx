@@ -48,7 +48,7 @@ export default function SignupForm({ next }: SignupFormProps) {
         <Card bordered className="border-secondary/20">
           <CardBody>
             <CardTitle>Create your account</CardTitle>
-            <div className="text-sm text-base-content/80 bg-base-200 p-3 rounded-lg mb-4 border border-base-300">
+            <div className="text-base text-base-content/80 bg-base-200 p-3 rounded-lg mb-4 border border-base-300">
             Creating an account here will also create a global account for you on <a href="https://app.staplescience.com" target="_blank" rel="noopener noreferrer" className="text-secondary font-medium hover:underline">STAPLE</a>. If you already have a STAPLE account, you do not need to sign up again.
           </div>
           {rootError && (
@@ -90,7 +90,7 @@ export default function SignupForm({ next }: SignupFormProps) {
               </Button>
             </div>
 
-            <div className="text-center pt-2 text-sm text-base-content/70">
+            <div className="text-center pt-2 text-base text-base-content/70">
               Already have an account?{" "}
               <Link href={loginHref} className="text-secondary font-medium hover:underline transition-all">
                 Log in

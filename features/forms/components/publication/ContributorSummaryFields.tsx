@@ -30,17 +30,17 @@ export function ContributorSummaryFields({
   return (
     <>
       <div className="flex-1 min-w-[140px]">
-        <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">Name</p>
+        <p className="text-base font-semibold uppercase tracking-wider text-base-content/50">Name</p>
         <p className="font-medium">{name || nameFallback}</p>
       </div>
       <div className="flex-1 min-w-[140px]">
-        <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">Roles</p>
+        <p className="text-base font-semibold uppercase tracking-wider text-base-content/50">Roles</p>
         {sortedRoles.length === 0 ? (
-          <p className="text-sm text-base-content/60 mt-0.5">Not specified</p>
+          <p className="text-base text-base-content/60 mt-0.5">Not specified</p>
         ) : (
           <div className="flex flex-wrap gap-1.5 mt-0.5">
             {sortedRoles.map((role) => (
-              <Badge key={role} variant="secondary" outline size="sm">
+              <Badge key={role} variant="secondary" outline size="md">
                 {contributorRoleLabel(role)}
               </Badge>
             ))}
@@ -48,12 +48,12 @@ export function ContributorSummaryFields({
         )}
       </div>
       <div className="flex-1 min-w-[140px]">
-        <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">ORCID</p>
+        <p className="text-base font-semibold uppercase tracking-wider text-base-content/50">ORCID</p>
         <p className="font-medium">{orcid || "Not specified"}</p>
       </div>
       {affiliations && affiliations.length > 0 && (
         <div className="flex-1 min-w-[140px]">
-          <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">Affiliation</p>
+          <p className="text-base font-semibold uppercase tracking-wider text-base-content/50">Affiliation</p>
           <p className="font-medium">{affiliations.map((affiliation) => affiliation.name).join(", ")}</p>
         </div>
       )}

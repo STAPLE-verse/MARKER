@@ -28,8 +28,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
   const sizeClasses = {
     lg: "btn-lg",
     md: "",
-    sm: "btn-sm",
-    xs: "btn-xs",
+    sm: "btn-md",
+    xs: "btn-md",
   }[size];
 
   return (

@@ -23,7 +23,7 @@ export default async function Home() {
       <main className="max-w-5xl mx-auto w-full space-y-12 animate-in fade-in zoom-in-95 duration-500 pt-8 sm:pt-12">
         {/* Header Section */}
         <div className="space-y-6 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-base mb-4">
             <SparklesIcon className="w-4 h-4" />
             v1.0.0
           </div>
@@ -41,7 +41,7 @@ export default async function Home() {
           <div className="flex items-center justify-between px-2">
             <h2 className="text-2xl font-bold tracking-tight">Recent Templates</h2>
             <Link href="/explore">
-              <Button variant="ghost" size="sm" className="text-primary gap-2">
+              <Button variant="ghost" size="md" className="text-primary gap-2">
                 Explore all <ArrowRightIcon className="w-4 h-4" />
               </Button>
             </Link>
@@ -56,11 +56,11 @@ export default async function Home() {
               <table className="table table-zebra w-full text-left">
                 <thead>
                   <tr className="bg-base-200/50 text-base-content/70">
-                    <th className="font-semibold text-sm w-1/2 py-4">Title</th>
-                    <th className="font-semibold text-sm">Version</th>
-                    <th className="font-semibold text-sm">Author</th>
-                    <th className="font-semibold text-sm">License</th>
-                    <th className="font-semibold text-sm text-right">Action</th>
+                    <th className="font-semibold text-base w-1/2 py-4">Title</th>
+                    <th className="font-semibold text-base">Version</th>
+                    <th className="font-semibold text-base">Author</th>
+                    <th className="font-semibold text-base">License</th>
+                    <th className="font-semibold text-base text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -68,22 +68,22 @@ export default async function Home() {
                     <tr key={schema.pid} className="hover:bg-base-200/30 transition-colors">
                       <td className="py-4">
                         <div className="font-bold text-base-content">{schema.title}</div>
-                        <div className="text-sm text-base-content/60 truncate max-w-sm mt-1">
+                        <div className="text-base text-base-content/60 truncate max-w-sm mt-1">
                           {schema.description}
                         </div>
                       </td>
                       <td>
-                        <span className="badge badge-secondary badge-outline badge-sm font-mono">
+                        <span className="badge badge-secondary badge-outline badge-md font-mono">
                           v{schema.version}
                         </span>
                       </td>
                       <td className="text-base-content/80">{contributorNamesLabel(schema)}</td>
                       <td>
-                        <span className="badge badge-accent badge-sm">{schema.license}</span>
+                        <span className="badge badge-accent badge-md">{schema.license}</span>
                       </td>
                       <td className="text-right">
                         <Link href={`/schemas/${schema.pid}`}>
-                          <Button variant="ghost" size="sm" className="hover:text-primary">
+                          <Button variant="ghost" size="md" className="hover:text-primary">
                             View
                           </Button>
                         </Link>

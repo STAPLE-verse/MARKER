@@ -22,7 +22,7 @@ export function UpdateFromStapleButton({ formId }: UpdateFromStapleButtonProps) 
     <>
       <Button
         variant="ghost"
-        size="sm"
+        size="md"
         className="w-full justify-start"
         disabled={isLoading}
         onClick={() => open(formId)}

@@ -50,7 +50,7 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
         <span
           className={`badge font-mono ${
             row.original.status === "Published" ? "badge-success" : "badge-warning"
-          } badge-sm`}
+          } badge-md`}
         >
           {row.original.statusLabel}
         </span>
@@ -65,7 +65,7 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
       header: "Actions",
       cell: ({ row }) => (
         <Link href={row.original.href}>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="md">
             View
           </Button>
         </Link>
@@ -98,7 +98,7 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
         description="Manage your metadata templates, draft new forms, or publish them to the Explore archive."
       >
         <Link href="/collection/new">
-          <Button variant="primary" size="sm">
+          <Button variant="primary" size="md">
             Add schema
           </Button>
         </Link>

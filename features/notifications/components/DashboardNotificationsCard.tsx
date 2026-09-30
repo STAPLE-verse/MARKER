@@ -45,7 +45,7 @@ export function DashboardNotificationsCard({ notifications: initialNotifications
           className="py-4 flex justify-between items-center first:pt-0 last:pb-0 hover:bg-base-200/50 -mx-2 px-2 rounded transition-colors"
         >
           <span className="text-base-content/80">{notification.message}</span>
-          <span className="text-xs text-base-content/50 shrink-0 ml-4">
+          <span className="text-base text-base-content/50 shrink-0 ml-4">
             {formatRelativeTime(notification.createdAt)}
           </span>
         </Link>

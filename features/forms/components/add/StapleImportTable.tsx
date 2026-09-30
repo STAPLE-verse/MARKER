@@ -43,10 +43,10 @@ export function StapleImportTable({ forms }: StapleImportTableProps) {
       cell: ({ row }) => {
         const count = row.original.markerTargets.length;
         if (count === 0) {
-          return <span className="badge badge-ghost badge-sm">Not imported</span>;
+          return <span className="badge badge-ghost badge-md">Not imported</span>;
         }
         return (
-          <span className="badge badge-info badge-sm">
+          <span className="badge badge-info badge-md">
             {count === 1 ? "Already imported" : `${count} MARKER copies`}
           </span>
         );
@@ -56,7 +56,7 @@ export function StapleImportTable({ forms }: StapleImportTableProps) {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <Button variant="ghost" size="sm" onClick={() => setActiveForm(row.original)}>
+        <Button variant="ghost" size="md" onClick={() => setActiveForm(row.original)}>
           Import
         </Button>
       ),

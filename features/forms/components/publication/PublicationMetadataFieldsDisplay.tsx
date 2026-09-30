@@ -16,7 +16,7 @@ interface PublicationMetadataFieldsDisplayProps {
 function FieldSection({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <h4 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-1">
+      <h4 className="text-base font-semibold text-base-content/60 uppercase tracking-wider mb-1">
         {label}
       </h4>
       {children}
@@ -88,7 +88,7 @@ export function PublicationMetadataFieldsDisplay({
       {showReleaseNotes && (
         <div className="md:col-span-3 mt-2">
           <FieldSection label="Release Notes">
-            <p className="text-sm text-base-content/80 bg-base-200/50 p-3 rounded-lg border border-base-200 whitespace-pre-wrap">
+            <p className="text-base text-base-content/80 bg-base-200/50 p-3 rounded-lg border border-base-200 whitespace-pre-wrap">
               {releaseNotes?.trim() || "Not specified"}
             </p>
           </FieldSection>

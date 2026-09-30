@@ -59,13 +59,13 @@ export default async function AppNavbar() {
 
             {/* Nav links stay tight together as one group, set apart from the bell and the avatar. */}
             <div className="flex items-center gap-1 ml-3">
-              <Link href="/dashboard" className="btn btn-ghost btn-sm">
+              <Link href="/dashboard" className="btn btn-ghost btn-md">
                 Dashboard
               </Link>
-              <Link href="/collection" className="btn btn-ghost btn-sm">
+              <Link href="/collection" className="btn btn-ghost btn-md">
                 My Collection
               </Link>
-              <Link href="/explore" className="btn btn-ghost btn-sm">
+              <Link href="/explore" className="btn btn-ghost btn-md">
                 Explore
               </Link>
             </div>
@@ -93,13 +93,13 @@ export default async function AppNavbar() {
         ) : (
           <>
             {/* Unauthenticated nav */}
-            <Link href="/explore" className="btn btn-ghost btn-sm">
+            <Link href="/explore" className="btn btn-ghost btn-md">
               Explore
             </Link>
-            <Link href="/login" className="btn btn-ghost btn-sm">
+            <Link href="/login" className="btn btn-ghost btn-md">
               Login
             </Link>
-            <Link href="/signup" className="btn btn-primary btn-sm">
+            <Link href="/signup" className="btn btn-primary btn-md">
               Sign Up
             </Link>
           </>

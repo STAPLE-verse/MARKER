@@ -34,7 +34,7 @@ export default async function DashboardPage() {
         description={`Welcome back, ${profile?.username || profile?.email || session.user.username || session.user.email}! Here's your workspace overview.`}
       >
         <Link href="/collection/new">
-          <Button variant="primary" size="sm">
+          <Button variant="primary" size="md">
             Add schema
           </Button>
         </Link>
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
                     Nothing here yet — create your first schema to get started.
                   </p>
                   <Link href="/collection/new">
-                    <Button variant="primary" size="sm">
+                    <Button variant="primary" size="md">
                       Add schema
                     </Button>
                   </Link>
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
                         <span className="font-semibold text-primary">{getActivityActionLabel(item)}</span>
                         <span className="text-base-content/80"> - {getActivityTargetLabel(item)}</span>
                       </div>
-                      <span className="text-xs text-base-content/50 shrink-0 ml-4">
+                      <span className="text-base text-base-content/50 shrink-0 ml-4">
                         {formatRelativeTime(item.timestamp)}
                       </span>
                     </Link>
@@ -83,7 +83,7 @@ export default async function DashboardPage() {
               <CardTitle className="text-xl font-bold">Notifications</CardTitle>
               <DashboardNotificationsCard notifications={notifications} />
               <div className="text-right mt-2">
-                <Link href="/notifications" className="text-sm font-medium text-primary hover:underline">
+                <Link href="/notifications" className="text-base font-medium text-primary hover:underline">
                   View all notifications
                 </Link>
               </div>

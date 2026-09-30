@@ -33,7 +33,7 @@ export function SchemaConformanceBlocked({ formId, message }: SchemaConformanceB
             {message}
           </Alert>
 
-          <p className="mt-6 text-sm text-base-content/70">
+          <p className="mt-6 text-base text-base-content/70">
             This needs to be fixed in the schema editor before this version can be
             published — the publish wizard only edits FAIR metadata and
             contributors, not the schema itself.

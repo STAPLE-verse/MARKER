@@ -81,7 +81,7 @@ export default function NotificationsClient({ notifications: initialNotification
       accessorKey: "announcement",
       header: "Type",
       cell: ({ row }) => (
-        <span className={`badge ${row.original.announcement ? "badge-secondary" : "badge-ghost"} badge-sm`}>
+        <span className={`badge ${row.original.announcement ? "badge-secondary" : "badge-ghost"} badge-md`}>
           {row.original.announcement ? "Announcement" : "Activity"}
         </span>
       ),
@@ -99,7 +99,7 @@ export default function NotificationsClient({ notifications: initialNotification
           <span className="tooltip" data-tip={row.original.read ? "Mark as unread" : "Mark as read"}>
             <Button
               variant="ghost"
-              size="xs"
+              size="md"
               className="shrink-0 transition-transform duration-150 hover:scale-110"
               aria-label={row.original.read ? "Mark as unread" : "Mark as read"}
               onClick={() => toggleRead(row.original.id, row.original.read)}
@@ -115,7 +115,7 @@ export default function NotificationsClient({ notifications: initialNotification
             <ConfirmActionButton
               triggerLabel={<TrashIcon className="h-5 w-5" aria-hidden="true" />}
               triggerVariant="ghost"
-              triggerSize="xs"
+              triggerSize="md"
               triggerClassName="text-error hover:bg-error/15 shrink-0 transition-transform duration-150 hover:scale-110"
               triggerAriaLabel="Delete notification"
               modalTitle="Delete Notification"
@@ -140,7 +140,7 @@ export default function NotificationsClient({ notifications: initialNotification
     <div className="container mx-auto px-4 py-8 max-w-6xl animate-in fade-in duration-300">
       <PageHeader title="Notifications" description="Stay updated on activity related to your schemas.">
         {notifications.some((n) => !n.read) && (
-          <Button variant="primary" outline size="sm" onClick={markAllAsRead}>
+          <Button variant="primary" outline size="md" onClick={markAllAsRead}>
             Mark all as read
           </Button>
         )}

@@ -30,12 +30,12 @@ export default async function ProfilePage() {
       >
         <div className="flex gap-2">
           <Link href="/profile/password">
-            <Button variant="primary" outline size="sm">
+            <Button variant="primary" outline size="md">
               Change Password
             </Button>
           </Link>
           <Link href="/profile/edit">
-            <Button variant="primary" size="sm">
+            <Button variant="primary" size="md">
               Edit Profile
             </Button>
           </Link>
@@ -48,19 +48,19 @@ export default async function ProfilePage() {
             <CardTitle className="text-xl border-b border-base-200 pb-2 mb-4">Account Information</CardTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <span className="text-xs text-base-content/60 font-semibold block">Username</span>
+                <span className="text-base text-base-content/60 font-semibold block">Username</span>
                 <span className="text-base font-medium">{dbUser.username || "Not set"}</span>
               </div>
               <div>
-                <span className="text-xs text-base-content/60 font-semibold block">Email Address</span>
+                <span className="text-base text-base-content/60 font-semibold block">Email Address</span>
                 <span className="text-base font-medium">{dbUser.email}</span>
               </div>
               <div>
-                <span className="text-xs text-base-content/60 font-semibold block">First Name</span>
+                <span className="text-base text-base-content/60 font-semibold block">First Name</span>
                 <span className="text-base font-medium">{dbUser.firstName || "Not set"}</span>
               </div>
               <div>
-                <span className="text-xs text-base-content/60 font-semibold block">Last Name</span>
+                <span className="text-base text-base-content/60 font-semibold block">Last Name</span>
                 <span className="text-base font-medium">{dbUser.lastName || "Not set"}</span>
               </div>
             </div>
@@ -72,7 +72,7 @@ export default async function ProfilePage() {
             <CardTitle className="text-xl border-b border-base-200 pb-2 mb-4">Academic Credentials</CardTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <span className="text-xs text-base-content/60 font-semibold block">ORCID iD</span>
+                <span className="text-base text-base-content/60 font-semibold block">ORCID iD</span>
                 {dbUser.orcid ? (
                   <span className="text-base font-mono font-medium text-success">{dbUser.orcid}</span>
                 ) : (
@@ -80,15 +80,15 @@ export default async function ProfilePage() {
                 )}
               </div>
               <div>
-                <span className="text-xs text-base-content/60 font-semibold block">Institution</span>
+                <span className="text-base text-base-content/60 font-semibold block">Institution</span>
                 <span className="text-base font-medium">{dbUser.institution || "Not set"}</span>
               </div>
               <div>
-                <span className="text-xs text-base-content/60 font-semibold block">Preferred Language</span>
+                <span className="text-base text-base-content/60 font-semibold block">Preferred Language</span>
                 <span className="text-base font-medium">{dbUser.language || "en-US"}</span>
               </div>
               <div>
-                <span className="text-xs text-base-content/60 font-semibold block">Theme</span>
+                <span className="text-base text-base-content/60 font-semibold block">Theme</span>
                 <span className="text-base font-medium capitalize">{dbUser.theme || "dark"}</span>
               </div>
             </div>

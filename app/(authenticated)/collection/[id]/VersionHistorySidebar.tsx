@@ -92,11 +92,11 @@ export function VersionHistorySidebar({
             >
               <div className={`flex flex-wrap items-center gap-2 font-semibold ${showDelete ? "pr-4" : ""}`}>
                 {versionLabel}
-                {v.status === "PUBLISHED" && <Badge size="sm" variant="success">Published</Badge>}
-                {isLatest && <Badge size="sm" variant="primary">Latest</Badge>}
+                {v.status === "PUBLISHED" && <Badge size="md" variant="success">Published</Badge>}
+                {isLatest && <Badge size="md" variant="primary">Latest</Badge>}
                 {v.stapleProvenance?.isDirectImport && (
                   <Badge
-                    size="sm"
+                    size="md"
                     variant={v.stapleProvenance.modificationStatus === "MODIFIED" ? "warning" : "success"}
                     outline
                     // z-10, not z-50 — see the matching comment on
@@ -112,10 +112,10 @@ export function VersionHistorySidebar({
                 )}
               </div>
               <div className="mt-1 flex items-end justify-between gap-2">
-                <div className="min-w-0 truncate text-sm text-base-content/70">
+                <div className="min-w-0 truncate text-base text-base-content/70">
                   {v.name || "Untitled Draft"}
                 </div>
-                <div className="shrink-0 whitespace-nowrap text-xs text-base-content/50">
+                <div className="shrink-0 whitespace-nowrap text-base text-base-content/50">
                   {new Date(v.createdAt).toLocaleDateString()}
                 </div>
               </div>

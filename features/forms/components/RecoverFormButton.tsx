@@ -21,7 +21,7 @@ export function RecoverFormButton({
   schemaTitle,
   redirectTo,
   onSuccess,
-  size = "sm",
+  size = "md",
 }: RecoverFormButtonProps) {
   const [open, setOpen] = useState(false);
   const { recover, isRecovering } = useUnarchiveForm({

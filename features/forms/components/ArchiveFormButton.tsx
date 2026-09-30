@@ -29,7 +29,7 @@ export function ArchiveFormButton({
   onSuccess,
   disabled = false,
   variant = "ghost",
-  size = "sm",
+  size = "md",
   className,
 }: ArchiveFormButtonProps) {
   const [open, setOpen] = useState(false)

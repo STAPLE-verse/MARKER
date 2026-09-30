@@ -48,7 +48,7 @@ export function DeleteFormVersionButton({
       onOpenChange={setOpen}
       triggerLabel={<TrashIcon className="h-4 w-4" aria-hidden="true" />}
       triggerVariant="ghost"
-      triggerSize="xs"
+      triggerSize="md"
       triggerClassName="text-error hover:bg-error/15 shrink-0"
       triggerAriaLabel={`Delete ${versionLabel}`}
       disabled={disabled}

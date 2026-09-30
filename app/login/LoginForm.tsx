@@ -53,11 +53,11 @@ export default function LoginForm({ next }: LoginFormProps) {
         <Card bordered className="border-primary/20">
           <CardBody>
             <CardTitle>Welcome back</CardTitle>
-            <div className="text-sm text-base-content/80 bg-base-200 p-3 rounded-lg mb-4 border border-base-300">
+            <div className="text-base text-base-content/80 bg-base-200 p-3 rounded-lg mb-4 border border-base-300">
             MARKER uses STAPLE accounts. If you already have an account on <a href="https://app.staplescience.com" target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">STAPLE</a>, you can log in directly here.
           </div>
           {rootError && (
-            <div className="alert alert-error mb-4 text-sm font-medium">
+            <div className="alert alert-error mb-4 text-base font-medium">
               <span>{rootError}</span>
             </div>
           )}
@@ -82,7 +82,7 @@ export default function LoginForm({ next }: LoginFormProps) {
               </Button>
             </div>
 
-            <div className="text-center pt-2 text-sm text-base-content/70">
+            <div className="text-center pt-2 text-base text-base-content/70">
               Don&apos;t have an account?{" "}
               <Link href={signupHref} className="text-primary font-medium hover:underline transition-all">
                 Sign up

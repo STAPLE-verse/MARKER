@@ -60,12 +60,12 @@ function MethodCard({ method }: { method: AddSchemaMethod }) {
               aria-hidden="true"
             />
           ) : (
-            <span className="badge badge-ghost badge-sm">Coming soon</span>
+            <span className="badge badge-ghost badge-md">Coming soon</span>
           )}
         </div>
         <div>
           <CardTitle className="text-xl">{method.title}</CardTitle>
-          <p className="mt-2 text-sm leading-relaxed text-base-content/60">
+          <p className="mt-2 text-base leading-relaxed text-base-content/60">
             {method.description}
           </p>
         </div>

@@ -266,7 +266,7 @@ export function SchemaDetailHeader({
       >
         <div className="flex gap-2 items-center">
           {!isViewingLatest && canEdit && (
-            <Button variant="primary" size="sm" onClick={onRestore} disabled={isRestoring}>
+            <Button variant="primary" size="md" onClick={onRestore} disabled={isRestoring}>
               {isRestoring ? "Restoring..." : "Restore as New Draft"}
             </Button>
           )}
@@ -279,13 +279,13 @@ export function SchemaDetailHeader({
           {isViewingLatest && !isPublished && canEdit && (
             <>
               <Link href={`/collection/${formId}/edit`}>
-                <Button variant="primary" outline size="sm">
+                <Button variant="primary" outline size="md">
                   Edit Structure
                 </Button>
               </Link>
               {isOwner && (
                 <Link href={`/collection/${formId}/publish`}>
-                  <Button variant="primary" size="sm">
+                  <Button variant="primary" size="md">
                     Publish Schema
                   </Button>
                 </Link>
@@ -299,7 +299,7 @@ export function SchemaDetailHeader({
               published version that wasn't also the latest. */}
           {isPublished && pid && (
             <Link href={`/schemas/${pid}?fromForm=${formId}`}>
-              <Button variant="secondary" size="sm">
+              <Button variant="secondary" size="md">
                 View Public URL
               </Button>
             </Link>
@@ -314,7 +314,7 @@ export function SchemaDetailHeader({
               <DropdownItem>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="md"
                   className="w-full justify-start"
                   onClick={onClone}
                   disabled={isCloning}

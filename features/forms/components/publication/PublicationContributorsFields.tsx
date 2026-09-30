@@ -147,7 +147,7 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
       )}
 
       {fields.length === 0 ? (
-        <p className="text-sm text-base-content/60 text-center py-4">No contributors added yet.</p>
+        <p className="text-base text-base-content/60 text-center py-4">No contributors added yet.</p>
       ) : (
         <div className="flex flex-col gap-3">
           {fields.map((field, index) => {
@@ -171,13 +171,13 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
                     orcid={contributor.orcid}
                     affiliations={contributor.affiliations}
                   />
-                  {rowError && <p className="text-error text-sm w-full">{rowError}</p>}
+                  {rowError && <p className="text-error text-base w-full">{rowError}</p>}
                 </div>
                 <div className="flex gap-1 shrink-0">
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
+                    size="md"
                     onClick={() => setEditingIndex(index)}
                     title="Edit Contributor"
                   >
@@ -187,7 +187,7 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
                     type="button"
                     variant="ghost"
                     className="text-error hover:bg-error/10"
-                    size="sm"
+                    size="md"
                     onClick={() => remove(index)}
                     title="Remove Contributor"
                   >
@@ -202,13 +202,13 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
 
       {unusedSuggestions.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 justify-center pt-2">
-          <span className="text-xs text-base-content/60">Add from this form&apos;s collaborators:</span>
+          <span className="text-base text-base-content/60">Add from this form&apos;s collaborators:</span>
           {unusedSuggestions.map((suggestion) => (
             <Button
               key={suggestion.userId}
               type="button"
               variant="ghost"
-              size="sm"
+              size="md"
               className="border border-dashed border-base-300"
               onClick={() => addSuggestion(suggestion)}
             >
@@ -220,13 +220,13 @@ export function PublicationContributorsFields<TFieldValues extends FieldValues>(
       )}
 
       <div className="flex justify-center pt-2">
-        <Button type="button" variant="secondary" outline size="sm" onClick={() => setEditingIndex(-1)}>
+        <Button type="button" variant="secondary" outline size="md" onClick={() => setEditingIndex(-1)}>
           <PlusIcon className="w-4 h-4 mr-1" />
           Add Contributor
         </Button>
       </div>
       {typeof contributorErrors?.message === "string" && (
-        <p className="text-error text-sm text-center mt-2">{contributorErrors.message}</p>
+        <p className="text-error text-base text-center mt-2">{contributorErrors.message}</p>
       )}
 
       {editingIndex !== null && (
@@ -386,7 +386,7 @@ function ContributorEditorModal({
             onChange={(e) => updateField("name", e.target.value)}
           />
         )}
-        {nameError && <p className="text-error text-sm">{nameError}</p>}
+        {nameError && <p className="text-error text-base">{nameError}</p>}
 
         <Input
           label="ORCID (Optional)"
@@ -435,7 +435,7 @@ function ContributorEditorModal({
               Add
             </Button>
           </div>
-          {rolesError && <p className="text-error text-sm mt-1">{rolesError}</p>}
+          {rolesError && <p className="text-error text-base mt-1">{rolesError}</p>}
         </div>
       </div>
 

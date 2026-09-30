@@ -29,8 +29,8 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     };
 
     const sizeClasses = {
-      xs: 'badge-xs',
-      sm: 'badge-sm',
+      xs: 'badge-md',
+      sm: 'badge-md',
       md: 'badge-md',
       lg: 'badge-lg',
     };

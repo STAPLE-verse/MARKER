@@ -19,7 +19,7 @@ export interface ActionMenuProps {
 export function ActionMenu({ children, ariaLabel = "More actions", className }: ActionMenuProps) {
   return (
     <Dropdown position="end" className={className}>
-      <DropdownTrigger className="btn btn-ghost btn-sm btn-circle" aria-label={ariaLabel}>
+      <DropdownTrigger className="btn btn-ghost btn-md btn-circle" aria-label={ariaLabel}>
         <EllipsisVerticalIcon className="h-5 w-5" />
       </DropdownTrigger>
       <DropdownContent className="w-56 mt-2">{children}</DropdownContent>

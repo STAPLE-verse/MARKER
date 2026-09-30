@@ -60,7 +60,7 @@ export function PendingInvitationsCard({ invites: initialInvites }: PendingInvit
       {invites.map((invite) => (
         <div key={invite.collaboratorId} className="py-4 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm">
+            <p className="text-base">
               <span className="font-semibold text-primary">{invite.inviterUsername}</span> invited you to
               collaborate on <span className="font-medium">&quot;{invite.formTitle}&quot;</span> as{" "}
               {ROLE_LABEL[invite.role]}.
@@ -73,14 +73,14 @@ export function PendingInvitationsCard({ invites: initialInvites }: PendingInvit
                 lower-commitment entry point: look before deciding, rather
                 than accept/decline blind from just the invite text here. */}
             <Link href={`/collection/${invite.formId}`}>
-              <Button size="xs" variant="ghost">
+              <Button size="md" variant="ghost">
                 View
               </Button>
             </Link>
-            <Button size="xs" variant="ghost" onClick={() => decline(invite.collaboratorId)} disabled={isPending}>
+            <Button size="md" variant="ghost" onClick={() => decline(invite.collaboratorId)} disabled={isPending}>
               Decline
             </Button>
-            <Button size="xs" onClick={() => accept(invite.collaboratorId, invite.formId)} disabled={isPending}>
+            <Button size="md" onClick={() => accept(invite.collaboratorId, invite.formId)} disabled={isPending}>
               Accept
             </Button>
           </div>

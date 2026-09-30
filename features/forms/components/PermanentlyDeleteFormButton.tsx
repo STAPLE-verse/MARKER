@@ -21,7 +21,7 @@ export function PermanentlyDeleteFormButton({
   schemaTitle,
   redirectTo = "/collection?tab=archived",
   onSuccess,
-  size = "sm",
+  size = "md",
 }: PermanentlyDeleteFormButtonProps) {
   const [open, setOpen] = useState(false);
   const { remove, isDeleting } = usePermanentlyDeleteForm({

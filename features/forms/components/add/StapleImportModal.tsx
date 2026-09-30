@@ -139,7 +139,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
           </select>
         )}
 
-        {isLoadingPreview && <div className="text-sm text-base-content/50">Loading preview…</div>}
+        {isLoadingPreview && <div className="text-base text-base-content/50">Loading preview…</div>}
         {preview && <SchemaTabsCard schema={preview.schema} uiSchema={preview.uiSchema} />}
       </div>
 

@@ -47,12 +47,12 @@ export function CollapsibleHistorySidebar({
         )}
         <div className={!isOpen && versionCount > 1 ? "indicator" : ""}>
           {!isOpen && versionCount > 1 && (
-            <Badge size="xs" variant="primary" className="indicator-item indicator-top indicator-end shadow-sm">
+            <Badge size="md" variant="primary" className="indicator-item indicator-top indicator-end shadow-sm">
               {versionCount}
             </Badge>
           )}
           <button
-            className="btn btn-sm btn-ghost btn-circle"
+            className="btn btn-md btn-ghost btn-circle"
             onClick={() => setIsOpen(!isOpen)}
             title="Toggle Version History"
             type="button"
@@ -67,7 +67,7 @@ export function CollapsibleHistorySidebar({
       ) : (
         <div className="flex-1 bg-base-200/30 flex flex-col items-center pt-4">
           <div
-            className="text-vertical writing-mode-vertical-rl rotate-180 text-sm font-semibold tracking-widest text-base-content/40 uppercase"
+            className="text-vertical writing-mode-vertical-rl rotate-180 text-base font-semibold tracking-widest text-base-content/40 uppercase"
             style={{ writingMode: "vertical-rl" }}
           >
             History

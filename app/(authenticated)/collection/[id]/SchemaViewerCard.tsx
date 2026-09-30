@@ -66,7 +66,7 @@ export function SchemaViewerCard({
               <div className="pb-2">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="md"
                   className="text-primary h-8 min-h-8 px-3"
                   onClick={openCompare}
                 >

@@ -36,7 +36,7 @@ export interface ConfirmActionButtonProps {
 export function ConfirmActionButton({
   triggerLabel,
   triggerVariant = "primary",
-  triggerSize = "sm",
+  triggerSize = "md",
   triggerClassName,
   disabled = false,
   disabledReason,

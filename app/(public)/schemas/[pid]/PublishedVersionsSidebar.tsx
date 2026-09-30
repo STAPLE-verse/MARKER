@@ -51,12 +51,12 @@ export function PublishedVersionsSidebar({
             <div className="flex flex-wrap items-center gap-2 font-semibold">
               v{version.version}
               {isLatest && (
-                <Badge size="sm" variant="primary">
+                <Badge size="md" variant="primary">
                   Latest
                 </Badge>
               )}
             </div>
-            <div className="mt-1 text-xs text-base-content/50">
+            <div className="mt-1 text-base text-base-content/50">
               {new Date(version.createdAt).toLocaleDateString(undefined, {
                 year: "numeric",
                 month: "long",

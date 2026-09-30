@@ -67,7 +67,7 @@ export default function SchemaDetailsClient({
           viewerVersionId={viewerVersionId}
         />
         <a href={`/api/schemas/${schema.pid}/package`} download={`${schema.pid}.json`}>
-          <Button variant="primary" outline size="sm">
+          <Button variant="primary" outline size="md">
             Export JSON
           </Button>
         </a>
@@ -81,7 +81,7 @@ export default function SchemaDetailsClient({
               {schema.description || "No description provided."}
             </p>
             {schema.relatedPublicationDoi && (
-              <p className="text-sm text-base-content/60 mt-2">
+              <p className="text-base text-base-content/60 mt-2">
                 Related publication:{" "}
                 <a
                   href={`https://doi.org/${schema.relatedPublicationDoi}`}
@@ -94,7 +94,7 @@ export default function SchemaDetailsClient({
               </p>
             )}
             {schema.forkedFrom && (
-              <p className="text-sm text-base-content/60 mt-2">
+              <p className="text-base text-base-content/60 mt-2">
                 Forked from{" "}
                 <Link href={`/schemas/${schema.forkedFrom.pid}`} className="link link-primary">
                   {schema.forkedFrom.title}

@@ -207,7 +207,7 @@ function EditPageContent(props: EditPageContentProps) {
             <div className="tooltip tooltip-bottom inline-block" data-tip={saveTooltip}>
               <span className={saveDisabled ? "inline-block cursor-not-allowed" : "inline-block"}>
                 <Button
-                  size="sm"
+                  size="md"
                   variant="secondary"
                   outline
                   onClick={handleSaveClick}
@@ -219,7 +219,7 @@ function EditPageContent(props: EditPageContentProps) {
               </span>
             </div>
             <Button
-              size="sm"
+              size="md"
               variant="primary"
               onClick={handleDoneClick}
               disabled={props.isSaving}
@@ -233,7 +233,7 @@ function EditPageContent(props: EditPageContentProps) {
       {commitDiagnostics.length > 0 && (
         <div className="flex-none mb-6 mt-2">
           <Alert variant="warning" showIcon>
-            <div className="text-sm font-medium">
+            <div className="text-base font-medium">
               Validation issues must be resolved before saving.
               <ul className="mt-1 list-disc pl-5 font-normal">
                 {commitDiagnostics.map((diagnostic, index) => (
@@ -251,7 +251,7 @@ function EditPageContent(props: EditPageContentProps) {
         <div className="flex-none mb-6 mt-2">
           <Alert variant="info" showIcon>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full gap-4">
-              <div className="text-sm font-medium">
+              <div className="text-base font-medium">
                 We found unsaved changes in your browser from a previous session.
                 {props.draftToRestore.timestamp && (
                   <span className="opacity-75 block sm:inline sm:ml-1 font-normal">
@@ -260,10 +260,10 @@ function EditPageContent(props: EditPageContentProps) {
                 )}
               </div>
               <div className="flex gap-2 shrink-0">
-                <Button size="sm" variant="ghost" onClick={props.discardDraft}>
+                <Button size="md" variant="ghost" onClick={props.discardDraft}>
                   Discard
                 </Button>
-                <Button size="sm" variant="primary" onClick={props.restoreDraft}>
+                <Button size="md" variant="primary" onClick={props.restoreDraft}>
                   Restore Draft
                 </Button>
               </div>

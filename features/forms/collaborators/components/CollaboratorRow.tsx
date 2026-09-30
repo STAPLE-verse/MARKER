@@ -63,14 +63,14 @@ export function CollaboratorRow({
         <Avatar email={collaborator.avatarEmail} fallback={collaborator.username[0]} size={36} />
         <div className="min-w-0 flex-1">
           <div className="font-medium truncate">{collaborator.username}</div>
-          {collaborator.name && <div className="text-xs text-base-content/60 truncate">{collaborator.name}</div>}
+          {collaborator.name && <div className="text-base text-base-content/60 truncate">{collaborator.name}</div>}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {/* Action button first, badge/select last — keeps the badge flush
               against the row's right edge whether or not a row has a button. */}
           {isOwnerViewer && (
             <Button
-              size="xs"
+              size="md"
               variant="ghost"
               onClick={() => onRemove(collaborator.collaboratorId)}
               disabled={isPending}
@@ -80,7 +80,7 @@ export function CollaboratorRow({
           )}
           {!isOwnerViewer && isSelf && !collaborator.isPending && (
             <Button
-              size="xs"
+              size="md"
               variant="ghost"
               onClick={() => onLeave(collaborator.collaboratorId)}
               disabled={isPending}
@@ -95,7 +95,7 @@ export function CollaboratorRow({
             </Badge>
           ) : isOwnerViewer ? (
             <select
-              className="select select-bordered select-sm"
+              className="select select-bordered select-md"
               value={confirmingTransfer ? "OWNER" : collaborator.role}
               onChange={(e) => handleRoleSelect(e.target.value)}
               disabled={isPending || confirmingTransfer}
@@ -114,16 +114,16 @@ export function CollaboratorRow({
       </li>
       {confirmingTransfer && (
         <li className="list-row items-center gap-3 bg-base-200/50">
-          <p className="text-sm flex-1 min-w-0">
+          <p className="text-base flex-1 min-w-0">
             Make <span className="font-medium">{collaborator.username}</span>{" "}
             the owner? You&apos;ll be demoted to Editor.
           </p>
           <div className="flex items-center gap-2 shrink-0">
-            <Button size="xs" variant="ghost" onClick={() => setConfirmingTransfer(false)} disabled={isPending}>
+            <Button size="md" variant="ghost" onClick={() => setConfirmingTransfer(false)} disabled={isPending}>
               Cancel
             </Button>
             <Button
-              size="xs"
+              size="md"
               variant="primary"
               onClick={() => onTransferOwnership(collaborator.userId, () => setConfirmingTransfer(false))}
               disabled={isPending}

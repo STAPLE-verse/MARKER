@@ -39,7 +39,7 @@ export default function AuthenticatedError({
 
       {error.digest && (
         <Alert variant="error" className="mb-6 w-full" showIcon={false}>
-          <span className="font-mono text-xs break-all">Reference: {error.digest}</span>
+          <span className="font-mono text-base break-all">Reference: {error.digest}</span>
         </Alert>
       )}
 

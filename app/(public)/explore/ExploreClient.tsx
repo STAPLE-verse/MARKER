@@ -80,7 +80,7 @@ function FilterCheckboxGroup({
 }) {
   return (
     <div>
-      <p className="text-sm font-semibold mb-1.5">{label}</p>
+      <p className="text-base font-semibold mb-1.5">{label}</p>
       <div className="flex flex-col gap-1">
         {options.map((option) => (
           <Checkbox
@@ -114,7 +114,7 @@ function publishedOnLabel(createdAt: Date): string {
 function VersionBadge({ schema }: { schema: PublishedSchemaCardDTO }) {
   if (schema.versions.length <= 1) {
     return (
-      <Badge variant="secondary" outline size="sm" className="font-mono">
+      <Badge variant="secondary" outline size="md" className="font-mono">
         v{schema.version}
       </Badge>
     );
@@ -123,7 +123,7 @@ function VersionBadge({ schema }: { schema: PublishedSchemaCardDTO }) {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Badge variant="secondary" outline size="sm" className="font-mono cursor-pointer gap-0.5">
+        <Badge variant="secondary" outline size="md" className="font-mono cursor-pointer gap-0.5">
           v{schema.version}
           <ChevronDownIcon className="w-3 h-3" />
         </Badge>
@@ -133,7 +133,7 @@ function VersionBadge({ schema }: { schema: PublishedSchemaCardDTO }) {
           <DropdownItem key={version.pid}>
             <Link href={`/schemas/${version.pid}`} className="flex items-center justify-between gap-2">
               <span className={version.pid === schema.pid ? "font-semibold" : ""}>v{version.version}</span>
-              <span className="text-xs text-base-content/50 whitespace-nowrap">
+              <span className="text-base text-base-content/50 whitespace-nowrap">
                 {publishedOnLabel(version.createdAt)}
               </span>
             </Link>
@@ -249,7 +249,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
             <span className="text-lg font-bold">Filters</span>
           </div>
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+            <Button variant="ghost" size="md" onClick={clearAllFilters}>
               Clear all
             </Button>
           )}
@@ -280,7 +280,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
             onToggle={(value) => setSourceFilters((prev) => toggleValue(prev, value))}
           />
           <div>
-            <p className="text-sm font-semibold mb-1.5">Published</p>
+            <p className="text-base font-semibold mb-1.5">Published</p>
             <div className="flex flex-col gap-2">
               <Input
                 type="date"
@@ -333,11 +333,11 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
                         <h2 className="text-xl font-bold">{schema.title}</h2>
                       </Link>
                       <VersionBadge schema={schema} />
-                      <Badge variant="primary" outline size="sm">
+                      <Badge variant="primary" outline size="md">
                         {domainLabel(schema.domain)}
                       </Badge>
                     </div>
-                    <p className="text-sm text-base-content/70 mt-0">
+                    <p className="text-base text-base-content/70 mt-0">
                       {contributorNamesLabel(schema)}
                     </p>
                   </div>
@@ -351,7 +351,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
                       {schema.keywords.map((keyword) => (
                         <span
                           key={keyword}
-                          className="badge badge-outline badge-sm border-base-content/20 text-base-content/60"
+                          className="badge badge-outline badge-md border-base-content/20 text-base-content/60"
                         >
                           {keyword}
                         </span>
@@ -359,7 +359,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
                     </div>
                   )}
 
-                  <p className="text-xs text-base-content/50">
+                  <p className="text-base text-base-content/50">
                     {licenseLabel(schema.license)} · Published {publishedOnLabel(schema.createdAt)}
                   </p>
                 </CardBody>

@@ -53,7 +53,7 @@ export function TextListInput({
       <div className="space-y-2">
         {value.map((item, index) => (
           <div key={index} className="flex items-center gap-2">
-            <span className="text-sm text-base-content/50 w-5 shrink-0 text-right">{index + 1}.</span>
+            <span className="text-base text-base-content/50 w-5 shrink-0 text-right">{index + 1}.</span>
             <Input
               placeholder={placeholder}
               value={item}
@@ -63,7 +63,7 @@ export function TextListInput({
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="md"
               onClick={() => moveItem(index, -1)}
               disabled={index === 0}
               title="Move Up"
@@ -73,7 +73,7 @@ export function TextListInput({
             <Button
               type="button"
               variant="ghost"
-              size="sm"
+              size="md"
               onClick={() => moveItem(index, 1)}
               disabled={index === value.length - 1}
               title="Move Down"
@@ -84,7 +84,7 @@ export function TextListInput({
               type="button"
               variant="ghost"
               className="text-error hover:bg-error/10"
-              size="sm"
+              size="md"
               onClick={() => removeItem(index)}
               title="Remove"
             >
@@ -92,7 +92,7 @@ export function TextListInput({
             </Button>
           </div>
         ))}
-        <Button type="button" variant="ghost" size="sm" onClick={() => onChange([...value, ""])}>
+        <Button type="button" variant="ghost" size="md" onClick={() => onChange([...value, ""])}>
           <PlusIcon className="w-4 h-4 mr-1" />
           {addButtonLabel}
         </Button>
