@@ -1,6 +1,7 @@
 import { Navbar, NavbarStart, NavbarEnd } from "@/components/ui/Navbar";
 import { Avatar } from "@/components/ui/Avatar";
 import { Logo } from "@/components/ui/Logo";
+import { Breadcrumbs } from "./Breadcrumbs";
 import {
   Dropdown,
   DropdownTrigger,
@@ -20,7 +21,7 @@ import { getUserProfile } from "@/features/users/queries/getUserProfile";
  * AppNavbar — the shared navigation bar used across all pages with navigation.
  *
  * This is a server component that reads the session and conditionally renders:
- * - Always: MARKER logo, Explore link
+ * - Always: MARKER logo, breadcrumbs, Explore link
  * - Authenticated: Dashboard, Collection, Notifications, Avatar dropdown
  * - Unauthenticated: Login, Sign Up buttons
  *
@@ -29,6 +30,7 @@ import { getUserProfile } from "@/features/users/queries/getUserProfile";
 export default async function AppNavbar() {
   const session = await auth();
   const isLoggedIn = !!session?.user;
+  const homeHref = isLoggedIn ? "/dashboard" : "/";
 
   // `session.user.username`/`.email` are JWT-cached at sign-in and only
   // change again at next login — reading a fresh `profile` row here means a
@@ -43,14 +45,11 @@ export default async function AppNavbar() {
 
   return (
     <Navbar className="border-b border-base-300 sticky top-0 z-50 bg-base-100">
-      <NavbarStart>
-        <Link
-          href={isLoggedIn ? "/dashboard" : "/"}
-          className="btn btn-ghost text-xl font-bold tracking-tight"
-        >
-          <Logo variant="mark" className="h-7" aria-hidden />
-          MARKER
+      <NavbarStart className="gap-8 pl-4 min-w-0">
+        <Link href={homeHref} className="shrink-0">
+          <Logo variant="mark" className="h-7" />
         </Link>
+        <Breadcrumbs homeHref={homeHref} />
       </NavbarStart>
       <NavbarEnd className="flex items-center gap-1 pr-2">
         {isLoggedIn ? (
