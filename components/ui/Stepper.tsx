@@ -15,7 +15,7 @@ export interface StepperProps extends React.HTMLAttributes<HTMLUListElement> {
 export const Stepper = React.forwardRef<HTMLUListElement, StepperProps>(
   ({ steps, currentStep, className, ...props }, ref) => {
     return (
-      <ul ref={ref} className={cn("steps", className)} {...props}>
+      <ul ref={ref} className={cn("steps text-base", className)} {...props}>
         {steps.map((step, index) => {
           const stepNumber = index + 1;
           const isCompletedOrCurrent = currentStep >= stepNumber;

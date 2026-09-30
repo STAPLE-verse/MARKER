@@ -48,7 +48,7 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
       header: "Latest Version",
       cell: ({ row }) => (
         <span
-          className={`badge font-mono ${
+          className={`badge text-base font-mono ${
             row.original.status === "Published" ? "badge-success" : "badge-warning"
           } badge-md`}
         >

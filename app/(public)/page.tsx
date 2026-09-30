@@ -53,7 +53,7 @@ export default async function Home() {
             </div>
           ) : (
             <div className="overflow-x-auto bg-base-100 shadow-xl border border-base-200 rounded-2xl">
-              <table className="table table-zebra w-full text-left">
+              <table className="table table-zebra w-full text-left text-base">
                 <thead>
                   <tr className="bg-base-200/50 text-base-content/70">
                     <th className="font-semibold text-base w-1/2 py-4">Title</th>
@@ -73,13 +73,13 @@ export default async function Home() {
                         </div>
                       </td>
                       <td>
-                        <span className="badge badge-secondary badge-outline badge-md font-mono">
+                        <span className="badge badge-secondary badge-outline badge-md text-base font-mono">
                           v{schema.version}
                         </span>
                       </td>
                       <td className="text-base-content/80">{contributorNamesLabel(schema)}</td>
                       <td>
-                        <span className="badge badge-accent badge-md">{schema.license}</span>
+                        <span className="badge badge-accent badge-md text-base">{schema.license}</span>
                       </td>
                       <td className="text-right">
                         <Link href={`/schemas/${schema.pid}`}>

@@ -39,7 +39,7 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
       <span
         ref={ref}
         className={cn(
-          "badge",
+          "badge text-base",
           variant && variantClasses[variant],
           size && sizeClasses[size],
           outline && "badge-outline",

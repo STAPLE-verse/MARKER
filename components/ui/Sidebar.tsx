@@ -24,7 +24,7 @@ SidebarContent.displayName = "SidebarContent";
 
 const SidebarMenu = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
   ({ className, ...props }, ref) => (
-    <ul ref={ref} className={cn("menu w-full p-0 gap-1", className)} {...props} />
+    <ul ref={ref} className={cn("menu text-base w-full p-0 gap-1", className)} {...props} />
   )
 );
 SidebarMenu.displayName = "SidebarMenu";

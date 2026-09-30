@@ -89,7 +89,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
             </span>
           </label>
           <select
-            className="select select-bordered w-full"
+            className="select select-bordered w-full text-base"
             value={versionId}
             onChange={(e) => setVersionId(Number(e.target.value))}
           >
@@ -126,7 +126,7 @@ export function StapleImportModal({ form, open, onClose, updateOnly = false }: S
 
         {showTargetSelect && (
           <select
-            className="select select-bordered w-full"
+            className="select select-bordered w-full text-base"
             value={targetId}
             onChange={(e) => setTargetId(Number(e.target.value))}
           >

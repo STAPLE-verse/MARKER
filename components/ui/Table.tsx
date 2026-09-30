@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 const Table = React.forwardRef<HTMLTableElement, React.TableHTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
     <div className="overflow-x-auto w-full">
-      <table ref={ref} className={cn("table", className)} {...props} />
+      <table ref={ref} className={cn("table text-base", className)} {...props} />
     </div>
   )
 );
@@ -287,7 +287,7 @@ function DataTable<TData>({
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder={globalSearchPlaceholder}
             aria-label="Search table data"
-            className="input input-bordered input-md w-full max-w-xs bg-base-200"
+            className="input input-bordered input-md text-base w-full max-w-xs bg-base-200"
           />
         </div>
       )}
@@ -347,7 +347,7 @@ function DataTable<TData>({
           <div className="join">
             <button
               type="button"
-              className="join-item btn btn-md"
+              className="join-item btn btn-md text-base"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
@@ -355,18 +355,18 @@ function DataTable<TData>({
             </button>
             <button
               type="button"
-              className="join-item btn btn-md"
+              className="join-item btn btn-md text-base"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               ‹
             </button>
-            <button className="join-item btn btn-md btn-disabled">
+            <button className="join-item btn btn-md text-base btn-disabled">
               Page {currentPage} of {pageCount}
             </button>
             <button
               type="button"
-              className="join-item btn btn-md"
+              className="join-item btn btn-md text-base"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
@@ -374,7 +374,7 @@ function DataTable<TData>({
             </button>
             <button
               type="button"
-              className="join-item btn btn-md"
+              className="join-item btn btn-md text-base"
               onClick={() => table.setPageIndex(pageCount - 1)}
               disabled={!table.getCanNextPage()}
             >
@@ -386,7 +386,7 @@ function DataTable<TData>({
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => table.setPageSize(Number(e.target.value))}
-            className="select select-bordered select-md"
+            className="select select-bordered select-md text-base"
           >
             {pageSizeOptions.map((size) => (
               <option key={size} value={size}>

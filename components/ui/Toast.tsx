@@ -33,7 +33,7 @@ export function Toast({ t }: { t: ToastType }) {
 
   return (
     <div
-      role="alert"
+      role="alert text-base"
       className={cn(
         `alert alert-${variant} shadow-lg max-w-sm w-full pointer-events-auto transition-all duration-200`,
         t.visible ? "animate-in fade-in slide-in-from-top-2" : "opacity-0 scale-95"
@@ -44,7 +44,7 @@ export function Toast({ t }: { t: ToastType }) {
       <button
         type="button"
         aria-label="Dismiss notification"
-        className="btn btn-ghost btn-md btn-circle"
+        className="btn btn-ghost btn-md text-base btn-circle"
         onClick={() => hotToast.dismiss(t.id)}
       >
         <XMarkIcon className="h-4 w-4" strokeWidth={2} />

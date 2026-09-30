@@ -81,7 +81,7 @@ export default function NotificationsClient({ notifications: initialNotification
       accessorKey: "announcement",
       header: "Type",
       cell: ({ row }) => (
-        <span className={`badge ${row.original.announcement ? "badge-secondary" : "badge-ghost"} badge-md`}>
+        <span className={`badge ${row.original.announcement ? "badge-secondary" : "badge-ghost"} badge-md text-base`}>
           {row.original.announcement ? "Announcement" : "Activity"}
         </span>
       ),

@@ -351,7 +351,7 @@ export default function ExploreClient({ schemas }: ExploreClientProps) {
                       {schema.keywords.map((keyword) => (
                         <span
                           key={keyword}
-                          className="badge badge-outline badge-md border-base-content/20 text-base-content/60"
+                          className="badge badge-outline badge-md text-base border-base-content/20 text-base-content/60"
                         >
                           {keyword}
                         </span>

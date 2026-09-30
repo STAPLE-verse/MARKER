@@ -60,7 +60,7 @@ function MethodCard({ method }: { method: AddSchemaMethod }) {
               aria-hidden="true"
             />
           ) : (
-            <span className="badge badge-ghost badge-md">Coming soon</span>
+            <span className="badge badge-ghost badge-md text-base">Coming soon</span>
           )}
         </div>
         <div>

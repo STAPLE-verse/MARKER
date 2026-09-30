@@ -106,18 +106,18 @@ export default async function DashboardPage() {
               <CardTitle className="text-lg font-bold">My Stats</CardTitle>
               <div className="stats stats-vertical bg-transparent w-full">
                 <Link href="/collection" className="stat px-0 hover:opacity-80 transition-opacity">
-                  <div className="stat-title text-base-content/70">Published Schemas</div>
+                  <div className="stat-title text-base text-base-content/70">Published Schemas</div>
                   <div className="stat-value text-primary text-3xl font-extrabold">{stats.publishedCount}</div>
                 </Link>
                 <Link href="/collection" className="stat px-0 hover:opacity-80 transition-opacity">
-                  <div className="stat-title text-base-content/70">Draft Templates</div>
+                  <div className="stat-title text-base text-base-content/70">Draft Templates</div>
                   <div className="stat-value text-secondary text-3xl font-extrabold">{stats.draftCount}</div>
                 </Link>
                 <Link
                   href={collectionTabHref("archived")}
                   className="stat px-0 hover:opacity-80 transition-opacity"
                 >
-                  <div className="stat-title text-base-content/70">Archived</div>
+                  <div className="stat-title text-base text-base-content/70">Archived</div>
                   <div className="stat-value text-accent text-3xl font-extrabold">{stats.archivedCount}</div>
                 </Link>
               </div>

@@ -43,7 +43,7 @@ export function StapleImportTable({ forms }: StapleImportTableProps) {
       cell: ({ row }) => {
         const count = row.original.markerTargets.length;
         if (count === 0) {
-          return <span className="badge badge-ghost badge-md">Not imported</span>;
+          return <span className="badge badge-ghost badge-md text-base">Not imported</span>;
         }
         return (
           <span className="badge badge-info badge-md">

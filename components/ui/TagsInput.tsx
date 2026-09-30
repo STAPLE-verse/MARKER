@@ -76,14 +76,14 @@ export function TagsInput({
           classNames={{
             tags: "w-full",
             tagInput: "w-full mt-2",
-            tagInputField: `input input-bordered w-full ${error ? "input-error" : ""}`,
+            tagInputField: `input input-bordered w-full text-base ${error ? "input-error" : ""}`,
             selected: "flex flex-wrap gap-2",
             tag: "badge badge-primary badge-lg gap-2 cursor-pointer font-medium p-3",
             remove: "hover:text-red-300 opacity-70 hover:opacity-100",
             suggestions: "absolute z-50 bg-base-100 shadow-xl rounded-md border border-base-200 mt-1 overflow-hidden",
             activeSuggestion: "bg-primary text-primary-content cursor-pointer",
             editTagInput: "w-full",
-            editTagInputField: "input input-bordered w-full",
+            editTagInputField: "input input-bordered w-full text-base",
           }}
         />
       </div>

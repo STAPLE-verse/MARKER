@@ -52,7 +52,7 @@ export function CollapsibleHistorySidebar({
             </Badge>
           )}
           <button
-            className="btn btn-md btn-ghost btn-circle"
+            className="btn btn-md text-base btn-ghost btn-circle"
             onClick={() => setIsOpen(!isOpen)}
             title="Toggle Version History"
             type="button"

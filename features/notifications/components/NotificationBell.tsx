@@ -93,7 +93,7 @@ export function NotificationBell({ initialUnreadCount, initialLatest }: Notifica
 
   return (
     <Dropdown position="end">
-      <DropdownTrigger className="btn btn-ghost btn-md">
+      <DropdownTrigger className="btn btn-ghost btn-md text-base">
         <div className={unreadCount > 0 ? "indicator" : ""}>
           {unreadCount > 0 && (
             <Badge size="md" variant="primary" className="indicator-item indicator-top indicator-end">

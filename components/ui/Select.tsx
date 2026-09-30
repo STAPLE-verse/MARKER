@@ -39,7 +39,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(({
       <select
         ref={ref}
         className={cn(
-          "select w-full",
+          "select w-full text-base",
           error && "select-error",
           className
         )}

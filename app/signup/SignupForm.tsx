@@ -52,7 +52,7 @@ export default function SignupForm({ next }: SignupFormProps) {
             Creating an account here will also create a global account for you on <a href="https://app.staplescience.com" target="_blank" rel="noopener noreferrer" className="text-secondary font-medium hover:underline">STAPLE</a>. If you already have a STAPLE account, you do not need to sign up again.
           </div>
           {rootError && (
-            <div className="alert alert-error mb-4">
+            <div className="alert alert-error mb-4 text-base">
               <span>{rootError}</span>
             </div>
           )}

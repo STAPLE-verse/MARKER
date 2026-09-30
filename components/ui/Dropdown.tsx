@@ -57,7 +57,7 @@ export const DropdownContent = React.forwardRef<HTMLUListElement, React.HTMLAttr
     <ul 
       ref={ref} 
       tabIndex={0} 
-      className={cn("dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-box", className)}
+      className={cn("dropdown-content z-[1] menu text-base p-2 shadow bg-base-300 rounded-box", className)}
       {...props}
     >
       {children}

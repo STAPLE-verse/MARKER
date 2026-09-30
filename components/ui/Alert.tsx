@@ -34,7 +34,7 @@ export function Alert({
   const Icon = showIcon ? iconMap[variant] : null;
 
   return (
-    <div role="alert" className={cn(`alert alert-${variant} shadow-sm`, className)}>
+    <div role="alert" className={cn(`alert alert-${variant} text-base shadow-sm`, className)}>
       {Icon && <Icon className="h-6 w-6 shrink-0" strokeWidth={2} />}
       <div className="flex-1 w-full">
         {title && <h3 className="font-bold">{title}</h3>}
