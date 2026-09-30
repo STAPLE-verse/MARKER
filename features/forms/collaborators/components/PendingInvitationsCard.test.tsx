@@ -36,10 +36,32 @@ describe("PendingInvitationsCard", () => {
     declineCollaboratorInvite.mockReset();
   });
 
-  it("shows an empty state when there are no pending invites", () => {
-    render(<PendingInvitationsCard invites={[]} />);
+  it("renders nothing at all when there are no pending invites", () => {
+    const { container } = render(<PendingInvitationsCard invites={[]} />);
 
-    expect(screen.getByText("No pending invitations.")).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("shows only the first five invites until Show all is clicked", () => {
+    const invites = Array.from({ length: 7 }, (_, i) =>
+      invite({ collaboratorId: i + 1, inviterUsername: `user_${i + 1}` })
+    );
+    render(<PendingInvitationsCard invites={invites} />);
+
+    expect(screen.getByText("user_5")).toBeInTheDocument();
+    expect(screen.queryByText("user_6")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Show all (7)"));
+
+    expect(screen.getByText("user_7")).toBeInTheDocument();
+    expect(screen.getByText("Show fewer")).toBeInTheDocument();
+  });
+
+  it("offers no Show all toggle at five invites or fewer", () => {
+    const invites = Array.from({ length: 5 }, (_, i) => invite({ collaboratorId: i + 1 }));
+    render(<PendingInvitationsCard invites={invites} />);
+
+    expect(screen.queryByText(/Show all/)).not.toBeInTheDocument();
   });
 
   it("renders the inviter, form title, and role", () => {
@@ -61,26 +83,26 @@ describe("PendingInvitationsCard", () => {
 
   it("accepting removes the row and navigates to the form", async () => {
     acceptCollaboratorInvite.mockResolvedValue({ ok: true, data: { success: true, formId: 42 } });
-    render(<PendingInvitationsCard invites={[invite()]} />);
+    const { container } = render(<PendingInvitationsCard invites={[invite()]} />);
 
     fireEvent.click(screen.getByText("Accept"));
 
     await waitFor(() => {
       expect(acceptCollaboratorInvite).toHaveBeenCalledWith({ collaboratorId: 1 });
       expect(push).toHaveBeenCalledWith("/collection/42");
-      expect(screen.getByText("No pending invitations.")).toBeInTheDocument();
+      expect(container).toBeEmptyDOMElement();
     });
   });
 
   it("declining removes the row without navigating", async () => {
     declineCollaboratorInvite.mockResolvedValue({ ok: true, data: { success: true } });
-    render(<PendingInvitationsCard invites={[invite()]} />);
+    const { container } = render(<PendingInvitationsCard invites={[invite()]} />);
 
     fireEvent.click(screen.getByText("Decline"));
 
     await waitFor(() => {
       expect(declineCollaboratorInvite).toHaveBeenCalledWith({ collaboratorId: 1 });
-      expect(screen.getByText("No pending invitations.")).toBeInTheDocument();
+      expect(container).toBeEmptyDOMElement();
     });
     expect(push).not.toHaveBeenCalled();
   });

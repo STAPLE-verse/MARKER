@@ -94,12 +94,7 @@ export default async function DashboardPage() {
 
           {/* Kept out of the "My Stats" column: a long invite list would
               stretch that column and push the stats card down with it. */}
-          <Card bordered>
-            <CardBody>
-              <CardTitle className="text-2xl font-bold">Pending Invitations</CardTitle>
-              <PendingInvitationsCard invites={pendingInvites} />
-            </CardBody>
-          </Card>
+          <PendingInvitationsCard invites={pendingInvites} />
         </div>
 
         <div className="space-y-6">
