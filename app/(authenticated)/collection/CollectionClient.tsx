@@ -40,7 +40,7 @@ export default function CollectionClient({ tab, schemas }: CollectionClientProps
       accessorKey: "title",
       header: "Title",
       cell: ({ row }) => (
-        <div className="font-bold text-base">{row.original.title}</div>
+        <div className="font-bold text-lg">{row.original.title}</div>
       ),
     },
     {

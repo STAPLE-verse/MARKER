@@ -53,22 +53,22 @@ export default async function Home() {
             </div>
           ) : (
             <div className="overflow-x-auto bg-base-100 shadow-xl border border-base-200 rounded-2xl">
-              <table className="table table-zebra w-full text-left text-base">
+              <table className="table table-zebra w-full text-left text-lg">
                 <thead>
                   <tr className="bg-base-200/50 text-base-content/90">
-                    <th className="font-semibold text-base w-1/2 py-4">Title</th>
-                    <th className="font-semibold text-base">Version</th>
-                    <th className="font-semibold text-base">Author</th>
-                    <th className="font-semibold text-base">License</th>
-                    <th className="font-semibold text-base text-right">Action</th>
+                    <th className="font-semibold text-lg w-1/2 py-4">Title</th>
+                    <th className="font-semibold text-lg">Version</th>
+                    <th className="font-semibold text-lg">Author</th>
+                    <th className="font-semibold text-lg">License</th>
+                    <th className="font-semibold text-lg text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentSchemas.map((schema) => (
                     <tr key={schema.pid} className="hover:bg-base-200/30 transition-colors">
-                      <td className="py-4">
+                      <td className="py-4 text-lg">
                         <div className="font-bold text-base-content">{schema.title}</div>
-                        <div className="text-base text-base-content/90 truncate max-w-sm mt-1">
+                        <div className="text-lg text-base-content/90 truncate max-w-sm mt-1">
                           {schema.description}
                         </div>
                       </td>
@@ -77,7 +77,7 @@ export default async function Home() {
                           v{schema.version}
                         </span>
                       </td>
-                      <td className="text-base-content/90">{contributorNamesLabel(schema)}</td>
+                      <td className="text-lg text-base-content/90">{contributorNamesLabel(schema)}</td>
                       <td>
                         <span className="badge badge-accent badge-md text-base">{schema.license}</span>
                       </td>

@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 const Table = React.forwardRef<HTMLTableElement, React.TableHTMLAttributes<HTMLTableElement>>(
   ({ className, ...props }, ref) => (
     <div className="overflow-x-auto w-full">
-      <table ref={ref} className={cn("table text-base", className)} {...props} />
+      <table ref={ref} className={cn("table text-lg", className)} {...props} />
     </div>
   )
 );
@@ -64,14 +64,14 @@ TableRow.displayName = 'TableRow';
 
 const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement>>(
   ({ className, ...props }, ref) => (
-    <th ref={ref} className={cn("font-semibold", className)} {...props} />
+    <th ref={ref} className={cn("text-lg font-semibold", className)} {...props} />
   )
 );
 TableHead.displayName = 'TableHead';
 
 const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<HTMLTableCellElement>>(
   ({ className, ...props }, ref) => (
-    <td ref={ref} className={className} {...props} />
+    <td ref={ref} className={cn("text-lg", className)} {...props} />
   )
 );
 TableCell.displayName = 'TableCell';
@@ -82,7 +82,7 @@ const TableEmpty = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HT
 }>(
   ({ colSpan, message = "No data found", className, ...props }, ref) => (
     <tr ref={ref} className={className} {...props}>
-      <td colSpan={colSpan} className="text-center p-8 text-base-content/90">
+      <td colSpan={colSpan} className="text-center p-8 text-lg text-base-content/90">
         {message}
       </td>
     </tr>
@@ -287,7 +287,7 @@ function DataTable<TData>({
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder={globalSearchPlaceholder}
             aria-label="Search table data"
-            className="input input-bordered input-md text-base w-full max-w-xs bg-base-200"
+            className="input input-bordered input-md text-lg w-full max-w-xs bg-base-200"
           />
         </div>
       )}

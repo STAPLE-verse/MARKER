@@ -22,7 +22,7 @@ export function StapleImportTable({ forms }: StapleImportTableProps) {
     {
       accessorKey: "latestName",
       header: "Title",
-      cell: ({ row }) => <div className="font-bold text-base">{row.original.latestName}</div>,
+      cell: ({ row }) => <div className="font-bold text-lg">{row.original.latestName}</div>,
     },
     {
       id: "latestVersion",
