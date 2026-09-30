@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils';
 export type SelectOption = {
   value: string;
   label: string;
+  /** Optional category, shown beside the label and searchable in `SearchableSelect`. */
+  group?: string;
 };
 
 type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {

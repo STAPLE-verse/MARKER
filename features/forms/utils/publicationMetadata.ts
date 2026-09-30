@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client"
 import type { ContributorAffiliationDTO, PublicationMetadataFieldsDTO, ContributorDTO, PublishedSchemaCardDTO } from "../types"
-import { PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS } from "../constants/publicationMetadataOptions"
+import { PUBLICATION_CONTRIBUTOR_ROLE_OPTIONS, normalizeDomainValue } from "../constants/publicationMetadataOptions"
 
 export type PublicationMetadataLike = {
   domain?: unknown
@@ -231,7 +231,7 @@ export function availableContributorRoles(
 
 export function normalizePublicationMetadata(input: PublicationMetadataLike | null | undefined): PublicationMetadataFieldsDTO {
   return {
-    domain: normalizeNullableString(input?.domain),
+    domain: normalizeDomainValue(normalizeNullableString(input?.domain)),
     language: normalizeNullableString(input?.language),
     license: normalizeNullableString(input?.license),
     keywords: normalizeKeywords(input?.keywords),

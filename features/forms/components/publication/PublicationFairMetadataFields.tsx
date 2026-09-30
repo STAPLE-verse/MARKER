@@ -1,5 +1,6 @@
-import { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form"
+import { Control, Controller, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form"
 import { Select } from "@/components/ui/Select"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import { KeywordsInput } from "@/components/ui/KeywordsInput"
 import { InfoTooltip } from "@/components/ui/InfoTooltip"
 import {
@@ -21,25 +22,53 @@ export function PublicationFairMetadataFields<TFieldValues extends FieldValues>(
 }: PublicationFairMetadataFieldsProps<TFieldValues>) {
   return (
     <div className="space-y-6">
-      <Select
-        label="Domain / Discipline"
-        placeholder="Select domain..."
-        options={PUBLICATION_DOMAIN_OPTIONS}
-        error={errors.domain?.message as string | undefined}
-        {...register("domain" as Path<TFieldValues>)}
+      {/* Domain and language are long standard lists (OECD fields, ISO
+          languages), so they're type-to-search rather than plain dropdowns. */}
+      <Controller
+        control={control}
+        name={"domain" as Path<TFieldValues>}
+        render={({ field }) => (
+          <SearchableSelect
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                Domain / Discipline
+                <InfoTooltip text="The research field this template is for. People use it to filter the Explore catalog. The choices are the OECD Fields of Science, a standard list of 42 fields used by funders and data repositories." />
+              </span>
+            }
+            placeholder="Type to search research fields..."
+            options={PUBLICATION_DOMAIN_OPTIONS}
+            value={typeof field.value === "string" ? field.value : ""}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            error={errors.domain?.message as string | undefined}
+          />
+        )}
       />
-      <Select
-        label="Primary Language"
-        placeholder="Select language..."
-        options={PUBLICATION_LANGUAGE_OPTIONS}
-        error={errors.language?.message as string | undefined}
-        {...register("language" as Path<TFieldValues>)}
+      <Controller
+        control={control}
+        name={"language" as Path<TFieldValues>}
+        render={({ field }) => (
+          <SearchableSelect
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                Primary Language
+                <InfoTooltip text="The language the template's questions and instructions are written in, not the language of the data collected with it. The choices are the standard ISO 639-1 languages." />
+              </span>
+            }
+            placeholder="Type to search languages..."
+            options={PUBLICATION_LANGUAGE_OPTIONS}
+            value={typeof field.value === "string" ? field.value : ""}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            error={errors.language?.message as string | undefined}
+          />
+        )}
       />
       <Select
         label={
           <span className="inline-flex items-center gap-1.5">
             License
-            <InfoTooltip text="Open-source licenses are required for STAPLE-verse publication to ensure FAIR principles." />
+            <InfoTooltip text="The terms under which others may reuse this template. An open license is required for STAPLE-verse publication, in line with the FAIR principles. It cannot be changed for a version once published." />
           </span>
         }
         options={PUBLICATION_LICENSE_OPTIONS}
@@ -52,7 +81,7 @@ export function PublicationFairMetadataFields<TFieldValues extends FieldValues>(
         label={
           <span className="inline-flex items-center gap-1.5">
             Keywords
-            <InfoTooltip text="Required for marketplace discovery." />
+            <InfoTooltip text="Words or short phrases people might search for. They are matched by the Explore search and shown on the template's card. Required for discovery." />
           </span>
         }
         placeholder="Add keywords..."

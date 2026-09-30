@@ -17,9 +17,6 @@ import {
   labelForSelectValue,
   languageLabel,
   licenseLabel,
-  PUBLICATION_DOMAIN_OPTIONS,
-  PUBLICATION_LANGUAGE_OPTIONS,
-  PUBLICATION_LICENSE_OPTIONS,
 } from "@/features/forms/constants/publicationMetadataOptions";
 import type { PublishedSchemaCardDTO } from "@/features/forms/types";
 import {
@@ -64,30 +61,26 @@ interface FacetOption extends SelectOption {
 }
 
 /**
- * A facet's chips: the canonical option list (e.g. `PUBLICATION_LICENSE_OPTIONS`)
- * plus every value actually stored on a published row, each with how many
- * schemas carry it. The canonical list alone can miss real values — legacy
- * data written before the list existed, a typo that predates strict
- * validation, or (later) an external-catalog import using a different
- * vocabulary. Per docs/refactor/explore.md §2.5's stance on not silently
- * hiding what an immutable record actually contains: every real value must
- * remain selectable in its filter, or that schema becomes permanently
- * unreachable by filtering (a `"CC-BY 4.0"` row against the canonical
- * `"CC-BY-4.0"` did exactly that).
+ * A facet's dropdown options: only the values at least one published schema
+ * actually carries, each with its count — not the full vocabulary (every ISO
+ * language, every OECD field), which would be a long list of dead ends here.
+ * That also keeps values outside the current vocabulary reachable (legacy
+ * data, a typo that predates strict validation, a later external-catalog
+ * import) — per docs/refactor/explore.md §2.5, an immutable record must stay
+ * findable by what it actually contains.
+ *
+ * A value that is selected but no longer present (an old bookmarked or saved
+ * search) is kept in the list with a count of 0, so the dropdown can still
+ * show — and clear — it.
  */
-function facetOptions(
-  canonical: SelectOption[],
-  present: ValueCount[],
-  labelFor: (value: string) => string
-): FacetOption[] {
-  const counts = new Map(present.map((entry) => [entry.value, entry.count]));
-  const known = new Set(canonical.map((option) => option.value));
+function facetOptions(present: ValueCount[], selected: string[], labelFor: (value: string) => string): FacetOption[] {
+  const presentValues = new Set(present.map((entry) => entry.value));
   return [
-    ...canonical.map((option) => ({ ...option, count: counts.get(option.value) ?? 0 })),
-    ...present
-      .filter((entry) => !known.has(entry.value))
-      .map((entry) => ({ value: entry.value, label: labelFor(entry.value), count: entry.count })),
-  ];
+    ...present.map((entry) => ({ value: entry.value, label: labelFor(entry.value), count: entry.count })),
+    ...selected
+      .filter((value) => !presentValues.has(value))
+      .map((value) => ({ value, label: labelFor(value), count: 0 })),
+  ].sort((x, y) => x.label.localeCompare(y.label));
 }
 
 const CHIP_CLASS = "badge badge-lg h-auto min-h-7 py-1 whitespace-normal text-left cursor-pointer transition-colors";
@@ -194,22 +187,15 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
   const [filters, setFilters] = useState<ExploreFilters>(initialFilters);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const domainOptions = useMemo(
-    () => facetOptions(PUBLICATION_DOMAIN_OPTIONS, countValues(schemas, (s) => [s.domain]), domainLabel),
-    [schemas]
-  );
-  const licenseOptions = useMemo(
-    () => facetOptions(PUBLICATION_LICENSE_OPTIONS, countValues(schemas, (s) => [s.license]), licenseLabel),
-    [schemas]
-  );
-  const languageOptions = useMemo(
-    () => facetOptions(PUBLICATION_LANGUAGE_OPTIONS, countValues(schemas, (s) => [s.language]), languageLabel),
-    [schemas]
-  );
-  const sourceOptions = useMemo(
-    () => facetOptions(CANONICAL_SOURCE_OPTIONS, countValues(schemas, (s) => [s.source]), sourceLabel),
-    [schemas]
-  );
+  const domainCounts = useMemo(() => countValues(schemas, (s) => [s.domain]), [schemas]);
+  const licenseCounts = useMemo(() => countValues(schemas, (s) => [s.license]), [schemas]);
+  const languageCounts = useMemo(() => countValues(schemas, (s) => [s.language]), [schemas]);
+  const sourceCounts = useMemo(() => countValues(schemas, (s) => [s.source]), [schemas]);
+
+  const domainOptions = facetOptions(domainCounts, filters.domain, domainLabel);
+  const licenseOptions = facetOptions(licenseCounts, filters.license, licenseLabel);
+  const languageOptions = facetOptions(languageCounts, filters.language, languageLabel);
+  const sourceOptions = facetOptions(sourceCounts, filters.source, sourceLabel);
   const keywordCounts = useMemo(() => countValues(schemas, (s) => s.keywords), [schemas]);
   const contributorCounts = useMemo(
     () => countValues(schemas, (s) => s.contributors.map((contributor) => contributor.name)),
@@ -217,7 +203,7 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
   );
 
   // A source filter is only worth a row once the catalog actually holds more than one source.
-  const showSourceFilter = sourceOptions.filter((option) => option.count > 0).length > 1 || filters.source.length > 0;
+  const showSourceFilter = sourceCounts.length > 1 || filters.source.length > 0;
 
   const activeCount = countActiveExploreFilters(filters);
   const [filtersOpen, setFiltersOpen] = useState(true);

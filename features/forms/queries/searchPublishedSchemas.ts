@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db"
 import { PublishedSchemaCardDTO } from "../types"
+import { normalizeDomainValue } from "../constants/publicationMetadataOptions"
 import { mapContributorsChecked, normalizeKeywordsChecked } from "../utils/publicationMetadata"
 import { getVersionsByFamilyIds } from "./publishedSchemaFamilyVersions"
 
@@ -49,7 +50,9 @@ export async function searchPublishedSchemas(): Promise<PublishedSchemaCardDTO[]
     title: schema.title,
     description: schema.description,
     version: schema.version,
-    domain: schema.domain,
+    // Older rows store the domain as a word; read them as their OECD code so
+    // they filter together with newer ones (the stored row itself is untouched).
+    domain: normalizeDomainValue(schema.domain),
     language: schema.language,
     license: schema.license,
     source: schema.source,
