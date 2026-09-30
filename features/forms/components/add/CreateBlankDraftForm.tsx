@@ -42,6 +42,7 @@ export function CreateBlankDraftForm() {
             label="Description (Optional):"
             placeholder="Internal notes for this draft..."
             rows={4}
+            markdown
             error={errors.description?.message}
             {...register("description")}
           />

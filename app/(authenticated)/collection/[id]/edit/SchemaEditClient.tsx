@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 import {
@@ -14,7 +13,6 @@ import {
 } from "@staple-verse/form-studio";
 import { semanticV1Extension } from "@staple-verse/form-studio/semantic-v1";
 import { Alert } from "@/components/ui/Alert";
-import { BackButton } from "@/components/ui/BackButton";
 import { FormPageLayout } from "@/features/forms/components/FormPageLayout";
 import { SchemaHeaderTitle } from "@/features/forms/components/SchemaHeaderTitle";
 import {
@@ -24,10 +22,7 @@ import {
   type DbBaseline,
 } from "@/features/forms/hooks/useFormDraft";
 import { useSaveForm } from "@/features/forms/hooks/useSaveForm";
-import {
-  useUnsavedChangesGuard,
-  confirmLeaveWithUnsavedChanges,
-} from "@/features/forms/hooks/useUnsavedChangesGuard";
+import { useUnsavedChangesGuard } from "@/features/forms/hooks/useUnsavedChangesGuard";
 import { toIsoTimestamp } from "@/features/forms/utils/timestamps";
 import { FormVersionDTO } from "@/features/forms/types";
 
@@ -147,7 +142,6 @@ export default function SchemaEditClient({ formId, version }: SchemaEditClientPr
 }
 
 function EditPageContent(props: EditPageContentProps) {
-  const router = useRouter();
   const { state } = useFormStudio();
   const { blockingDiagnostics, commitDiagnostics, attemptCommit } = useFormStudioCommit();
 
@@ -164,14 +158,6 @@ function EditPageContent(props: EditPageContentProps) {
 
   useUnsavedChangesGuard(isDirty);
 
-  const handleBack = () => {
-    if (isDirty) {
-      if (!confirmLeaveWithUnsavedChanges(isDirty)) return;
-      props.clearDraft();
-    }
-    router.push(`/collection/${props.formId}`);
-  };
-
   const saveDisabled = props.isSaving || !isDirty || blockingDiagnostics.length > 0;
   const saveTooltip =
     blockingDiagnostics.length > 0
@@ -184,7 +170,7 @@ function EditPageContent(props: EditPageContentProps) {
 
   // "Done" only needs the commit gate when it's actually about to save
   // (isDirty) — with nothing to save, it should still let the user leave the
-  // same way "Back" already does, even if some stray diagnostic exists.
+  // page, even if some stray diagnostic exists.
   const handleDoneClick = () => {
     if (!isDirty) {
       props.handleDone(state, isDirty);
@@ -194,13 +180,7 @@ function EditPageContent(props: EditPageContentProps) {
   };
 
   return (
-    <FormPageLayout
-      backButton={
-        <BackButton onClick={handleBack} disabled={props.isSaving}>
-          Back
-        </BackButton>
-      }
-    >
+    <FormPageLayout>
       <div className="flex-none mb-2">
         <PageHeader title={<SchemaHeaderTitle version={props.version} prefix="Form Builder" />}>
           <div className="flex gap-2 items-center">

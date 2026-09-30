@@ -16,10 +16,3 @@ export function useUnsavedChangesGuard(isDirty: boolean) {
     return () => window.removeEventListener("beforeunload", handler);
   }, [isDirty]);
 }
-
-export function confirmLeaveWithUnsavedChanges(isDirty: boolean): boolean {
-  if (!isDirty) return true;
-  return window.confirm(
-    "You have unsaved changes that are not saved to your collection. Leave without saving?"
-  );
-}

@@ -56,7 +56,6 @@ export default function UserSchemaDetailsClient({
 
   return (
     <FormPageLayout
-      sidebarOpen={isHistoryOpen}
       sidebar={
         <VersionHistorySidebar
           isHistoryOpen={isHistoryOpen}

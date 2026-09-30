@@ -37,7 +37,6 @@ export default function SchemaDetailsClient({
 
   return (
     <FormPageLayout
-      sidebarOpen={isHistoryOpen}
       sidebar={
         hasHistory ? (
           <PublishedVersionsSidebar

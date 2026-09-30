@@ -21,7 +21,7 @@ export function PublicationMetadataCardShell({
         bordered
         defaultOpen={defaultOpen}
         title={
-          <h2 className="w-full text-xl font-bold border-b border-base-200 pb-2">
+          <h2 className="w-full text-xl font-bold border-b border-base-content/10 pb-2">
             {title}
           </h2>
         }
@@ -36,7 +36,7 @@ export function PublicationMetadataCardShell({
   return (
     <Card bordered>
       <CardBody>
-        <CardTitle className="text-xl border-b border-base-200 pb-2 mb-4">
+        <CardTitle className="text-xl border-b border-base-content/10 pb-2 mb-4">
           {title}
         </CardTitle>
         {children}

@@ -22,7 +22,11 @@ export function ActionMenu({ children, ariaLabel = "More actions", className }: 
       <DropdownTrigger className="btn btn-ghost btn-md text-base btn-circle" aria-label={ariaLabel}>
         <EllipsisVerticalIcon className="h-5 w-5" />
       </DropdownTrigger>
-      <DropdownContent className="w-56 mt-2">{children}</DropdownContent>
+      {/* `right-0`: pin the menu's right edge to the trigger so it opens
+          leftwards. `dropdown-end` alone doesn't do it here, and a menu that
+          opens rightwards gets cut off by the scrolling content column (or
+          hidden under the history sidebar). Same fix as the navbar's avatar menu. */}
+      <DropdownContent className="w-56 mt-2 right-0">{children}</DropdownContent>
     </Dropdown>
   );
 }

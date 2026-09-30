@@ -32,8 +32,10 @@ const CollapsibleCard = React.forwardRef<HTMLDetailsElement, CollapsibleCardProp
       ref={ref}
       open={defaultOpen || undefined}
       className={cn(
-        "collapse collapse-arrow bg-base-100 w-full max-w-full",
-        bordered ? "border border-base-300 shadow-sm" : "shadow-xl",
+        // Same surface as `Card`: filled a step off the page, with a border
+        // kept for forced-colors / high-contrast modes.
+        "collapse collapse-arrow bg-base-300 border border-base-content/10 w-full max-w-full",
+        bordered ? "shadow-sm" : "shadow-xl",
         className
       )}
       {...props}

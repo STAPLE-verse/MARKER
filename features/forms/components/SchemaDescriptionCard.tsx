@@ -17,7 +17,7 @@ export function SchemaDescriptionCard({ schema }: SchemaDescriptionCardProps) {
       bordered
       defaultOpen
       title={
-        <h2 className="w-full text-xl font-bold border-b border-base-200 pb-2">
+        <h2 className="w-full text-xl font-bold border-b border-base-content/10 pb-2">
           Description
         </h2>
       }
