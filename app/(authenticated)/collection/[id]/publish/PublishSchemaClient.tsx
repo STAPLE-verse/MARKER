@@ -133,7 +133,12 @@ export default function PublishSchemaClient({ formId, version, publishedVersions
           onSubmit={handlePublish}
           onKeyDown={(e) => {
             // Prevent Enter key from implicitly submitting the entire form on steps 1 and 2
-            if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+            const target = e.target as HTMLElement;
+            // A child field that already consumed Enter (keyword/role tag
+            // inputs add a value and preventDefault) must not also advance
+            // the wizard, and Enter on a focused button should just click it.
+            if (e.defaultPrevented || target.closest('button, a')) return;
+            if (e.key === 'Enter' && target.tagName !== 'TEXTAREA') {
               e.preventDefault();
               if (currentStep < 3) {
                 handleNext();
