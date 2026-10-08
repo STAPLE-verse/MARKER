@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db"
 import { ActionError } from "@/utils/action-result"
+import { repairUiOrder } from "./repairUiOrder"
 
 export interface ResolvedStapleVersion {
   sourceFormId: number
@@ -55,7 +56,7 @@ export async function resolveStapleSource(
     sourceVersionNumber: version.version,
     title: version.name,
     schema: (version.schema ?? {}) as Record<string, unknown>,
-    uiSchema: version.uiSchema as Record<string, unknown> | null,
+    uiSchema: repairUiOrder(version.uiSchema) as Record<string, unknown> | null,
     semantics: version.semantics,
   }
 }

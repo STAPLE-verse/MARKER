@@ -41,7 +41,7 @@ function assertConforms(args: {
   if (diagnostics.length > 0) {
     throw new ActionError(
       "VALIDATION",
-      `This STAPLE form doesn't meet MARKER's template requirements (${formatDiagnosticsForUser(diagnostics)}). Ask the form owner to fix it in STAPLE, or import it and edit it in MARKER's builder first.`
+      `This STAPLE form doesn't meet MARKER's template requirements (${formatDiagnosticsForUser(diagnostics)}). Fix it in STAPLE's form builder, then import again.`
     )
   }
 }
