@@ -80,7 +80,9 @@ export function TagsInput({
             tagInputField: `input w-full text-base ${stapleFieldClass("input", !!error)}`,
             selected: "flex flex-wrap gap-2",
             tag: "badge badge-primary badge-lg gap-2 cursor-pointer font-medium p-3",
-            remove: "hover:text-red-300 opacity-70 hover:opacity-100",
+            // "ReactTags__remove" must stay: after a delete the library finds the remove buttons by
+            // that class to move focus, and throws if there are none
+            remove: "ReactTags__remove hover:text-red-300 opacity-70 hover:opacity-100",
             suggestions: "absolute z-50 bg-base-100 shadow-xl rounded-md border border-base-200 mt-1 overflow-hidden",
             activeSuggestion: "bg-primary text-primary-content cursor-pointer",
             editTagInput: "w-full",
