@@ -25,6 +25,8 @@ import { useSaveForm } from "@/features/forms/hooks/useSaveForm";
 import { useUnsavedChangesGuard } from "@/features/forms/hooks/useUnsavedChangesGuard";
 import { toIsoTimestamp } from "@/features/forms/utils/timestamps";
 import { FormVersionDTO } from "@/features/forms/types";
+import { listCopyableForms } from "@/features/forms/actions/listCopyableForms";
+import { getCopyableFormContents } from "@/features/forms/actions/getCopyableFormContents";
 
 const FORM_STUDIO_EXTENSIONS = [semanticV1Extension] as const;
 
@@ -145,6 +147,23 @@ function EditPageContent(props: EditPageContentProps) {
   const { state } = useFormStudio();
   const { blockingDiagnostics, commitDiagnostics, attemptCommit } = useFormStudioCommit();
 
+  // Lets the builder copy items from the user's other MARKER forms
+  const itemSource = useMemo(
+    () => ({
+      listForms: async () => {
+        const result = await listCopyableForms({ excludeFormId: props.formId });
+        if (!result.ok) throw new Error(result.error);
+        return result.data;
+      },
+      getForm: async (id: string | number) => {
+        const result = await getCopyableFormContents({ formId: Number(id) });
+        if (!result.ok) throw new Error(result.error);
+        return result.data;
+      },
+    }),
+    [props.formId]
+  );
+
   const isDirty = useMemo(
     () => isDirtyVsDbBaseline(state.schema, state.uiSchema, extensionValueOf(state), props.dbBaseline),
     [state, props.dbBaseline]
@@ -252,7 +271,11 @@ function EditPageContent(props: EditPageContentProps) {
       )}
 
       <div className="flex-1 w-full min-h-0 relative mt-4">
-        <FormStudioUI onAutoSave={props.handleAutoSave} saveStatus={saveStatus} />
+        <FormStudioUI
+          onAutoSave={props.handleAutoSave}
+          saveStatus={saveStatus}
+          mods={{ itemSource }}
+        />
       </div>
     </FormPageLayout>
   );
