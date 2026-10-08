@@ -477,7 +477,7 @@ export default function ExploreClient({ schemas, initialFilters }: ExploreClient
                   {schema.keywords.map((keyword) => (
                     <span
                       key={keyword}
-                      className="badge badge-outline badge-md text-base border-base-content/20 text-base-content/90"
+                      className="badge badge-outline badge-md h-auto py-1 text-base border-base-content/20 text-base-content/90"
                     >
                       {keyword}
                     </span>

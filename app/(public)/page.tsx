@@ -74,13 +74,13 @@ export default async function Home() {
                         </div>
                       </td>
                       <td>
-                        <span className="badge badge-secondary badge-outline badge-md text-base font-mono">
+                        <span className="badge badge-secondary badge-outline badge-md h-auto whitespace-nowrap py-1 text-base font-mono">
                           v{schema.version}
                         </span>
                       </td>
                       <td className="text-lg text-base-content/90">{contributorNamesLabel(schema)}</td>
                       <td>
-                        <span className="badge badge-accent badge-md text-base">{schema.license}</span>
+                        <span className="badge badge-accent badge-md h-auto whitespace-nowrap py-1 text-base">{schema.license}</span>
                       </td>
                       <td className="text-right">
                         <Link href={`/schemas/${schema.pid}`}>
