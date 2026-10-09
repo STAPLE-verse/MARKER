@@ -214,6 +214,66 @@ describe("assemblePublishedPackage", () => {
   });
 });
 
+describe("forms built with Form Studio's choice fields", () => {
+  const draft = (schema: Record<string, unknown>, uiSchema: Record<string, unknown>) =>
+    assembleDraftPackage({
+      familyId: "mf_1234567890",
+      versionId: "mv_1234567890",
+      version: "1",
+      title: "Collaboration planning",
+      schema: { $schema: "http://json-schema.org/draft-07/schema#", type: "object", ...schema },
+      uiSchema,
+      createdAt: new Date("2026-09-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-09-01T00:00:00.000Z"),
+    });
+
+  it("accepts a multi-select (checkboxes) field, which STAPLE forms use for 'select all that apply'", () => {
+    const pkg = draft(
+      {
+        properties: {
+          "Collaboration.Model": {
+            type: "array",
+            title: "Collaboration model",
+            uniqueItems: true,
+            items: { type: "string", enum: ["Centralised", "Distributed"] },
+          },
+        },
+      },
+      { "Collaboration.Model": { "ui:widget": "checkboxes" } }
+    );
+
+    expect(validateTemplatePackage(pkg)).toEqual([]);
+  });
+
+  it("accepts options shown with different text than the value that is stored (enumNames)", () => {
+    const pkg = draft(
+      {
+        properties: {
+          access: { type: "string", enum: ["open", "closed"], enumNames: ["Open to all", "Closed"] },
+          methods: {
+            type: "array",
+            uniqueItems: true,
+            items: { type: "string", enum: ["survey", "interview"], enumNames: ["Survey", "Interview"] },
+          },
+        },
+      },
+      { access: { "ui:widget": "radio" }, methods: { "ui:widget": "checkboxes" } }
+    );
+
+    expect(validateTemplatePackage(pkg)).toEqual([]);
+  });
+
+  it("still rejects a widget that is not in Core V1", () => {
+    const pkg = draft(
+      { properties: { colour: { type: "string" } } },
+      { colour: { "ui:widget": "colorpicker" } }
+    );
+
+    const diagnostics = validateTemplatePackage(pkg);
+    expect(diagnostics.map((d) => d.code)).toContain("UI_UNSUPPORTED_WIDGET");
+  });
+});
+
 describe("formatDiagnosticsForUser", () => {
   it("joins diagnostic messages for display", () => {
     const message = formatDiagnosticsForUser([
