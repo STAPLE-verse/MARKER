@@ -12,7 +12,11 @@ export function LogoutButton() {
   return (
     <button
       onClick={async () => {
-        await signOut({ redirectTo: "/login" });
+        // Clear the session without letting Auth.js build the redirect URL:
+        // behind the proxy it derives the host from the internal
+        // localhost:3001 request. A relative navigation keeps the public host.
+        await signOut({ redirect: false });
+        window.location.assign("/login");
       }}
       className="w-full text-left"
     >
