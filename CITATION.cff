@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use MARKER in your research, please cite it using the following information."
+type: software
+title: "MARKER"
+version: "1.0.1"
+date-released: "2026-10-14"
+repository-code: "https://github.com/STAPLE-verse/MARKER"
+license-url: "https://github.com/STAPLE-verse/MARKER/blob/main/LICENSE.md"
+authors:
+  - family-names: "Buchanan"
+    given-names: "Erin M."
+    orcid: "https://orcid.org/0000-0002-9689-4189"
+  - family-names: "Kovacs"
+    given-names: "Marton"
+    orcid: "https://orcid.org/0000-0002-8142-8492"
