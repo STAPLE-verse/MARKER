@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23354404.svg)](https://doi.org/10.5281/zenodo.23354404)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23354403.svg)](https://doi.org/10.5281/zenodo.23354403)
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
