@@ -5,6 +5,7 @@ title: "MARKER"
 version: "1.0.1"
 date-released: "2026-10-14"
 repository-code: "https://github.com/STAPLE-verse/MARKER"
+license-url: "https://github.com/STAPLE-verse/MARKER/blob/main/LICENSE.md"
 authors:
   - family-names: "Buchanan"
     given-names: "Erin M."
